@@ -278,6 +278,22 @@
 
           <hr style="border:0; border-top: 1px solid var(--border-blue); margin: 14px 0;">
 
+          <!-- NIEUWE VET-ANALYSE BLOCK -->
+          <div class="result-row">
+            <span>Vet in huidige batch:</span>
+            <span id="currentFatKgVal" class="result-value">0 kg</span>
+          </div>
+          <div class="result-row">
+            <span>Gewenst vet in batch:</span>
+            <span id="targetFatKgVal" class="result-value">0 kg</span>
+          </div>
+          <div class="result-row" style="margin-bottom: 12px;">
+            <span>Verschil in vet:</span>
+            <span id="diffFatKgVal" class="result-value" style="color: var(--primary);">0 kg</span>
+          </div>
+
+          <hr style="border:0; border-top: 1px solid var(--border-blue); margin: 14px 0;">
+
           <div class="result-row" id="rowAddIngredient">
             <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
               <span id="addLabel">Hoeveelheid room toevoegen:</span>
@@ -291,6 +307,19 @@
             <span>Hoeveelheid water toevoegen:</span>
             <span id="waterToAdd" class="result-value">0 kg</span>
           </div>
+
+          <!-- NIEUWE OPTIE: WATER INHOUDEN VOLGENDE BATCH -->
+          <div class="result-row" id="rowHoldWaterNextBatch" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-blue); display: none;">
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <span>Water inhouden op volgende batch:</span>
+              <span class="info-icon" onclick="toggleTooltip('holdWaterTooltip')">?</span>
+            </div>
+            <span id="waterToHoldNextBatch" class="result-value" style="color: #d9534f;">0 kg</span>
+          </div>
+          <div id="holdWaterTooltip" class="info-tooltip" style="margin-bottom: 10px;">
+            <strong>Optie volgende batch:</strong> Doseer op de volgende batch dit aantal kg water minder om het tekort aan vet over 2 batches gemiddeld recht te trekken.
+          </div>
+
           <div class="result-row" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-blue);">
             <span>Totale grootte batch na correctie:</span>
             <span id="totalBatch" class="result-value">0 kg</span>
@@ -635,7 +664,7 @@
       if(el) el.value = '';
     });
     document.getElementById('missingComponent').value = 'cream_less';
-    ['batchTooltip', 'addTooltip', 'lattizTooltip'].forEach(id => {
+    ['batchTooltip', 'addTooltip', 'lattizTooltip', 'holdWaterTooltip'].forEach(id => {
       const el = document.getElementById(id);
       if(el) el.style.display = 'none';
     });
@@ -746,9 +775,10 @@
 
     const rowAddIngredient = document.getElementById('rowAddIngredient');
     const rowAddWater = document.getElementById('rowAddWater');
+    const rowHoldWaterNextBatch = document.getElementById('rowHoldWaterNextBatch');
     const errorSection = document.getElementById('errorSection');
 
-    let addAmount = 0, waterToAdd = 0, stepsHtml = '';
+    let addAmount = 0, waterToAdd = 0, waterToHoldNext = 0, stepsHtml = '';
     const ingredientName = additionType === 'fat' ? 'vloeibaar vet' : 'room';
 
     const isMoreCause = ['cream_more', 'fat_more', 'water_less'].includes(missingComponent);
@@ -772,19 +802,49 @@
       errorSection.innerHTML = '';
     }
 
+    // BEREKENING VET KG & VERSCHIL
+    let currentFatKg = 0;
+    let targetFatKg = 0;
+    let diffFatKg = 0;
+
+    if (activeBatchSize > 0 && currentFat > 0 && targetFat > 0) {
+      currentFatKg = (activeBatchSize * currentFat) / 100;
+      targetFatKg = (activeBatchSize * targetFat) / 100;
+      diffFatKg = currentFatKg - targetFatKg;
+    }
+
+    document.getElementById('currentFatKgVal').innerText = currentFatKg > 0 ? (currentFatKg.toFixed(2) + ' kg') : '0 kg';
+    document.getElementById('targetFatKgVal').innerText = targetFatKg > 0 ? (targetFatKg.toFixed(2) + ' kg') : '0 kg';
+    
+    if (diffFatKg < 0) {
+      document.getElementById('diffFatKgVal').innerText = Math.abs(diffFatKg).toFixed(2) + ' kg tekort';
+      document.getElementById('diffFatKgVal').style.color = '#c0392b';
+    } else if (diffFatKg > 0) {
+      document.getElementById('diffFatKgVal').innerText = diffFatKg.toFixed(2) + ' kg overschot';
+      document.getElementById('diffFatKgVal').style.color = '#27ae60';
+    } else {
+      document.getElementById('diffFatKgVal').innerText = '0 kg';
+      document.getElementById('diffFatKgVal').style.color = 'var(--primary)';
+    }
+
     if (!hasError && activeBatchSize > 0) {
       if (currentFat > 0 && targetFat > currentFat) {
         rowAddIngredient.style.display = 'flex';
         rowAddWater.style.display = 'none';
+        rowHoldWaterNextBatch.style.display = 'flex';
+
+        // Berekening water inhouden op volgende batch
+        // Formule: te kort aan vet (in kg) gedeeld door gewenste vetfractie
+        waterToHoldNext = Math.abs(diffFatKg) / (targetFat / 100);
+
         if (effectiveCreamFat > targetFat) {
           addAmount = ((targetFat - currentFat) / (effectiveCreamFat - targetFat)) * activeBatchSize;
-          const currentFatKg = (activeBatchSize * currentFat) / 100;
           
           stepsHtml = `
             <div class="calc-step">
               <strong>Stap 1: Berekening huidige vethoeveelheid</strong><br>
               We vermenigvuldigen de actieve batchgrootte (${Math.round(activeBatchSize)} kg) met het gemeten vetgehalte (${currentFat.toFixed(2)}%).<br>
-              <em>Formule:</em> ${Math.round(activeBatchSize)} × (${currentFat.toFixed(2)} / 100) = <strong>${currentFatKg.toFixed(2)} kg vet</strong>.
+              <em>Formule:</em> ${Math.round(activeBatchSize)} × (${currentFat.toFixed(2)} / 100) = <strong>${currentFatKg.toFixed(2)} kg vet</strong> (streef: ${targetFatKg.toFixed(2)} kg, tekort: ${Math.abs(diffFatKg).toFixed(2)} kg).
             </div>
             <div class="calc-step">
               <strong>Stap 2: Berekening benodigde ${ingredientName}</strong><br>
@@ -793,19 +853,25 @@
               Uitkomst: <strong>${addAmount.toFixed(2)} kg</strong> (wordt afgerond op hele kilo's: <strong>${Math.round(addAmount)} kg</strong>).
             </div>
             <div class="calc-step">
-              <strong>Stap 3: Totaaloverzicht na correctie</strong><br>
+              <strong>Alternatief: Water inhouden op volgende batch</strong><br>
+              Indien er geen extra room wordt toegevoegd, kan de volgende batch gecorrigeerd worden door minder water te doseren.<br>
+              <em>Formule:</em> Tekort aan vet (${Math.abs(diffFatKg).toFixed(2)} kg) / (${targetFat.toFixed(2)} / 100) = <strong>${waterToHoldNext.toFixed(2)} kg water minder doseren</strong>.
+            </div>
+            <div class="calc-step">
+              <strong>Stap 3: Totaaloverzicht na correctie (met room)</strong><br>
               Nieuwe totale batchgrootte = Actieve batch (${Math.round(activeBatchSize)} kg) + toe te voegen ${ingredientName} (${Math.round(addAmount)} kg) = <strong>${Math.round(activeBatchSize + addAmount)} kg</strong>.
             </div>`;
         }
       } else if (currentFat > targetFat && targetFat > 0) {
         rowAddIngredient.style.display = 'none';
         rowAddWater.style.display = 'flex';
+        rowHoldWaterNextBatch.style.display = 'none';
         waterToAdd = ((currentFat / targetFat) - 1) * activeBatchSize;
         
         stepsHtml = `
           <div class="calc-step">
             <strong>Stap 1: Analyse huidige vethoeveelheid</strong><br>
-            De huidige hoeveelheid vet in de batch bedraagt: ${Math.round(activeBatchSize)} kg × ${currentFat.toFixed(2)}% = <strong>${(activeBatchSize * currentFat / 100).toFixed(2)} kg vet</strong>.
+            De huidige hoeveelheid vet in de batch bedraagt: ${Math.round(activeBatchSize)} kg × ${currentFat.toFixed(2)}% = <strong>${currentFatKg.toFixed(2)} kg vet</strong> (streef: ${targetFatKg.toFixed(2)} kg, overschot: ${diffFatKg.toFixed(2)} kg).
           </div>
           <div class="calc-step">
             <strong>Stap 2: Berekening benodigde water</strong><br>
@@ -817,11 +883,16 @@
             <strong>Stap 3: Totaaloverzicht na verdunning</strong><br>
             Nieuwe totale batchgrootte = ${Math.round(activeBatchSize)} kg + ${Math.round(waterToAdd)} kg water = <strong>${Math.round(activeBatchSize + waterToAdd)} kg</strong>.
           </div>`;
+      } else {
+        rowHoldWaterNextBatch.style.display = 'none';
       }
+    } else {
+      rowHoldWaterNextBatch.style.display = 'none';
     }
 
     document.getElementById('addValue').innerText = Math.round(addAmount) + ' kg';
     document.getElementById('waterToAdd').innerText = Math.round(waterToAdd) + ' kg';
+    document.getElementById('waterToHoldNextBatch').innerText = Math.round(waterToHoldNext) + ' kg minder water';
     document.getElementById('totalBatch').innerText = Math.round(activeBatchSize + addAmount + waterToAdd) + ' kg';
     document.getElementById('calcSteps').innerHTML = stepsHtml || '<p style="margin:0; color:#666;">Vul gegevens in om de stappen te tonen.</p>';
 
