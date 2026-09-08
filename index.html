@@ -264,7 +264,7 @@
         <option value="unknown">Oorzaak onbekend</option>
         <option value="cream_less">Te weinig room gedoseerd</option>
         <option value="cream_more">Te veel room gedoseerd</option>
-        <option value="reprocess_missing">Ontbrekende Herverwerking</option>
+        <option value="reprocess_missing">Ontbrekende <strong>room</strong> herverwerking</option>
         <option value="fat_less">Te weinig vloeibaar vet gedoseerd</option>
         <option value="fat_more">Te veel vloeibaar vet gedoseerd</option>
         <option value="water_less">Te weinig water gedoseerd</option>
@@ -272,7 +272,7 @@
       </select>
     </div>
 
-    <!-- Extra velden bij 'Ontbrekende Herverwerking' -->
+    <!-- Extra velden bij 'Ontbrekende room herverwerking' -->
     <div id="reprocessFieldsGroup" style="display: none;">
       <div class="form-group">
         <label for="missingReprocessKg">Ontbrekende herverwerking (kg):</label>
@@ -869,7 +869,13 @@
       if (currentFat > 0 && targetFat > currentFat) {
         rowAddIngredient.style.display = 'flex';
         rowAddWater.style.display = 'none';
-        rowHoldWaterNextBatch.style.display = 'flex';
+        
+        // Verberg 'water inhouden' bij ontbrekende herverwerking
+        if (missingComponent === 'reprocess_missing') {
+          rowHoldWaterNextBatch.style.display = 'none';
+        } else {
+          rowHoldWaterNextBatch.style.display = 'flex';
+        }
 
         waterToHoldNext = Math.abs(diffFatKg) / (targetFat / 100);
 
@@ -887,12 +893,13 @@
               Om het vetgehalte op te trekken naar ${targetFat.toFixed(2)}% met ${ingredientName} van ${effectiveCreamFat.toFixed(2)}% vet, gebruiken we de mengformule (massa-balans).<br>
               <em>Formule:</em> ((${targetFat.toFixed(2)} - ${currentFat.toFixed(2)}) / (${effectiveCreamFat.toFixed(2)} - ${targetFat.toFixed(2)})) × ${Math.round(activeBatchSize)}<br>
               Uitkomst: <strong>${addAmount.toFixed(2)} kg</strong> (wordt afgerond op hele kilo's: <strong>${Math.round(addAmount)} kg</strong>).
-            </div>
+            </div>` +
+            (missingComponent !== 'reprocess_missing' ? `
             <div class="calc-step">
               <strong>Alternatief: Water inhouden op volgende batch</strong><br>
               Indien er geen extra room wordt toegevoegd, kan de volgende batch gecorrigeerd worden door minder water te doseren.<br>
               <em>Formule:</em> Tekort aan vet (${Math.abs(diffFatKg).toFixed(2)} kg) / (${targetFat.toFixed(2)} / 100) = <strong>${waterToHoldNext.toFixed(2)} kg water</strong>.
-            </div>
+            </div>` : '') + `
             <div class="calc-step">
               <strong>Stap 3: Totaaloverzicht na correctie (met room)</strong><br>
               Nieuwe totale batchgrootte = Actieve batch (${Math.round(activeBatchSize)} kg) + toe te voegen ${ingredientName} (${Math.round(addAmount)} kg) = <strong>${Math.round(activeBatchSize + addAmount)} kg</strong>.
@@ -950,11 +957,10 @@
         
         const missingFatKg = (missingReprocessKg * reprocessFat) / 100;
         actualTotal = baseForActualCalc - missingReprocessKg;
-        const actualFatKg = currentFatKg; // de gemeten vetmassa
         
         detailsEl.innerHTML = `
           <div class="calc-step">
-            <strong>Analyse Ontbrekende Herverwerking:</strong><br>
+            <strong>Analyse Ontbrekende Room Herverwerking:</strong><br>
             • <strong>Geplande herverwerking:</strong> ${missingReprocessKg} kg (${reprocessFat.toFixed(2)}% vet = ${(missingFatKg).toFixed(2)} kg vet)<br>
             • <strong>Vermoedelijke werkelijke batchgrootte:</strong> ${Math.round(actualTotal)} kg<br>
             • <strong>Ontbrekend vet in tank:</strong> ${(missingFatKg).toFixed(2)} kg vet<br>
