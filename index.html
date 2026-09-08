@@ -346,12 +346,8 @@
           <div class="result-row" id="rowHoldWaterNextBatch" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-blue); display: none;">
             <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
               <span>Water <strong>inhouden</strong> op volgende batch:</span>
-              <span class="info-icon" onclick="toggleTooltip('holdWaterTooltip')">?</span>
             </div>
             <span id="waterToHoldNextBatch" class="result-value" style="color: #d9534f;">0 kg</span>
-          </div>
-          <div id="holdWaterTooltip" class="info-tooltip" style="margin-bottom: 10px;">
-            <strong>Optie volgende batch:</strong> Doseer op de volgende batch dit aantal kg water minder om het tekort aan vet over 2 batches gemiddeld recht te trekken.
           </div>
 
           <div class="result-row" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-blue);">
@@ -558,7 +554,7 @@
 
   function toggleTooltip(id) {
     const el = document.getElementById(id);
-    el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    if (el) el.style.display = el.style.display === 'block' ? 'none' : 'block';
   }
 
   function switchTab(tabId, btn) {
@@ -710,7 +706,7 @@
     });
     document.getElementById('missingComponent').value = 'unknown';
     document.getElementById('resultsTabWrapper').style.display = 'none';
-    ['batchTooltip', 'addTooltip', 'lattizTooltip', 'holdWaterTooltip', 'diffFatTooltip'].forEach(id => {
+    ['batchTooltip', 'addTooltip', 'lattizTooltip', 'diffFatTooltip'].forEach(id => {
       const el = document.getElementById(id);
       if(el) el.style.display = 'none';
     });
@@ -870,7 +866,6 @@
         rowAddIngredient.style.display = 'flex';
         rowAddWater.style.display = 'none';
         
-        // Verberg 'water inhouden' bij ontbrekende herverwerking
         if (missingComponent === 'reprocess_missing') {
           rowHoldWaterNextBatch.style.display = 'none';
         } else {
