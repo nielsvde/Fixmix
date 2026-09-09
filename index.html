@@ -237,7 +237,7 @@
         <label for="batchSize">Geplande batchgrootte (kg):</label>
         <span class="info-icon" onclick="toggleTooltip('batchTooltip')">?</span>
       </div>
-      <input type="text" inputmode="decimal" id="batchSize" placeholder="bijv. 6000" oninput="formatInput(this); checkIfManuallyEdited()">
+      <input type="text" inputmode="decimal" id="batchSize" placeholder="bijv. 6000" oninput="formatInput(this); checkIfManuallyEdited(); hideTool1Results()">
       <div id="batchTooltip" class="info-tooltip"><strong>Let op:</strong> De werkelijke batchgrootte kan afwijken als een grondstof onvolledig is gedoseerd in de mixtank!</div>
     </div>
 
@@ -245,22 +245,22 @@
     <div class="form-row-2col">
       <div class="form-group">
         <label for="currentFat">Gemeten vet (%):</label>
-        <input type="text" inputmode="decimal" id="currentFat" placeholder="bijv. 29.75" oninput="formatInput(this)" onblur="formatDecimals(this, 2)">
+        <input type="text" inputmode="decimal" id="currentFat" placeholder="bijv. 29.75" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
       </div>
       <div class="form-group">
         <label for="targetFat">Doel vet (%):</label>
-        <input type="text" inputmode="decimal" id="targetFat" placeholder="bijv. 30.50" oninput="formatInput(this)" onblur="formatDecimals(this, 2)">
+        <input type="text" inputmode="decimal" id="targetFat" placeholder="bijv. 30.50" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
       </div>
     </div>
 
     <div class="form-group" id="creamFatGroup">
       <label id="creamFatLabel" for="creamFat">Vetgehalte beschikbare room (%):</label>
-      <input type="text" inputmode="decimal" id="creamFat" placeholder="bijv. 43.15" oninput="formatInput(this)" onblur="formatDecimals(this, 2)">
+      <input type="text" inputmode="decimal" id="creamFat" placeholder="bijv. 43.15" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
     </div>
 
     <div class="form-group">
       <label for="missingComponent">Oorzaak afwijking:</label>
-      <select id="missingComponent" onchange="onCauseChange()">
+      <select id="missingComponent" onchange="onCauseChange(); hideTool1Results()">
         <option value="unknown">Oorzaak onbekend</option>
         <option value="cream_less">Te weinig room gedoseerd</option>
         <option value="cream_more">Te veel room gedoseerd</option>
@@ -276,11 +276,11 @@
     <div id="reprocessFieldsGroup" style="display: none;">
       <div class="form-group">
         <label for="missingReprocessKg">Ontbrekende herverwerking (kg):</label>
-        <input type="text" inputmode="decimal" id="missingReprocessKg" placeholder="bijv. 250" oninput="formatInput(this)">
+        <input type="text" inputmode="decimal" id="missingReprocessKg" placeholder="bijv. 250" oninput="formatInput(this); hideTool1Results()">
       </div>
       <div class="form-group">
         <label for="reprocessFat">Vetgehalte herverwerking (%):</label>
-        <input type="text" inputmode="decimal" id="reprocessFat" placeholder="bijv. 35.00" oninput="formatInput(this)" onblur="formatDecimals(this, 2)">
+        <input type="text" inputmode="decimal" id="reprocessFat" placeholder="bijv. 35.00" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
       </div>
     </div>
 
@@ -514,6 +514,13 @@
     }
   }
 
+  function hideTool1Results() {
+    const resultsWrapper = document.getElementById('resultsTabWrapper');
+    if (resultsWrapper) {
+      resultsWrapper.style.display = 'none';
+    }
+  }
+
   function formatInput(input) {
     if (input.value.includes(',')) {
       const cursorPos = input.selectionStart;
@@ -705,7 +712,7 @@
       if(el) el.value = '';
     });
     document.getElementById('missingComponent').value = 'unknown';
-    document.getElementById('resultsTabWrapper').style.display = 'none';
+    hideTool1Results();
     ['batchTooltip', 'addTooltip', 'lattizTooltip', 'diffFatTooltip'].forEach(id => {
       const el = document.getElementById(id);
       if(el) el.style.display = 'none';
