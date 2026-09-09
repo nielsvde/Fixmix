@@ -42,19 +42,14 @@
     .btn-header-action.visible { display: flex; }
     .btn-header-action:hover { background: #e9ecef; color: #212529; }
 
-    /* Instellingen panelen */
-    .settings-panel {
+    /* Instellingen paneel */
+    #settingsPanel {
       display: none; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 10px;
       padding: 14px; margin-bottom: 20px; text-align: left; font-size: 0.85rem;
     }
     .settings-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 10px; }
     .settings-row:last-child { margin-bottom: 0; }
-    .settings-row input[type="text"] { width: 80px !important; padding: 6px !important; font-size: 0.85rem !important; text-align: right; }
-    
-    .cause-setting-item {
-      background: #ffffff; border: 1px solid #ffeeba; border-radius: 6px; padding: 10px; margin-bottom: 10px;
-    }
-    .cause-setting-item label { font-size: 0.8rem; font-weight: normal; }
+    .settings-row input { width: 80px !important; padding: 6px !important; font-size: 0.85rem !important; text-align: right; }
 
     /* Hoofdnavigatie tabbladen */
     .main-tabs { display: flex; gap: 0; margin-bottom: 0; width: 100%; box-sizing: border-box; }
@@ -168,12 +163,6 @@
     }
     .code-section { display: none; }
     .code-section.active { display: block; }
-    
-    .btn-sm-action {
-      background: #6c757d; color: white; border: none; border-radius: 6px;
-      padding: 4px 8px; font-size: 0.75rem; font-weight: bold; cursor: pointer;
-    }
-    .btn-sm-action.btn-danger { background: #dc3545; }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
@@ -200,25 +189,14 @@
       <img src="logotekst.png" alt="Product correctie calculator" id="headerTextImg" class="header-text-img" onerror="this.style.display='none'">
     </div>
     <div class="header-buttons">
-      <button type="button" id="settingsBtn" class="btn-header-action visible" onclick="toggleSettings()" title="Instellingen">⚙️</button>
+      <button type="button" id="settingsBtn" class="btn-header-action" onclick="toggleSettings()" title="Instellingen factoren">⚙️</button>
       <button type="button" class="btn-header-action visible" onclick="resetCalculator()" title="Wis alle invoer">↺ Reset</button>
     </div>
   </div>
 
-  <!-- Verborgen Instellingen Paneel Tool 1 -->
-  <div id="settingsPanelTool1" class="settings-panel">
-    <div class="section-title" style="margin-bottom: 8px;">Beheer Oorzaken (Tool 1)</div>
-    <p style="font-size:0.78rem; color:#666; margin-top:0;">Pas de namen aan, kies welke invoervelden getoond moeten worden of voeg nieuwe oorzaken toe.</p>
-    
-    <div id="causesConfigList"></div>
-
-    <button type="button" class="btn-sm-action" style="background:#28a745; margin-top:6px; width:100%; padding:8px;" onclick="addNewCauseSetting()">+ Nieuwe Oorzaak Toevoegen</button>
-    <button type="button" class="btn-sm-action" style="background:var(--primary); margin-top:8px; width:100%; padding:8px;" onclick="resetCausesToDefault()">↺ Herstel Standaard Oorzaken</button>
-  </div>
-
-  <!-- Verborgen Instellingen Paneel Tool 2 -->
-  <div id="settingsPanel" class="settings-panel">
-    <div class="section-title" style="margin-bottom: 8px;">Factoren Instellingen (Tool 2)</div>
+  <!-- Verborgen Instellingen Paneel -->
+  <div id="settingsPanel">
+    <div class="section-title" style="margin-bottom: 8px;">Factoren Instellingen</div>
     <div class="settings-row">
       <span>Factor Product Opbrengst (standaard 1.08):</span>
       <input type="text" inputmode="decimal" id="facYield" value="1.08" oninput="formatInput(this); calculateLattiz()">
@@ -279,11 +257,18 @@
     <div class="form-group">
       <label for="missingComponent">Oorzaak afwijking:</label>
       <select id="missingComponent" onchange="onCauseChange(); hideTool1Results()">
-        <!-- Wordt dynamisch opgebouwd -->
+        <option value="unknown">Oorzaak onbekend</option>
+        <option value="cream_less">Te weinig room gedoseerd</option>
+        <option value="cream_more">Te veel room gedoseerd</option>
+        <option value="reprocess_missing">Ontbrekende <strong>room</strong> herverwerking</option>
+        <option value="fat_less">Te weinig vloeibaar vet gedoseerd</option>
+        <option value="fat_more">Te veel vloeibaar vet gedoseerd</option>
+        <option value="water_less">Te weinig water gedoseerd</option>
+        <option value="water_more">Te veel water gedoseerd</option>
       </select>
     </div>
 
-    <!-- Extra velden bij herverwerking -->
+    <!-- Extra velden bij 'Ontbrekende room herverwerking' -->
     <div id="reprocessFieldsGroup" style="display: none;">
       <div class="form-group">
         <label for="missingReprocessKg">Ontbrekende herverwerking (kg):</label>
@@ -308,7 +293,7 @@
         <div id="tab-resultat" class="tab-content active">
           <div id="errorSection"></div>
           
-          <!-- VERMOEDELIJKE WERKELIJKE BATCHGROOTTE BLOCK -->
+          <!-- VERMOEDELIJKE WERKELIJKE BATCHGROOTTE BLOCK (Verborgen bij 'Oorzaak onbekend') -->
           <div id="actualBatchBlock" style="margin-bottom: 12px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <span id="actualBatchLabel" style="font-size: 0.85rem; color: #555;">Vermoedelijke werkelijke batchgrootte:</span>
@@ -501,23 +486,9 @@
 </div>
 
 <script>
-  let activeToolId = 'tool1';
   let computedActualTotal = 0;
   let logoIndex = 0;
   const logos = ['logo.png', 'logo3.png'];
-
-  const defaultCauses = [
-    { value: 'unknown', name: 'Oorzaak onbekend', showCream: true, showReprocess: false },
-    { value: 'cream_less', name: 'Te weinig room gedoseerd', showCream: true, showReprocess: false },
-    { value: 'cream_more', name: 'Te veel room gedoseerd', showCream: true, showReprocess: false },
-    { value: 'reprocess_missing', name: 'Ontbrekende room herverwerking', showCream: true, showReprocess: true },
-    { value: 'fat_less', name: 'Te weinig vloeibaar vet gedoseerd', showCream: false, showReprocess: false },
-    { value: 'fat_more', name: 'Te veel vloeibaar vet gedoseerd', showCream: false, showReprocess: false },
-    { value: 'water_less', name: 'Te weinig water gedoseerd', showCream: false, showReprocess: false },
-    { value: 'water_more', name: 'Te veel water gedoseerd', showCream: false, showReprocess: false }
-  ];
-
-  let causes = [];
 
   function cycleLogo() {
     logoIndex = (logoIndex + 1) % logos.length;
@@ -536,15 +507,8 @@
   function toggleSettings() {
     const password = prompt("Voer het wachtwoord in om de instellingen te openen:");
     if (password === "Pcc") {
-      if (activeToolId === 'tool1') {
-        const panel = document.getElementById('settingsPanelTool1');
-        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-      } else if (activeToolId === 'tool2') {
-        const panel = document.getElementById('settingsPanel');
-        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-      } else {
-        alert("Geen instellingen beschikbaar voor deze tool.");
-      }
+      const panel = document.getElementById('settingsPanel');
+      panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
     } else if (password !== null) {
       alert("Onjuist wachtwoord!");
     }
@@ -572,7 +536,6 @@
     localStorage.setItem('facEvap', document.getElementById('facEvap').value);
     localStorage.setItem('facPkgMult', document.getElementById('facPkgMult').value);
     localStorage.setItem('facBulkMult', document.getElementById('facBulkMult').value);
-    localStorage.setItem('customCauses', JSON.stringify(causes));
   }
 
   function loadSettings() {
@@ -581,99 +544,6 @@
     if(localStorage.getItem('facEvap')) document.getElementById('facEvap').value = localStorage.getItem('facEvap');
     if(localStorage.getItem('facPkgMult')) document.getElementById('facPkgMult').value = localStorage.getItem('facPkgMult');
     if(localStorage.getItem('facBulkMult')) document.getElementById('facBulkMult').value = localStorage.getItem('facBulkMult');
-
-    const savedCauses = localStorage.getItem('customCauses');
-    if (savedCauses) {
-      try { causes = JSON.parse(savedCauses); } catch(e) { causes = [...defaultCauses]; }
-    } else {
-      causes = [...defaultCauses];
-    }
-    renderCausesDropdown();
-    renderCausesConfigList();
-  }
-
-  function renderCausesDropdown() {
-    const select = document.getElementById('missingComponent');
-    const currentVal = select.value;
-    select.innerHTML = '';
-    causes.forEach(c => {
-      const opt = document.createElement('option');
-      opt.value = c.value;
-      opt.innerHTML = c.name;
-      select.appendChild(opt);
-    });
-    if (currentVal && causes.some(c => c.value === currentVal)) {
-      select.value = currentVal;
-    } else {
-      select.value = causes[0] ? causes[0].value : 'unknown';
-    }
-    onCauseChange();
-  }
-
-  function renderCausesConfigList() {
-    const container = document.getElementById('causesConfigList');
-    container.innerHTML = '';
-
-    causes.forEach((c, idx) => {
-      const div = document.createElement('div');
-      div.className = 'cause-setting-item';
-      div.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <input type="text" value="${c.name.replace(/"/g, '&quot;')}" style="width:70% !important; text-align:left; font-size:0.85rem !important;" oninput="updateCauseName(${idx}, this.value)">
-          <button type="button" class="btn-sm-action btn-danger" onclick="deleteCauseSetting(${idx})">✕</button>
-        </div>
-        <div style="display:flex; gap:12px; align-items:center;">
-          <label><input type="checkbox" ${c.showCream ? 'checked' : ''} onchange="updateCauseProp(${idx}, 'showCream', this.checked)"> Roomvet % tonen</label>
-          <label><input type="checkbox" ${c.showReprocess ? 'checked' : ''} onchange="updateCauseProp(${idx}, 'showReprocess', this.checked)"> Herverwerking tonen</label>
-        </div>
-      `;
-      container.appendChild(div);
-    });
-  }
-
-  function updateCauseName(index, val) {
-    causes[index].name = val;
-    saveSettings();
-    renderCausesDropdown();
-  }
-
-  function updateCauseProp(index, prop, val) {
-    causes[index][prop] = val;
-    saveSettings();
-    onCauseChange();
-  }
-
-  function deleteCauseSetting(index) {
-    if (causes.length <= 1) {
-      alert("Er moet minimaal één oorzaak overblijven.");
-      return;
-    }
-    causes.splice(index, 1);
-    saveSettings();
-    renderCausesDropdown();
-    renderCausesConfigList();
-  }
-
-  function addNewCauseSetting() {
-    const newKey = 'custom_' + Date.now();
-    causes.push({
-      value: newKey,
-      name: 'Nieuwe oorzaak',
-      showCream: true,
-      showReprocess: false
-    });
-    saveSettings();
-    renderCausesDropdown();
-    renderCausesConfigList();
-  }
-
-  function resetCausesToDefault() {
-    if (confirm("Weet je zeker dat je alle oorzaken wilt herstellen naar de standaardinstellingen?")) {
-      causes = JSON.parse(JSON.stringify(defaultCauses));
-      saveSettings();
-      renderCausesDropdown();
-      renderCausesConfigList();
-    }
   }
 
   function formatDecimals(input, decimals) {
@@ -702,20 +572,18 @@
   }
 
   function switchMainTool(toolId, btn) {
-    activeToolId = toolId;
     document.querySelectorAll('.main-tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.main-tool-content').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById(toolId).classList.add('active');
 
     const settingsBtn = document.getElementById('settingsBtn');
-    document.getElementById('settingsPanel').style.display = 'none';
-    document.getElementById('settingsPanelTool1').style.display = 'none';
-
-    if (toolId === 'tool1' || toolId === 'tool2') {
+    const settingsPanel = document.getElementById('settingsPanel');
+    if (toolId === 'tool2') {
       settingsBtn.classList.add('visible');
     } else {
       settingsBtn.classList.remove('visible');
+      settingsPanel.style.display = 'none';
     }
   }
 
@@ -786,25 +654,24 @@
   }
 
   function onCauseChange() {
-    const causeVal = document.getElementById('missingComponent').value;
-    const currentCauseObj = causes.find(c => c.value === causeVal) || {};
-
+    const cause = document.getElementById('missingComponent').value;
     const creamFatGroup = document.getElementById('creamFatGroup');
     const reprocessGroup = document.getElementById('reprocessFieldsGroup');
     const addLabel = document.getElementById('addLabel');
 
-    if (currentCauseObj.showReprocess) {
+    if (cause === 'reprocess_missing') {
       reprocessGroup.style.display = 'block';
-    } else {
-      reprocessGroup.style.display = 'none';
-    }
-
-    if (currentCauseObj.showCream) {
       creamFatGroup.style.display = 'block';
       addLabel.innerHTML = 'Hoeveelheid room <strong>toevoegen</strong>:';
     } else {
-      creamFatGroup.style.display = 'none';
-      addLabel.innerHTML = causeVal.startsWith('fat') ? 'Hoeveelheid vloeibaar vet <strong>toevoegen</strong>:' : 'Hoeveelheid room/vet <strong>toevoegen</strong>:';
+      reprocessGroup.style.display = 'none';
+      if (cause.startsWith('cream') || cause === 'unknown' || cause === 'water_more') {
+        creamFatGroup.style.display = 'block';
+        addLabel.innerHTML = 'Hoeveelheid room <strong>toevoegen</strong>:';
+      } else {
+        creamFatGroup.style.display = 'none';
+        addLabel.innerHTML = cause.startsWith('fat') ? 'Hoeveelheid vloeibaar vet <strong>toevoegen</strong>:' : 'Hoeveelheid room/vet <strong>toevoegen</strong>:';
+      }
     }
   }
 
@@ -818,7 +685,7 @@
       const el = document.getElementById(id);
       if(el) el.value = '';
     });
-    if (causes.length > 0) document.getElementById('missingComponent').value = causes[0].value;
+    document.getElementById('missingComponent').value = 'unknown';
     hideTool1Results();
     ['batchTooltip', 'addTooltip', 'lattizTooltip', 'diffFatTooltip'].forEach(id => {
       const el = document.getElementById(id);
@@ -940,11 +807,11 @@
     const actualBatchValueEl = document.getElementById('actualBatchValue');
     let hasError = false;
 
-    if (missingComponent !== 'unknown' && inputBatchSize > 0 && currentFat > 0 && targetFat > 0 && (effectiveCreamFat > 0 || missingComponent.startsWith('water') || missingComponent.includes('reprocess'))) {
+    if (missingComponent !== 'unknown' && inputBatchSize > 0 && currentFat > 0 && targetFat > 0 && (effectiveCreamFat > 0 || missingComponent.startsWith('water') || missingComponent === 'reprocess_missing')) {
       let calcCreamFat = (missingComponent.startsWith('water') && effectiveCreamFat === 0) ? 43 : effectiveCreamFat;
       let actualTotal = 0, actualIngredient = 0, actualWater = 0;
 
-      if (missingComponent.includes('reprocess')) {
+      if (missingComponent === 'reprocess_missing') {
         const missingReprocessKg = parseNum(document.getElementById('missingReprocessKg').value);
         const reprocessFat = parseNum(document.getElementById('reprocessFat').value);
         
@@ -963,7 +830,7 @@
       } else {
         const plannedWater = inputBatchSize - (((inputBatchSize * targetFat) / 100) / calcCreamFat) * 100;
         
-        if (['cream_less', 'cream_more', 'fat_less', 'fat_more'].includes(missingComponent) || missingComponent.includes('less') || missingComponent.includes('more')) {
+        if (['cream_less', 'cream_more', 'fat_less', 'fat_more'].includes(missingComponent)) {
           actualWater = plannedWater;
           actualTotal = actualWater / (1 - (currentFat / calcCreamFat));
           actualIngredient = actualTotal - actualWater;
@@ -996,8 +863,8 @@
     const activeBatchSize = (missingComponent !== 'unknown' && computedActualTotal > 0) ? computedActualTotal : inputBatchSize;
 
     // VALIDATIE CONTROLES
-    const isMoreCause = ['cream_more', 'fat_more', 'water_less'].includes(missingComponent) || missingComponent.includes('more');
-    const isLessCause = ['cream_less', 'fat_less', 'water_more'].includes(missingComponent) || missingComponent.includes('less');
+    const isMoreCause = ['cream_more', 'fat_more', 'water_less'].includes(missingComponent);
+    const isLessCause = ['cream_less', 'fat_less', 'water_more'].includes(missingComponent);
 
     if (inputBatchSize > 0 && currentFat > 0 && targetFat > 0) {
       if (isMoreCause && currentFat < targetFat) {
@@ -1123,6 +990,7 @@
 
   window.addEventListener('DOMContentLoaded', () => {
     loadSettings();
+    onCauseChange();
     generateCodes();
     updateDateInformation();
 
