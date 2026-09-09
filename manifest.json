@@ -1,6 +1,6 @@
 {
-  "name": "Product correctie calculator",
-  "short_name": "Correctie Calc",
+  "name": "FixMix",
+  "short_name": "FixMix",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
