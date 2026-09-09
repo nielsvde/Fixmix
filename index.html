@@ -360,13 +360,13 @@
         <!-- Tab 2 -->
         <div id="tab-berekening" class="tab-content">
           <div id="actualBatchDetailsSection">
-            <div class="section-title">1.🔍 Wat zit er nu écht in de tank?</div>
-            <div id="actualBatchDetails"><p style="margin:0; font-style:italic; color:#666;">Vul de gegevens in om te zien wat er mis ging.</p></div>
+            <div class="section-title">1. Analyse van de huidige batch</div>
+            <div id="actualBatchDetails"><p style="margin:0; font-style:italic; color:#666;">Vul de gegevens in om de analyse te bekijken.</p></div>
             <hr style="border:0; border-top: 2px dashed #b6d4fe; margin: 18px 0;">
           </div>
 
-          <div class="section-title" id="step2Title">2. 🧮 Hoe lossen we dit op? (Stap voor stap)</div>
-          <div id="calcSteps"><p style="margin:0; font-style:italic; color:#666;">Vul de gegevens in om de oplossing te bekijken.</p></div>
+          <div class="section-title" id="step2Title">2. Correctieberekening (Stap voor stap)</div>
+          <div id="calcSteps"><p style="margin:0; font-style:italic; color:#666;">Vul de gegevens in om de stappen te bekijken.</p></div>
         </div>
       </div>
     </div>
@@ -797,11 +797,11 @@
     if (missingComponent === 'unknown') {
       actualBatchBlock.style.display = 'none';
       actualBatchDetailsSection.style.display = 'none';
-      step2Title.innerText = '2. 🧮 Hoe lossen we dit op? (Stap voor stap)';
+      step2Title.innerText = '2. Correctieberekening (Stap voor stap)';
     } else {
       actualBatchBlock.style.display = 'block';
       actualBatchDetailsSection.style.display = 'block';
-      step2Title.innerText = '2. 🧮 Hoe lossen we dit op? (Stap voor stap)';
+      step2Title.innerText = '2. Correctieberekening (Stap voor stap)';
     }
 
     // 1. EERST WERKELIJKE BATCH BEREKENEN
@@ -822,11 +822,11 @@
         
         detailsEl.innerHTML = `
           <div class="calc-step">
-            <strong>Oei! Er is een emmer/massa herverwerking vergeten:</strong><br>
-            • Je wou eigenlijk <strong>${inputBatchSize} kg</strong> maken.<br>
-            • Maar er is <strong>${missingReprocessKg} kg</strong> herverwerking niet ingegooid.<br>
-            • Dus er zit nu maar <strong>${Math.round(actualTotal)} kg</strong> in je tank!<br>
-            • En doordat die herverwerking mist, mis je ook meteen <strong>${missingFatKg.toFixed(2)} kg vet</strong>.
+            <strong>Analyse van de afwijking (Herverwerking ontbreekt):</strong><br>
+            • Geplande batchgrootte: <strong>${inputBatchSize} kg</strong><br>
+            • Niet-gedoseerde herverwerking: <strong>${missingReprocessKg} kg</strong><br>
+            • Werkelijk aanwezige massa in tank: <strong>${Math.round(actualTotal)} kg</strong><br>
+            • Ontbrekende hoeveelheid vetmassa: <strong>${missingFatKg.toFixed(2)} kg vet</strong>
           </div>`;
         computedActualTotal = actualTotal;
       } else {
@@ -848,18 +848,17 @@
 
         detailsEl.innerHTML = `
           <div class="calc-step">
-            <strong>Wat de computer denkt vs. wat er echt gebeurd is:</strong><br>
-            • De computer dacht dat er <strong>${inputBatchSize} kg</strong> in de tank zou zitten.<br>
-            • Maar door de doseerfout zit er nu in het echt <strong>${Math.round(actualTotal)} kg</strong> in de tank.<br>
-            • Dat is <strong>${diffTotal > 0 ? Math.round(diffTotal) + ' kg te veel' : Math.round(Math.abs(diffTotal)) + ' kg te weinig'}</strong> spul in de tank!<br>
-            • Er zit nu <strong>${Math.round(actualIngredient)} kg</strong> ${ingredName} en <strong>${Math.round(actualWater)} kg</strong> water in de mix.
+            <strong>Analyse van de actuele tankinhoud:</strong><br>
+            • Geplande batchgrootte: <strong>${inputBatchSize} kg</strong><br>
+            • Berekende werkelijke inhoud: <strong>${Math.round(actualTotal)} kg</strong> (${diffTotal > 0 ? '+' + Math.round(diffTotal) + ' kg afwijking' : Math.round(diffTotal) + ' kg afwijking'})<br>
+            • Samenstelling Huidige Tank: <strong>${Math.round(actualIngredient)} kg</strong> ${ingredName} en <strong>${Math.round(actualWater)} kg</strong> water.
           </div>`;
       }
       actualBatchValueEl.innerText = Math.round(computedActualTotal) + ' kg';
     } else {
       computedActualTotal = 0;
       actualBatchValueEl.innerText = '0 kg';
-      detailsEl.innerHTML = '<p style="margin:0; font-style:italic; color:#666;">Vul vereiste velden in en klik op "Bereken correctie".</p>';
+      detailsEl.innerHTML = '<p style="margin:0; font-style:italic; color:#666;">Vul de vereiste velden in en klik op "Bereken correctie".</p>';
     }
 
     // BEPALEN WELKE BATCHGROOTTE WORDT GEBRUIKT VOOR CORRECTIEBEREKENING
@@ -935,28 +934,29 @@
           
           stepsHtml = `
             <div class="calc-step">
-              <strong>Stap 1: Hoeveel vet hebben we nu in de tank?</strong><br>
-              In de tank zit nu <strong>${Math.round(activeBatchSize)} kg</strong> mix met <strong>${currentFat.toFixed(2)}%</strong> vet.<br>
-              Als we dat uitrekenen zit er precies <strong>${currentFatKg.toFixed(2)} kg puur vet</strong> in de tank.<br>
-              We willen eigenlijk <strong>${targetFatKg.toFixed(2)} kg vet</strong> hebben. We komen dus <strong>${Math.abs(diffFatKg).toFixed(2)} kg vet te kort</strong>!
-              <span class="calc-formula">Vet in tank = ${Math.round(activeBatchSize)} kg × ${currentFat.toFixed(2)}% = ${currentFatKg.toFixed(2)} kg</span>
+              <strong>Stap 1: Vetmassa in de huidige batch</strong><br>
+              De tank bevat momenteel <strong>${Math.round(activeBatchSize)} kg</strong> met een vetgehalte van <strong>${currentFat.toFixed(2)}%</strong>.<br>
+              • Aanwezige vetmassa: <strong>${currentFatKg.toFixed(2)} kg</strong><br>
+              • Benodigde vetmassa: <strong>${targetFatKg.toFixed(2)} kg</strong><br>
+              • Tekort aan vetmassa: <strong>${Math.abs(diffFatKg).toFixed(2)} kg</strong>
+              <span class="calc-formula">Aanwezig vet = ${Math.round(activeBatchSize)} kg × ${currentFat.toFixed(2)}% = ${currentFatKg.toFixed(2)} kg</span>
             </div>
             <div class="calc-step">
-              <strong>Stap 2: Hoeveel extra ${ingredientName} moeten we bijgieten?</strong><br>
-              Omdat de mix te mager is, moeten we ${ingredientName} toevoegen met <strong>${effectiveCreamFat.toFixed(2)}%</strong> vet.<br>
-              Met de slimme meng-formule rekenen we uit hoeveel kilo ${ingredientName} we moeten bijstorten om de hele tank weer precies op <strong>${targetFat.toFixed(2)}%</strong> vet te krijgen.<br>
-              <span class="calc-formula">Bijstorten = ((${targetFat.toFixed(2)}% - ${currentFat.toFixed(2)}%) / (${effectiveCreamFat.toFixed(2)}% - ${targetFat.toFixed(2)}%)) × ${Math.round(activeBatchSize)} kg</span>
-              👉 <strong>Antwoord: Gooi er exact ${Math.round(addAmount)} kg ${ingredientName} bij!</strong>
+              <strong>Stap 2: Bepaling toe te voegen ${ingredientName}</strong><br>
+              Om het vetgehalte te verhogen naar de doelwaarde van <strong>${targetFat.toFixed(2)}%</strong>, wordt ${ingredientName} toegevoegd met een vetgehalte van <strong>${effectiveCreamFat.toFixed(2)}%</strong>.<br>
+              <span class="calc-formula">Toevoegen = ((${targetFat.toFixed(2)}% - ${currentFat.toFixed(2)}%) / (${effectiveCreamFat.toFixed(2)}% - ${targetFat.toFixed(2)}%)) × ${Math.round(activeBatchSize)} kg</span>
+              👉 <strong>Dosering: Voeg exact ${Math.round(addAmount)} kg ${ingredientName} toe.</strong>
             </div>` +
             (!hideHoldWaterCauses.includes(missingComponent) ? `
             <div class="calc-step">
-              <strong>💡 Slimme Truk (Minder water bij de volgende batch):</strong><br>
-              Wil je deze batch liever laten zoals hij is? Geen probleem! Omdat je nu <strong>${Math.abs(diffFatKg).toFixed(2)} kg vet</strong> mist, kun je bij de <i>volgende</i> batch gewoon <strong>${Math.round(waterToHoldNext)} kg water</strong> minder in de tank laten stromen. Dan klopt de gemiddelde mix weer helemaal!
+              <strong>Alternatieve correctie (Water inhouden op volgende batch):</strong><br>
+              Indien de huidige batch niet direct wordt gecorrigeerd met extra ${ingredientName}, kan het vettekort van <strong>${Math.abs(diffFatKg).toFixed(2)} kg</strong> worden gecompenseerd door bij de <i>volgende batch</i> <strong>${Math.round(waterToHoldNext)} kg minder water</strong> te doseren.
             </div>` : '') + `
             <div class="calc-step">
-              <strong>Stap 3: Hoe groot is de tank na het bijvullen?</strong><br>
-              Je begon met <strong>${Math.round(activeBatchSize)} kg</strong> en gooit er <strong>${Math.round(addAmount)} kg ${ingredientName}</strong> bij.<br>
-              Je nieuwe totale batch is straks <strong>${Math.round(activeBatchSize + addAmount)} kg</strong>.
+              <strong>Stap 3: Resultaat na correctie</strong><br>
+              • Oorspronkelijke inhoud: <strong>${Math.round(activeBatchSize)} kg</strong><br>
+              • Correctiedosering: <strong>${Math.round(addAmount)} kg ${ingredientName}</strong><br>
+              • Totale nieuwe batchgrootte: <strong>${Math.round(activeBatchSize + addAmount)} kg</strong>
             </div>`;
         }
       } else if (currentFat > targetFat && targetFat > 0) {
@@ -967,22 +967,24 @@
         
         stepsHtml = `
           <div class="calc-step">
-            <strong>Stap 1: De mix is te vet!</strong><br>
-            Er zit nu <strong>${Math.round(activeBatchSize)} kg</strong> mix in de tank met <strong>${currentFat.toFixed(2)}%</strong> vet.<br>
-            Dat is in totaal <strong>${currentFatKg.toFixed(2)} kg puur vet</strong>. Maar we wilden maar <strong>${targetFatKg.toFixed(2)} kg vet</strong>.<br>
-            Er zit dus <strong>${diffFatKg.toFixed(2)} kg vet te veel</strong> in de tank!
-            <span class="calc-formula">Vet in tank = ${Math.round(activeBatchSize)} kg × ${currentFat.toFixed(2)}% = ${currentFatKg.toFixed(2)} kg</span>
+            <strong>Stap 1: Vetmassa in de huidige batch</strong><br>
+            De tank bevat momenteel <strong>${Math.round(activeBatchSize)} kg</strong> met een vetgehalte van <strong>${currentFat.toFixed(2)}%</strong>.<br>
+            • Aanwezige vetmassa: <strong>${currentFatKg.toFixed(2)} kg</strong><br>
+            • Gewenste vetmassa: <strong>${targetFatKg.toFixed(2)} kg</strong><br>
+            • Overschot aan vetmassa: <strong>${diffFatKg.toFixed(2)} kg</strong>
+            <span class="calc-formula">Aanwezig vet = ${Math.round(activeBatchSize)} kg × ${currentFat.toFixed(2)}% = ${currentFatKg.toFixed(2)} kg</span>
           </div>
           <div class="calc-step">
-            <strong>Stap 2: Hoeveel water moeten we bijgieten om het te verdunnen?</strong><br>
-            We gaan de mix verdunnen met schoon water totdat het vetgehalte zakken naar precies <strong>${targetFat.toFixed(2)}%</strong>.<br>
-            <span class="calc-formula">Water bijgieten = ((${currentFat.toFixed(2)}% / ${targetFat.toFixed(2)}%) - 1) × ${Math.round(activeBatchSize)} kg</span>
-            👉 <strong>Antwoord: Gooi er exact ${Math.round(waterToAdd)} kg water bij!</strong>
+            <strong>Stap 2: Bepaling toe te voegen water (Verdunning)</strong><br>
+            Om de mix te verdunnen naar de doelwaarde van <strong>${targetFat.toFixed(2)}%</strong> vet, dient water te worden toegevoegd.<br>
+            <span class="calc-formula">Water toevoegen = ((${currentFat.toFixed(2)}% / ${targetFat.toFixed(2)}%) - 1) × ${Math.round(activeBatchSize)} kg</span>
+            👉 <strong>Dosering: Voeg exact ${Math.round(waterToAdd)} kg water toe.</strong>
           </div>
           <div class="calc-step">
-            <strong>Stap 3: Hoe groot is de tank na het verdunnen?</strong><br>
-            Je had <strong>${Math.round(activeBatchSize)} kg</strong> en je gooit er <strong>${Math.round(waterToAdd)} kg water</strong> bij.<br>
-            Je nieuwe totale batch wordt straks <strong>${Math.round(activeBatchSize + waterToAdd)} kg</strong>.
+            <strong>Stap 3: Resultaat na verdunning</strong><br>
+            • Oorspronkelijke inhoud: <strong>${Math.round(activeBatchSize)} kg</strong><br>
+            • Toegevoegd water: <strong>${Math.round(waterToAdd)} kg</strong><br>
+            • Totale nieuwe batchgrootte: <strong>${Math.round(activeBatchSize + waterToAdd)} kg</strong>
           </div>`;
       } else {
         holdWaterBlock.style.display = 'none';
