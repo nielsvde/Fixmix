@@ -322,7 +322,7 @@
             <span id="currentFatKgVal" class="result-value">0 kg</span>
           </div>
           <div class="result-row">
-            <span>Gewenst vet in batch:</span>
+            <span>Gewenst vet in batch (na correctie):</span>
             <span id="targetFatKgVal" class="result-value">0 kg</span>
           </div>
           <div class="result-row" style="margin-bottom: 12px;">
@@ -333,7 +333,7 @@
             <span id="diffFatKgVal" class="result-value" style="color: var(--primary);">0 kg</span>
           </div>
           <div id="diffFatTooltip" class="info-tooltip" style="margin-bottom: 10px;">
-            <strong>Toelichting:</strong> - betekent te weinig vet in de batch, + betekent te veel vet.
+            <strong>Toelichting:</strong> Het verschil tussen aanwezig vet in de huidige batch en het totaal gewenste vet na correctie.
           </div>
 
           <hr style="border:0; border-top: 1px solid var(--border-blue); margin: 14px 0;">
@@ -609,7 +609,6 @@
       settingsPanel.style.display = 'none';
     }
     
-    // Sluit live camera als je van tool wisselt
     if (toolId !== 'tool3' && html5QrCode) {
       const cameraContainer = document.getElementById('cameraContainer');
       if (cameraContainer && cameraContainer.style.display === 'block') {
@@ -674,11 +673,9 @@
         (decodedText, decodedResult) => {
           document.getElementById('codeTextInput').value = decodedText;
           generateCodes();
-          toggleEmbeddedCamera(); // Sluit camera na succesvolle scan
+          toggleEmbeddedCamera();
         },
-        (errorMessage) => {
-          // Zoeken naar code...
-        }
+        (errorMessage) => {}
       ).catch(err => {
         alert("Kan camera niet openen. Controleer camerarechten.");
         cameraContainer.style.display = 'none';
@@ -935,13 +932,28 @@
       errorSection.innerHTML = '';
     }
 
+    let addAmount = 0, waterToAdd = 0, waterToHoldNext = 0, stepsHtml = '';
+    const ingredientName = additionType === 'fat' ? 'vloeibaar vet' : 'room';
+
+    // Eerst de nodige toevoegingen berekenen om de eindmassa van de batch te bepalen
+    if (!hasError && activeBatchSize > 0 && currentFat > 0 && targetFat > 0) {
+      if (currentFat < targetFat && effectiveCreamFat > targetFat) {
+        addAmount = ((targetFat - currentFat) / (effectiveCreamFat - targetFat)) * activeBatchSize;
+      } else if (currentFat > targetFat) {
+        waterToAdd = ((currentFat / targetFat) - 1) * activeBatchSize;
+      }
+    }
+
+    const finalBatchSize = activeBatchSize + addAmount + waterToAdd;
+
+    // Vetberekeningen op basis van HUIDIGE batch versus EIND BATCH NA CORRECTIE
     let currentFatKg = 0;
     let targetFatKg = 0;
     let diffFatKg = 0;
 
     if (activeBatchSize > 0 && currentFat > 0 && targetFat > 0) {
       currentFatKg = (activeBatchSize * currentFat) / 100;
-      targetFatKg = (activeBatchSize * targetFat) / 100;
+      targetFatKg = (finalBatchSize * targetFat) / 100;
       diffFatKg = currentFatKg - targetFatKg;
     }
 
@@ -960,9 +972,6 @@
       diffFatEl.style.color = 'var(--primary)';
     }
 
-    let addAmount = 0, waterToAdd = 0, waterToHoldNext = 0, stepsHtml = '';
-    const ingredientName = additionType === 'fat' ? 'vloeibaar vet' : 'room';
-
     if (!hasError && activeBatchSize > 0) {
       if (currentFat > 0 && targetFat > currentFat) {
         rowAddIngredient.style.display = 'flex';
@@ -975,19 +984,18 @@
           holdWaterBlock.style.display = 'block';
         }
 
-        waterToHoldNext = Math.abs(diffFatKg) / (targetFat / 100);
+        const uncorrectedDiffFat = ((activeBatchSize * targetFat) / 100) - currentFatKg;
+        waterToHoldNext = Math.abs(uncorrectedDiffFat) / (targetFat / 100);
 
         if (effectiveCreamFat > targetFat) {
-          addAmount = ((targetFat - currentFat) / (effectiveCreamFat - targetFat)) * activeBatchSize;
-          
           stepsHtml = `
             <div class="calc-step">
-              <strong>Stap 1: Vetmassa in de huidige batch</strong><br>
-              De tank bevat momenteel <strong>${Math.round(activeBatchSize)} kg</strong> met een vetgehalte van <strong>${currentFat.toFixed(2)}%</strong>.<br>
-              • Aanwezige vetmassa: <strong>${currentFatKg.toFixed(2)} kg</strong><br>
-              • Benodigde vetmassa: <strong>${targetFatKg.toFixed(2)} kg</strong><br>
-              • Tekort aan vetmassa: <strong>${Math.abs(diffFatKg).toFixed(2)} kg</strong>
-              <span class="calc-formula">Aanwezig vet = ${Math.round(activeBatchSize)} kg × ${currentFat.toFixed(2)}% = ${currentFatKg.toFixed(2)} kg</span>
+              <strong>Stap 1: Huidige vs. verwachte situatie na correctie</strong><br>
+              • Huidige tankinhoud: <strong>${Math.round(activeBatchSize)} kg</strong> met <strong>${currentFat.toFixed(2)}%</strong> vet = <strong>${currentFatKg.toFixed(2)} kg vet</strong><br>
+              • Berekende toevoeging: <strong>${Math.round(addAmount)} kg ${ingredientName}</strong><br>
+              • Totale batch na correctie: <strong>${Math.round(finalBatchSize)} kg</strong> met <strong>${targetFat.toFixed(2)}%</strong> vet<br>
+              • Gewenst vet in totale batch: <strong>${targetFatKg.toFixed(2)} kg vet</strong><br>
+              • Toetevoegen vet massa via ${ingredientName}: <strong>${Math.abs(diffFatKg).toFixed(2)} kg vet</strong>
             </div>
             <div class="calc-step">
               <strong>Stap 2: Bepaling toe te voegen ${ingredientName}</strong><br>
@@ -998,29 +1006,27 @@
             (!hideHoldWaterCauses.includes(missingComponent) ? `
             <div class="calc-step">
               <strong>Alternatieve correctie (Water inhouden op volgende batch):</strong><br>
-              Indien de huidige batch niet direct wordt gecorrigeerd met extra ${ingredientName}, kan het vettekort van <strong>${Math.abs(diffFatKg).toFixed(2)} kg</strong> worden gecompenseerd door bij de <i>volgende batch</i> <strong>${Math.round(waterToHoldNext)} kg minder water</strong> te doseren.
+              Indien de huidige batch niet direct wordt gecorrigeerd met extra ${ingredientName}, kan het vettekort op de huidige batchgrootte (<strong>${Math.abs(uncorrectedDiffFat).toFixed(2)} kg</strong>) worden gecompenseerd door bij de <i>volgende batch</i> <strong>${Math.round(waterToHoldNext)} kg minder water</strong> te doseren.
             </div>` : '') + `
             <div class="calc-step">
               <strong>Stap 3: Resultaat na correctie</strong><br>
               • Oorspronkelijke inhoud: <strong>${Math.round(activeBatchSize)} kg</strong><br>
               • Correctiedosering: <strong>${Math.round(addAmount)} kg ${ingredientName}</strong><br>
-              • Totale nieuwe batchgrootte: <strong>${Math.round(activeBatchSize + addAmount)} kg</strong>
+              • Totale nieuwe batchgrootte: <strong>${Math.round(finalBatchSize)} kg</strong>
             </div>`;
         }
       } else if (currentFat > targetFat && targetFat > 0) {
         rowAddIngredient.style.display = 'none';
         rowAddWater.style.display = 'flex';
         holdWaterBlock.style.display = 'none';
-        waterToAdd = ((currentFat / targetFat) - 1) * activeBatchSize;
         
         stepsHtml = `
           <div class="calc-step">
-            <strong>Stap 1: Vetmassa in de huidige batch</strong><br>
-            De tank bevat momenteel <strong>${Math.round(activeBatchSize)} kg</strong> met een vetgehalte van <strong>${currentFat.toFixed(2)}%</strong>.<br>
-            • Aanwezige vetmassa: <strong>${currentFatKg.toFixed(2)} kg</strong><br>
-            • Gewenste vetmassa: <strong>${targetFatKg.toFixed(2)} kg</strong><br>
-            • Overschot aan vetmassa: <strong>${diffFatKg.toFixed(2)} kg</strong>
-            <span class="calc-formula">Aanwezig vet = ${Math.round(activeBatchSize)} kg × ${currentFat.toFixed(2)}% = ${currentFatKg.toFixed(2)} kg</span>
+            <strong>Stap 1: Huidige vs. verwachte situatie na verdunning</strong><br>
+            • Huidige tankinhoud: <strong>${Math.round(activeBatchSize)} kg</strong> met <strong>${currentFat.toFixed(2)}%</strong> vet = <strong>${currentFatKg.toFixed(2)} kg vet</strong><br>
+            • Berekende water toevoeging: <strong>${Math.round(waterToAdd)} kg water</strong><br>
+            • Totale batch na verdunning: <strong>${Math.round(finalBatchSize)} kg</strong> met <strong>${targetFat.toFixed(2)}%</strong> vet<br>
+            • Gewenst vet in totale batch: <strong>${targetFatKg.toFixed(2)} kg vet</strong>
           </div>
           <div class="calc-step">
             <strong>Stap 2: Bepaling toe te voegen water (Verdunning)</strong><br>
@@ -1032,7 +1038,7 @@
             <strong>Stap 3: Resultaat na verdunning</strong><br>
             • Oorspronkelijke inhoud: <strong>${Math.round(activeBatchSize)} kg</strong><br>
             • Toegevoegd water: <strong>${Math.round(waterToAdd)} kg</strong><br>
-            • Totale nieuwe batchgrootte: <strong>${Math.round(activeBatchSize + waterToAdd)} kg</strong>
+            • Totale nieuwe batchgrootte: <strong>${Math.round(finalBatchSize)} kg</strong>
           </div>`;
       } else {
         holdWaterBlock.style.display = 'none';
@@ -1044,7 +1050,7 @@
     document.getElementById('addValue').innerText = Math.round(addAmount) + ' kg';
     document.getElementById('waterToAdd').innerText = Math.round(waterToAdd) + ' kg';
     document.getElementById('waterToHoldNextBatch').innerText = Math.round(waterToHoldNext) + ' kg';
-    document.getElementById('totalBatch').innerText = Math.round(activeBatchSize + addAmount + waterToAdd) + ' kg';
+    document.getElementById('totalBatch').innerText = Math.round(finalBatchSize) + ' kg';
     document.getElementById('calcSteps').innerHTML = stepsHtml || '<p style="margin:0; color:#666;">Vul gegevens in om de stappen te tonen.</p>';
   }
 
