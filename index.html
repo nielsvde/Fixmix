@@ -296,15 +296,16 @@
         <!-- Tab 1 -->
         <div id="tab-resultat" class="tab-content active">
           <div id="errorSection"></div>
-          <div style="margin-bottom: 12px;">
+          
+          <!-- VERMOEDELIJKE WERKELIJKE BATCHGROOTTE BLOCK (Verborgen bij 'Oorzaak onbekend') -->
+          <div id="actualBatchBlock" style="margin-bottom: 12px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <span id="actualBatchLabel" style="font-size: 0.85rem; color: #555;">Vermoedelijke werkelijke batchgrootte:</span>
               <span id="actualBatchValue" class="result-value" style="font-size: 1.1rem; color: var(--primary);">0 kg</span>
             </div>
             <button type="button" class="btn-apply-batch" onclick="toggleBatchSizeState()">↺ Overnemen als geplande batch</button>
+            <hr style="border:0; border-top: 1px solid var(--border-blue); margin: 14px 0;">
           </div>
-
-          <hr style="border:0; border-top: 1px solid var(--border-blue); margin: 14px 0;">
 
           <!-- VET-ANALYSE BLOCK -->
           <div class="result-row">
@@ -358,12 +359,13 @@
 
         <!-- Tab 2 -->
         <div id="tab-berekening" class="tab-content">
-          <div class="section-title">1. Analyse werkelijke batch inhoud</div>
-          <div id="actualBatchDetails"><p style="margin:0; font-style:italic; color:#666;">Vul de gegevens in om de werkelijke batchberekening te zien.</p></div>
+          <div id="actualBatchDetailsSection">
+            <div class="section-title">1. Analyse werkelijke batch inhoud</div>
+            <div id="actualBatchDetails"><p style="margin:0; font-style:italic; color:#666;">Vul de gegevens in om de werkelijke batchberekening te zien.</p></div>
+            <hr style="border:0; border-top: 2px dashed #b6d4fe; margin: 18px 0;">
+          </div>
 
-          <hr style="border:0; border-top: 2px dashed #b6d4fe; margin: 18px 0;">
-
-          <div class="section-title">2. Correctie berekening stappen</div>
+          <div class="section-title" id="step2Title">2. Correctie berekening stappen</div>
           <div id="calcSteps"><p style="margin:0; font-style:italic; color:#666;">Vul de gegevens in om de berekening in stappen te zien.</p></div>
         </div>
       </div>
@@ -817,6 +819,20 @@
     const rowAddWater = document.getElementById('rowAddWater');
     const rowHoldWaterNextBatch = document.getElementById('rowHoldWaterNextBatch');
     const errorSection = document.getElementById('errorSection');
+    const actualBatchBlock = document.getElementById('actualBatchBlock');
+    const actualBatchDetailsSection = document.getElementById('actualBatchDetailsSection');
+    const step2Title = document.getElementById('step2Title');
+
+    // VERBERGEN van vermoedelijke batchgrootte bij 'unknown'
+    if (missingComponent === 'unknown') {
+      actualBatchBlock.style.display = 'none';
+      actualBatchDetailsSection.style.display = 'none';
+      step2Title.innerText = 'Correctie berekening stappen';
+    } else {
+      actualBatchBlock.style.display = 'block';
+      actualBatchDetailsSection.style.display = 'block';
+      step2Title.innerText = '2. Correctie berekening stappen';
+    }
 
     let addAmount = 0, waterToAdd = 0, waterToHoldNext = 0, stepsHtml = '';
     const ingredientName = additionType === 'fat' ? 'vloeibaar vet' : 'room';
@@ -873,7 +889,9 @@
         rowAddIngredient.style.display = 'flex';
         rowAddWater.style.display = 'none';
         
-        if (missingComponent === 'reprocess_missing') {
+        // VERBERGEN van water inhouden bij 'cream_less', 'fat_less' en 'reprocess_missing'
+        const hideHoldWaterCauses = ['cream_less', 'fat_less', 'reprocess_missing'];
+        if (hideHoldWaterCauses.includes(missingComponent)) {
           rowHoldWaterNextBatch.style.display = 'none';
         } else {
           rowHoldWaterNextBatch.style.display = 'flex';
@@ -896,7 +914,7 @@
               <em>Formule:</em> ((${targetFat.toFixed(2)} - ${currentFat.toFixed(2)}) / (${effectiveCreamFat.toFixed(2)} - ${targetFat.toFixed(2)})) × ${Math.round(activeBatchSize)}<br>
               Uitkomst: <strong>${addAmount.toFixed(2)} kg</strong> (wordt afgerond op hele kilo's: <strong>${Math.round(addAmount)} kg</strong>).
             </div>` +
-            (missingComponent !== 'reprocess_missing' ? `
+            (!hideHoldWaterCauses.includes(missingComponent) ? `
             <div class="calc-step">
               <strong>Alternatief: Water inhouden op volgende batch</strong><br>
               Indien er geen extra room wordt toegevoegd, kan de volgende batch gecorrigeerd worden door minder water te doseren.<br>
@@ -948,7 +966,7 @@
 
     const baseForActualCalc = isApplied && originalBatchSize !== null ? originalBatchSize : inputBatchSize;
 
-    if (!hasError && baseForActualCalc > 0 && currentFat > 0 && targetFat > 0 && (effectiveCreamFat > 0 || missingComponent.startsWith('water') || missingComponent === 'reprocess_missing')) {
+    if (missingComponent !== 'unknown' && !hasError && baseForActualCalc > 0 && currentFat > 0 && targetFat > 0 && (effectiveCreamFat > 0 || missingComponent.startsWith('water') || missingComponent === 'reprocess_missing')) {
       let calcCreamFat = (missingComponent.startsWith('water') && effectiveCreamFat === 0) ? 43 : effectiveCreamFat;
       
       let actualTotal = 0, actualIngredient = 0, actualWater = 0;
