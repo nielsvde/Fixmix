@@ -63,6 +63,10 @@
     .main-tool-content { display: none; text-align: left; }
     .main-tool-content.active { display: block; }
 
+    /* Wizard Styling */
+    .wizard-step { margin-bottom: 16px; animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
     .form-group { margin-bottom: 16px; text-align: left; }
     .form-row-2col { display: flex; gap: 10px; margin-bottom: 16px; }
     .form-row-2col .form-group { flex: 1; margin-bottom: 0; }
@@ -232,59 +236,75 @@
 
   <!-- CONTAINER VOOR TOOL 1 -->
   <div id="tool1" class="main-tool-content tab-content-container active">
-    <div class="form-group">
-      <div class="label-container">
-        <label for="batchSize">Geplande batchgrootte (kg):</label>
-        <span class="info-icon" onclick="toggleTooltip('batchTooltip')">?</span>
-      </div>
-      <input type="text" inputmode="decimal" id="batchSize" placeholder="bijv. 6000" oninput="formatInput(this); checkIfManuallyEdited()">
-      <div id="batchTooltip" class="info-tooltip"><strong>Let op:</strong> De werkelijke batchgrootte kan afwijken als een grondstof onvolledig is gedoseerd in de mixtank!</div>
-    </div>
-
-    <!-- Gemeten vet % en Doel vet % naast elkaar -->
-    <div class="form-row-2col">
+    
+    <!-- WIZARD STAP 1 -->
+    <div id="step1" class="wizard-step">
       <div class="form-group">
-        <label for="currentFat">Gemeten vet (%):</label>
-        <input type="text" inputmode="decimal" id="currentFat" placeholder="bijv. 29.75" oninput="formatInput(this)" onblur="formatDecimals(this, 2)">
+        <label for="deviationType">1. Wat is de afwijking?</label>
+        <select id="deviationType" onchange="onDeviationChange()">
+          <option value="" disabled selected>Kies de afwijking...</option>
+          <option value="too_low">Vetgehalte in de tank is te laag</option>
+          <option value="too_high">Vetgehalte in de tank is te hoog</option>
+          <option value="reprocess_missing">Er ontbreekt herverwerking in de tank</option>
+          <option value="unknown">Afwijking of oorzaak is onbekend</option>
+        </select>
       </div>
+    </div>
+
+    <!-- WIZARD STAP 2 -->
+    <div id="step2" class="wizard-step" style="display: none;">
       <div class="form-group">
-        <label for="targetFat">Doel vet (%):</label>
-        <input type="text" inputmode="decimal" id="targetFat" placeholder="bijv. 30.50" oninput="formatInput(this)" onblur="formatDecimals(this, 2)">
+        <label for="missingComponent">2. Wat is de oorzaak?</label>
+        <select id="missingComponent" onchange="onCauseChange()">
+          <option value="" disabled selected>Kies de oorzaak...</option>
+        </select>
       </div>
     </div>
 
-    <div class="form-group" id="creamFatGroup">
-      <label id="creamFatLabel" for="creamFat">Vetgehalte beschikbare room (%):</label>
-      <input type="text" inputmode="decimal" id="creamFat" placeholder="bijv. 43.15" oninput="formatInput(this)" onblur="formatDecimals(this, 2)">
-    </div>
-
-    <div class="form-group">
-      <label for="missingComponent">Oorzaak afwijking:</label>
-      <select id="missingComponent" onchange="onCauseChange()">
-        <option value="unknown">Oorzaak onbekend</option>
-        <option value="cream_less">Te weinig room gedoseerd</option>
-        <option value="cream_more">Te veel room gedoseerd</option>
-        <option value="reprocess_missing">Ontbrekende <strong>room</strong> herverwerking</option>
-        <option value="fat_less">Te weinig vloeibaar vet gedoseerd</option>
-        <option value="fat_more">Te veel vloeibaar vet gedoseerd</option>
-        <option value="water_less">Te weinig water gedoseerd</option>
-        <option value="water_more">Te veel water gedoseerd</option>
-      </select>
-    </div>
-
-    <!-- Extra velden bij 'Ontbrekende room herverwerking' -->
-    <div id="reprocessFieldsGroup" style="display: none;">
+    <!-- WIZARD STAP 3 -->
+    <div id="step3" class="wizard-step" style="display: none;">
+      <div class="section-title" style="margin-top: 10px; margin-bottom: 16px;">3. Vul de actuele waarden in</div>
+      
       <div class="form-group">
-        <label for="missingReprocessKg">Ontbrekende herverwerking (kg):</label>
-        <input type="text" inputmode="decimal" id="missingReprocessKg" placeholder="bijv. 250" oninput="formatInput(this)">
+        <div class="label-container">
+          <label for="batchSize">Geplande batchgrootte (kg):</label>
+          <span class="info-icon" onclick="toggleTooltip('batchTooltip')">?</span>
+        </div>
+        <input type="text" inputmode="decimal" id="batchSize" placeholder="bijv. 6000" oninput="formatInput(this); checkIfManuallyEdited()">
+        <div id="batchTooltip" class="info-tooltip"><strong>Let op:</strong> De werkelijke batchgrootte kan afwijken als een grondstof onvolledig is gedoseerd in de mixtank!</div>
       </div>
-      <div class="form-group">
-        <label for="reprocessFat">Vetgehalte herverwerking (%):</label>
-        <input type="text" inputmode="decimal" id="reprocessFat" placeholder="bijv. 35.00" oninput="formatInput(this)" onblur="formatDecimals(this, 2)">
-      </div>
-    </div>
 
-    <button type="button" class="btn-calc-action" onclick="executeCalculation()">Bereken correctie</button>
+      <!-- Gemeten vet % en Doel vet % naast elkaar -->
+      <div class="form-row-2col">
+        <div class="form-group">
+          <label for="currentFat">Gemeten vet (%):</label>
+          <input type="text" inputmode="decimal" id="currentFat" placeholder="bijv. 29.75" oninput="formatInput(this)" onblur="formatDecimals(this, 2)">
+        </div>
+        <div class="form-group">
+          <label for="targetFat">Doel vet (%):</label>
+          <input type="text" inputmode="decimal" id="targetFat" placeholder="bijv. 30.50" oninput="formatInput(this)" onblur="formatDecimals(this, 2)">
+        </div>
+      </div>
+
+      <div class="form-group" id="creamFatGroup">
+        <label id="creamFatLabel" for="creamFat">Vetgehalte beschikbare room (%):</label>
+        <input type="text" inputmode="decimal" id="creamFat" placeholder="bijv. 43.15" oninput="formatInput(this)" onblur="formatDecimals(this, 2)">
+      </div>
+
+      <!-- Extra velden bij 'Ontbrekende room herverwerking' -->
+      <div id="reprocessFieldsGroup" style="display: none;">
+        <div class="form-group">
+          <label for="missingReprocessKg">Ontbrekende herverwerking (kg):</label>
+          <input type="text" inputmode="decimal" id="missingReprocessKg" placeholder="bijv. 250" oninput="formatInput(this)">
+        </div>
+        <div class="form-group">
+          <label for="reprocessFat">Vetgehalte herverwerking (%):</label>
+          <input type="text" inputmode="decimal" id="reprocessFat" placeholder="bijv. 35.00" oninput="formatInput(this)" onblur="formatDecimals(this, 2)">
+        </div>
+      </div>
+
+      <button type="button" class="btn-calc-action" onclick="executeCalculation()">Bereken correctie</button>
+    </div>
 
     <div class="tabs-wrapper" id="resultsTabWrapper">
       <div class="tab-buttons">
@@ -646,11 +666,57 @@
     document.getElementById('futureDateValue').innerText = formattedDate;
   }
 
+  function onDeviationChange() {
+    const devType = document.getElementById('deviationType').value;
+    const causeSelect = document.getElementById('missingComponent');
+    const step2 = document.getElementById('step2');
+    const step3 = document.getElementById('step3');
+    const results = document.getElementById('resultsTabWrapper');
+
+    causeSelect.innerHTML = '<option value="" disabled selected>Kies de oorzaak...</option>';
+
+    if (devType === 'too_low') {
+      causeSelect.innerHTML += `
+        <option value="cream_less">Te weinig room gedoseerd</option>
+        <option value="fat_less">Te weinig vloeibaar vet gedoseerd</option>
+        <option value="water_more">Te veel water gedoseerd</option>
+      `;
+      step2.style.display = 'block';
+    } else if (devType === 'too_high') {
+      causeSelect.innerHTML += `
+        <option value="cream_more">Te veel room gedoseerd</option>
+        <option value="fat_more">Te veel vloeibaar vet gedoseerd</option>
+        <option value="water_less">Te weinig water gedoseerd</option>
+      `;
+      step2.style.display = 'block';
+    } else if (devType === 'reprocess_missing') {
+      causeSelect.innerHTML += `
+        <option value="reprocess_missing">Ontbrekende room herverwerking</option>
+      `;
+      step2.style.display = 'block';
+    } else if (devType === 'unknown') {
+      causeSelect.innerHTML += `
+        <option value="unknown">Oorzaak onbekend</option>
+      `;
+      step2.style.display = 'block';
+    }
+    
+    step3.style.display = 'none';
+    results.style.display = 'none';
+  }
+
   function onCauseChange() {
     const cause = document.getElementById('missingComponent').value;
+    const step3 = document.getElementById('step3');
     const creamFatGroup = document.getElementById('creamFatGroup');
     const reprocessGroup = document.getElementById('reprocessFieldsGroup');
     const addLabel = document.getElementById('addLabel');
+
+    if (cause) {
+      step3.style.display = 'block';
+    } else {
+      step3.style.display = 'none';
+    }
 
     if (cause === 'reprocess_missing') {
       reprocessGroup.style.display = 'block';
@@ -658,10 +724,10 @@
       addLabel.innerHTML = 'Hoeveelheid room <strong>toevoegen</strong>:';
     } else {
       reprocessGroup.style.display = 'none';
-      if (cause.startsWith('cream') || cause === 'unknown') {
+      if (cause && (cause.startsWith('cream') || cause === 'unknown')) {
         creamFatGroup.style.display = 'block';
         addLabel.innerHTML = 'Hoeveelheid room <strong>toevoegen</strong>:';
-      } else {
+      } else if (cause) {
         creamFatGroup.style.display = 'none';
         addLabel.innerHTML = cause.startsWith('fat') ? 'Hoeveelheid vloeibaar vet <strong>toevoegen</strong>:' : 'Hoeveelheid room/vet <strong>toevoegen</strong>:';
       }
@@ -704,15 +770,23 @@
       const el = document.getElementById(id);
       if(el) el.value = '';
     });
-    document.getElementById('missingComponent').value = 'unknown';
+    
+    const devSelect = document.getElementById('deviationType');
+    if(devSelect) devSelect.value = '';
+    const causeSelect = document.getElementById('missingComponent');
+    if(causeSelect) causeSelect.innerHTML = '<option value="" disabled selected>Kies de oorzaak...</option>';
+    
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('step3').style.display = 'none';
     document.getElementById('resultsTabWrapper').style.display = 'none';
+    
     ['batchTooltip', 'addTooltip', 'lattizTooltip', 'diffFatTooltip'].forEach(id => {
       const el = document.getElementById(id);
       if(el) el.style.display = 'none';
     });
     originalBatchSize = null;
     isApplied = false;
-    onCauseChange();
+    
     calculateLattiz();
     generateCodes();
   }
@@ -796,7 +870,7 @@
     const inputBatchSize = parseNum(document.getElementById('batchSize').value);
     const currentFat = parseNum(document.getElementById('currentFat').value);
     const targetFat = parseNum(document.getElementById('targetFat').value);
-    const missingComponent = document.getElementById('missingComponent').value;
+    const missingComponent = document.getElementById('missingComponent').value || 'unknown';
     
     const activeBatchSize = (isApplied && computedActualTotal > 0) ? computedActualTotal : inputBatchSize;
 
@@ -1008,7 +1082,8 @@
 
   window.addEventListener('DOMContentLoaded', () => {
     loadSettings();
-    onCauseChange();
+    const devSelect = document.getElementById('deviationType');
+    if(devSelect) devSelect.value = '';
     generateCodes();
     updateDateInformation();
 
