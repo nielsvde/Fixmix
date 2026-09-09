@@ -169,6 +169,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+  <!-- LIVE BARCODE / QR CAMERA SCANNER -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
   <script>
     if ('serviceWorker' in navigator) {
@@ -440,10 +442,15 @@
     </div>
 
     <div style="background: #ffffff; border: 1px solid var(--border-blue); border-radius: 0 0 12px 12px; padding: 16px; margin-top: -1px;">
-      <button type="button" id="scanBtn" class="btn-scan" onclick="startCameraScan()">
-        📷 Scan ordernummer / cijfers via foto
+      
+      <!-- INGESLOTEN LIVE CAMERA VAK -->
+      <div id="cameraContainer" style="display:none; margin-bottom: 12px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-blue);">
+        <div id="reader" style="width: 100%;"></div>
+      </div>
+
+      <button type="button" id="scanBtn" class="btn-scan" onclick="toggleEmbeddedCamera()">
+        📷 Open Live Scanner
       </button>
-      <input type="file" id="scanFileInput" accept="image/*" capture="environment" style="display:none;" onchange="handleOCRScan(this)">
 
       <div class="form-group" style="margin-top: 10px;">
         <label for="codeTextInput">Voer tekst of cijfercode in:</label>
@@ -491,6 +498,7 @@
   let computedActualTotal = 0;
   let logoIndex = 0;
   const logos = ['logo.png', 'logo3.png'];
+  let html5QrCode = null;
 
   function cycleLogo() {
     logoIndex = (logoIndex + 1) % logos.length;
@@ -587,6 +595,14 @@
       settingsBtn.classList.remove('visible');
       settingsPanel.style.display = 'none';
     }
+    
+    // Sluit live camera als je van tool wisselt
+    if (toolId !== 'tool3' && html5QrCode) {
+      const cameraContainer = document.getElementById('cameraContainer');
+      if (cameraContainer && cameraContainer.style.display === 'block') {
+        toggleEmbeddedCamera();
+      }
+    }
   }
 
   function switchCodeType(type, btn) {
@@ -600,36 +616,44 @@
     }
   }
 
-  function startCameraScan() {
-    document.getElementById('scanFileInput').click();
-  }
-
-  async function handleOCRScan(input) {
-    const file = input.files[0];
-    if (!file) return;
-
+  /* EMBEDDED CAMERA SCANNER FUNCTIE */
+  function toggleEmbeddedCamera() {
+    const cameraContainer = document.getElementById('cameraContainer');
     const scanBtn = document.getElementById('scanBtn');
-    scanBtn.innerText = '⏳ Bezig met analyseren van foto...';
-    scanBtn.disabled = true;
 
-    try {
-      const { data: { text } } = await Tesseract.recognize(file, 'eng');
-      const cleanText = text.replace(/[\r\n]+/g, ' ').trim();
-      
-      if (cleanText.length > 0) {
-        const match = cleanText.match(/[A-Za-z0-9\-_]{3,}/);
-        document.getElementById('codeTextInput').value = match ? match[0] : cleanText;
-        generateCodes();
-      } else {
-        alert('Geen leesbare tekst of cijfers gevonden op de foto. Probeer het opnieuw.');
+    if (cameraContainer.style.display === 'block') {
+      if (html5QrCode) {
+        html5QrCode.stop().then(() => {
+          cameraContainer.style.display = 'none';
+          scanBtn.innerText = '📷 Open Live Scanner';
+        }).catch(err => console.error(err));
       }
-    } catch (err) {
-      console.error(err);
-      alert('Er is een fout opgetreden bij het lezen van de foto.');
-    } finally {
-      scanBtn.innerText = '📷 Scan ordernummer / cijfers via foto';
-      scanBtn.disabled = false;
-      input.value = '';
+    } else {
+      cameraContainer.style.display = 'block';
+      scanBtn.innerText = '❌ Sluit Camera';
+
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("reader");
+      }
+
+      const config = { fps: 10, qrbox: { width: 250, height: 150 } };
+
+      html5QrCode.start(
+        { facingMode: "environment" },
+        config,
+        (decodedText, decodedResult) => {
+          document.getElementById('codeTextInput').value = decodedText;
+          generateCodes();
+          toggleEmbeddedCamera(); // Sluit camera na succesvolle scan
+        },
+        (errorMessage) => {
+          // Zoeken naar code...
+        }
+      ).catch(err => {
+        alert("Kan camera niet openen. Controleer camerarechten.");
+        cameraContainer.style.display = 'none';
+        scanBtn.innerText = '📷 Open Live Scanner';
+      });
     }
   }
 
@@ -793,7 +817,6 @@
     const actualBatchDetailsSection = document.getElementById('actualBatchDetailsSection');
     const step2Title = document.getElementById('step2Title');
 
-    // VERBERGEN van vermoedelijke batchgrootte bij 'unknown'
     if (missingComponent === 'unknown') {
       actualBatchBlock.style.display = 'none';
       actualBatchDetailsSection.style.display = 'none';
@@ -804,7 +827,6 @@
       step2Title.innerText = '2. Correctieberekening (Stap voor stap)';
     }
 
-    // 1. EERST WERKELIJKE BATCH BEREKENEN
     const detailsEl = document.getElementById('actualBatchDetails');
     const actualBatchValueEl = document.getElementById('actualBatchValue');
     let hasError = false;
@@ -861,10 +883,8 @@
       detailsEl.innerHTML = '<p style="margin:0; font-style:italic; color:#666;">Vul de vereiste velden in en klik op "Bereken correctie".</p>';
     }
 
-    // BEPALEN WELKE BATCHGROOTTE WORDT GEBRUIKT VOOR CORRECTIEBEREKENING
     const activeBatchSize = (missingComponent !== 'unknown' && computedActualTotal > 0) ? computedActualTotal : inputBatchSize;
 
-    // VALIDATIE CONTROLES
     const isMoreCause = ['cream_more', 'fat_more', 'water_less'].includes(missingComponent);
     const isLessCause = ['cream_less', 'fat_less', 'water_more'].includes(missingComponent);
 
@@ -885,7 +905,6 @@
       errorSection.innerHTML = '';
     }
 
-    // BEREKENING VET KG & VERSCHIL
     let currentFatKg = 0;
     let targetFatKg = 0;
     let diffFatKg = 0;
@@ -919,7 +938,6 @@
         rowAddIngredient.style.display = 'flex';
         rowAddWater.style.display = 'none';
         
-        // VERBERGEN van water inhouden bij 'cream_less', 'fat_less' en 'reprocess_missing'
         const hideHoldWaterCauses = ['cream_less', 'fat_less', 'reprocess_missing'];
         if (hideHoldWaterCauses.includes(missingComponent)) {
           holdWaterBlock.style.display = 'none';
