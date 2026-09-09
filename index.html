@@ -123,12 +123,8 @@
     .calc-step:last-child { margin-bottom: 0; }
     .error-box { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 12px; border-radius: 8px; font-size: 0.85rem; line-height: 1.4; margin-bottom: 14px; }
     
-    .btn-apply-batch {
-      background: #e7f1ff; border: 1px solid #b6d4fe; color: var(--primary-hover);
-      padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; width: 100%; margin-top: 6px; box-sizing: border-box;
-    }
-    .btn-apply-batch:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
-    
+    .subtext-note { font-size: 0.78rem; color: #6c757d; font-style: italic; margin-top: -6px; margin-bottom: 8px; text-align: left; }
+
     .footer-actions { margin-top: 24px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
     .feedback-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #6c757d; text-decoration: none; padding: 6px 12px; border-radius: 6px; }
     .feedback-link:hover { background: #e9ecef; color: var(--primary); }
@@ -237,7 +233,7 @@
         <label for="batchSize">Geplande batchgrootte (kg):</label>
         <span class="info-icon" onclick="toggleTooltip('batchTooltip')">?</span>
       </div>
-      <input type="text" inputmode="decimal" id="batchSize" placeholder="bijv. 6000" oninput="formatInput(this); checkIfManuallyEdited(); hideTool1Results()">
+      <input type="text" inputmode="decimal" id="batchSize" placeholder="bijv. 6000" oninput="formatInput(this); hideTool1Results()">
       <div id="batchTooltip" class="info-tooltip"><strong>Let op:</strong> De werkelijke batchgrootte kan afwijken als een grondstof onvolledig is gedoseerd in de mixtank!</div>
     </div>
 
@@ -303,7 +299,6 @@
               <span id="actualBatchLabel" style="font-size: 0.85rem; color: #555;">Vermoedelijke werkelijke batchgrootte:</span>
               <span id="actualBatchValue" class="result-value" style="font-size: 1.1rem; color: var(--primary);">0 kg</span>
             </div>
-            <button type="button" class="btn-apply-batch" onclick="toggleBatchSizeState()">↺ Overnemen als geplande batch</button>
             <hr style="border:0; border-top: 1px solid var(--border-blue); margin: 14px 0;">
           </div>
 
@@ -344,11 +339,14 @@
           </div>
 
           <!-- WATER INHOUDEN VOLGENDE BATCH -->
-          <div class="result-row" id="rowHoldWaterNextBatch" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-blue); display: none;">
-            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-              <span>Water <strong>inhouden</strong> op volgende batch:</span>
+          <div id="holdWaterBlock" style="display: none;">
+            <div class="result-row" id="rowHoldWaterNextBatch" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-blue);">
+              <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                <span>Water <strong>inhouden</strong> op volgende batch:</span>
+              </div>
+              <span id="waterToHoldNextBatch" class="result-value" style="color: #d9534f;">0 kg</span>
             </div>
-            <span id="waterToHoldNextBatch" class="result-value" style="color: #d9534f;">0 kg</span>
+            <div class="subtext-note">Alleen toepassen als de huidige batch niet met room wordt gecorrigeerd.</div>
           </div>
 
           <div class="result-row" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-blue);">
@@ -488,7 +486,7 @@
 </div>
 
 <script>
-  let computedActualTotal = 0, originalBatchSize = null, isApplied = false;
+  let computedActualTotal = 0;
   let logoIndex = 0;
   const logos = ['logo.png', 'logo3.png'];
 
@@ -677,32 +675,6 @@
     }
   }
 
-  function checkIfManuallyEdited() {
-    if (isApplied) {
-      const currentInputVal = parseNum(document.getElementById('batchSize').value);
-      if (currentInputVal !== Math.round(computedActualTotal)) {
-        isApplied = false;
-        originalBatchSize = null;
-      }
-    }
-  }
-
-  function toggleBatchSizeState() {
-    const batchInput = document.getElementById('batchSize');
-    if (!isApplied && computedActualTotal > 0) {
-      if (originalBatchSize === null) {
-        originalBatchSize = parseNum(batchInput.value);
-      }
-      batchInput.value = Math.round(computedActualTotal);
-      isApplied = true;
-    } else if (isApplied && originalBatchSize !== null) {
-      batchInput.value = originalBatchSize;
-      originalBatchSize = null;
-      isApplied = false;
-    }
-    calculate();
-  }
-
   function executeCalculation() {
     document.getElementById('resultsTabWrapper').style.display = 'block';
     calculate();
@@ -719,8 +691,6 @@
       const el = document.getElementById(id);
       if(el) el.style.display = 'none';
     });
-    originalBatchSize = null;
-    isApplied = false;
     onCauseChange();
     calculateLattiz();
     generateCodes();
@@ -806,8 +776,6 @@
     const currentFat = parseNum(document.getElementById('currentFat').value);
     const targetFat = parseNum(document.getElementById('targetFat').value);
     const missingComponent = document.getElementById('missingComponent').value;
-    
-    const activeBatchSize = (isApplied && computedActualTotal > 0) ? computedActualTotal : inputBatchSize;
 
     let additionType = 'cream';
     let effectiveCreamFat = parseNum(document.getElementById('creamFat').value);
@@ -817,7 +785,7 @@
 
     const rowAddIngredient = document.getElementById('rowAddIngredient');
     const rowAddWater = document.getElementById('rowAddWater');
-    const rowHoldWaterNextBatch = document.getElementById('rowHoldWaterNextBatch');
+    const holdWaterBlock = document.getElementById('holdWaterBlock');
     const errorSection = document.getElementById('errorSection');
     const actualBatchBlock = document.getElementById('actualBatchBlock');
     const actualBatchDetailsSection = document.getElementById('actualBatchDetailsSection');
@@ -834,12 +802,69 @@
       step2Title.innerText = '2. Correctie berekening stappen';
     }
 
-    let addAmount = 0, waterToAdd = 0, waterToHoldNext = 0, stepsHtml = '';
-    const ingredientName = additionType === 'fat' ? 'vloeibaar vet' : 'room';
+    // 1. EERST WERKELIJKE BATCH BEREKENEN
+    const detailsEl = document.getElementById('actualBatchDetails');
+    const actualBatchValueEl = document.getElementById('actualBatchValue');
+    let hasError = false;
 
+    if (missingComponent !== 'unknown' && inputBatchSize > 0 && currentFat > 0 && targetFat > 0 && (effectiveCreamFat > 0 || missingComponent.startsWith('water') || missingComponent === 'reprocess_missing')) {
+      let calcCreamFat = (missingComponent.startsWith('water') && effectiveCreamFat === 0) ? 43 : effectiveCreamFat;
+      let actualTotal = 0, actualIngredient = 0, actualWater = 0;
+
+      if (missingComponent === 'reprocess_missing') {
+        const missingReprocessKg = parseNum(document.getElementById('missingReprocessKg').value);
+        const reprocessFat = parseNum(document.getElementById('reprocessFat').value);
+        
+        const missingFatKg = (missingReprocessKg * reprocessFat) / 100;
+        actualTotal = inputBatchSize - missingReprocessKg;
+        
+        detailsEl.innerHTML = `
+          <div class="calc-step">
+            <strong>Analyse Ontbrekende Room Herverwerking:</strong><br>
+            • <strong>Geplande herverwerking:</strong> ${missingReprocessKg} kg (${reprocessFat.toFixed(2)}% vet = ${(missingFatKg).toFixed(2)} kg vet)<br>
+            • <strong>Vermoedelijke werkelijke batchgrootte:</strong> ${Math.round(actualTotal)} kg<br>
+            • <strong>Ontbrekend vet in tank:</strong> ${(missingFatKg).toFixed(2)} kg vet<br>
+            <em>Uitleg:</em> Doordat er ${missingReprocessKg} kg herverwerking is vergeten, mist de batch massa én vet.
+          </div>`;
+        computedActualTotal = actualTotal;
+      } else {
+        const plannedWater = inputBatchSize - (((inputBatchSize * targetFat) / 100) / calcCreamFat) * 100;
+        
+        if (['cream_less', 'cream_more', 'fat_less', 'fat_more'].includes(missingComponent)) {
+          actualWater = plannedWater;
+          actualTotal = actualWater / (1 - (currentFat / calcCreamFat));
+          actualIngredient = actualTotal - actualWater;
+        } else {
+          actualIngredient = (((inputBatchSize * targetFat) / 100) / calcCreamFat) * 100;
+          actualTotal = ((actualIngredient * calcCreamFat) / 100) / (currentFat / 100);
+          actualWater = actualTotal - actualIngredient;
+        }
+        computedActualTotal = actualTotal;
+
+        const diffTotal = actualTotal - inputBatchSize;
+
+        detailsEl.innerHTML = `
+          <div class="calc-step">
+            <strong>Analyse op basis van gekozen oorzaak:</strong><br>
+            • <strong>Gepland water / ${additionType === 'fat' ? 'vloeibaar vet' : 'room'}:</strong> ${Math.round(plannedWater)} kg / ${Math.round(inputBatchSize - plannedWater)} kg<br>
+            • <strong>Werkelijk water / ${additionType === 'fat' ? 'vloeibaar vet' : 'room'}:</strong> ${Math.round(actualWater)} kg / ${Math.round(actualIngredient)} kg<br>
+            • <strong>Verschil in totale massa:</strong> <span style="color:${Math.abs(diffTotal) < 0.5 ? '#27ae60' : '#c0392b'}; font-weight:bold;">${diffTotal > 0 ? '+' : ''}${Math.round(diffTotal)} kg</span><br>
+            <em>Uitleg:</em> Berekend via de droge stof / vetbalans om te achterhalen hoeveel ${additionType === 'fat' ? 'vloeibaar vet' : 'room'} of water er door een weeg- of doseerfout feitelijk te weinig/te veel in de mixtank is gekomen.
+          </div>`;
+      }
+      actualBatchValueEl.innerText = Math.round(computedActualTotal) + ' kg';
+    } else {
+      computedActualTotal = 0;
+      actualBatchValueEl.innerText = '0 kg';
+      detailsEl.innerHTML = '<p style="margin:0; font-style:italic; color:#666;">Vul vereiste velden in en klik op "Bereken correctie".</p>';
+    }
+
+    // BEPALEN WELKE BATCHGROOTTE WORDT GEBRUIKT VOOR CORRECTIEBEREKENING
+    const activeBatchSize = (missingComponent !== 'unknown' && computedActualTotal > 0) ? computedActualTotal : inputBatchSize;
+
+    // VALIDATIE CONTROLES
     const isMoreCause = ['cream_more', 'fat_more', 'water_less'].includes(missingComponent);
     const isLessCause = ['cream_less', 'fat_less', 'water_more'].includes(missingComponent);
-    let hasError = false;
 
     if (inputBatchSize > 0 && currentFat > 0 && targetFat > 0) {
       if (isMoreCause && currentFat < targetFat) {
@@ -884,6 +909,9 @@
       diffFatEl.style.color = 'var(--primary)';
     }
 
+    let addAmount = 0, waterToAdd = 0, waterToHoldNext = 0, stepsHtml = '';
+    const ingredientName = additionType === 'fat' ? 'vloeibaar vet' : 'room';
+
     if (!hasError && activeBatchSize > 0) {
       if (currentFat > 0 && targetFat > currentFat) {
         rowAddIngredient.style.display = 'flex';
@@ -892,9 +920,9 @@
         // VERBERGEN van water inhouden bij 'cream_less', 'fat_less' en 'reprocess_missing'
         const hideHoldWaterCauses = ['cream_less', 'fat_less', 'reprocess_missing'];
         if (hideHoldWaterCauses.includes(missingComponent)) {
-          rowHoldWaterNextBatch.style.display = 'none';
+          holdWaterBlock.style.display = 'none';
         } else {
-          rowHoldWaterNextBatch.style.display = 'flex';
+          holdWaterBlock.style.display = 'block';
         }
 
         waterToHoldNext = Math.abs(diffFatKg) / (targetFat / 100);
@@ -905,7 +933,7 @@
           stepsHtml = `
             <div class="calc-step">
               <strong>Stap 1: Berekening huidige vethoeveelheid</strong><br>
-              We vermenigvuldigen de actieve batchgrootte (${Math.round(activeBatchSize)} kg) met het gemeten vetgehalte (${currentFat.toFixed(2)}%).<br>
+              We vermenigvuldigen de actieve/werkelijke batchgrootte (${Math.round(activeBatchSize)} kg) met het gemeten vetgehalte (${currentFat.toFixed(2)}%).<br>
               <em>Formule:</em> ${Math.round(activeBatchSize)} × (${currentFat.toFixed(2)} / 100) = <strong>${currentFatKg.toFixed(2)} kg vet</strong> (streef: ${targetFatKg.toFixed(2)} kg, verschil: -${Math.abs(diffFatKg).toFixed(2)} kg).
             </div>
             <div class="calc-step">
@@ -928,7 +956,7 @@
       } else if (currentFat > targetFat && targetFat > 0) {
         rowAddIngredient.style.display = 'none';
         rowAddWater.style.display = 'flex';
-        rowHoldWaterNextBatch.style.display = 'none';
+        holdWaterBlock.style.display = 'none';
         waterToAdd = ((currentFat / targetFat) - 1) * activeBatchSize;
         
         stepsHtml = `
@@ -947,10 +975,10 @@
             Nieuwe totale batchgrootte = ${Math.round(activeBatchSize)} kg + ${Math.round(waterToAdd)} kg water = <strong>${Math.round(activeBatchSize + waterToAdd)} kg</strong>.
           </div>`;
       } else {
-        rowHoldWaterNextBatch.style.display = 'none';
+        holdWaterBlock.style.display = 'none';
       }
     } else {
-      rowHoldWaterNextBatch.style.display = 'none';
+      holdWaterBlock.style.display = 'none';
     }
 
     document.getElementById('addValue').innerText = Math.round(addAmount) + ' kg';
@@ -958,77 +986,6 @@
     document.getElementById('waterToHoldNextBatch').innerText = Math.round(waterToHoldNext) + ' kg';
     document.getElementById('totalBatch').innerText = Math.round(activeBatchSize + addAmount + waterToAdd) + ' kg';
     document.getElementById('calcSteps').innerHTML = stepsHtml || '<p style="margin:0; color:#666;">Vul gegevens in om de stappen te tonen.</p>';
-
-    const actualBatchLabelEl = document.getElementById('actualBatchLabel');
-    const actualBatchValueEl = document.getElementById('actualBatchValue');
-    const detailsEl = document.getElementById('actualBatchDetails');
-    const applyButton = document.querySelector('.btn-apply-batch');
-
-    const baseForActualCalc = isApplied && originalBatchSize !== null ? originalBatchSize : inputBatchSize;
-
-    if (missingComponent !== 'unknown' && !hasError && baseForActualCalc > 0 && currentFat > 0 && targetFat > 0 && (effectiveCreamFat > 0 || missingComponent.startsWith('water') || missingComponent === 'reprocess_missing')) {
-      let calcCreamFat = (missingComponent.startsWith('water') && effectiveCreamFat === 0) ? 43 : effectiveCreamFat;
-      
-      let actualTotal = 0, actualIngredient = 0, actualWater = 0;
-
-      if (missingComponent === 'reprocess_missing') {
-        const missingReprocessKg = parseNum(document.getElementById('missingReprocessKg').value);
-        const reprocessFat = parseNum(document.getElementById('reprocessFat').value);
-        
-        const missingFatKg = (missingReprocessKg * reprocessFat) / 100;
-        actualTotal = baseForActualCalc - missingReprocessKg;
-        
-        detailsEl.innerHTML = `
-          <div class="calc-step">
-            <strong>Analyse Ontbrekende Room Herverwerking:</strong><br>
-            • <strong>Geplande herverwerking:</strong> ${missingReprocessKg} kg (${reprocessFat.toFixed(2)}% vet = ${(missingFatKg).toFixed(2)} kg vet)<br>
-            • <strong>Vermoedelijke werkelijke batchgrootte:</strong> ${Math.round(actualTotal)} kg<br>
-            • <strong>Ontbrekend vet in tank:</strong> ${(missingFatKg).toFixed(2)} kg vet<br>
-            <em>Uitleg:</em> Doordat er ${missingReprocessKg} kg herverwerking is vergeten, mist de batch massa én vet.
-          </div>`;
-        computedActualTotal = actualTotal;
-      } else {
-        const plannedWater = baseForActualCalc - (((baseForActualCalc * targetFat) / 100) / calcCreamFat) * 100;
-        
-        if (['cream_less', 'cream_more', 'fat_less', 'fat_more'].includes(missingComponent)) {
-          actualWater = plannedWater;
-          actualTotal = actualWater / (1 - (currentFat / calcCreamFat));
-          actualIngredient = actualTotal - actualWater;
-        } else {
-          actualIngredient = (((baseForActualCalc * targetFat) / 100) / calcCreamFat) * 100;
-          actualTotal = ((actualIngredient * calcCreamFat) / 100) / (currentFat / 100);
-          actualWater = actualTotal - actualIngredient;
-        }
-        computedActualTotal = actualTotal;
-
-        const diffTotal = actualTotal - baseForActualCalc;
-
-        detailsEl.innerHTML = `
-          <div class="calc-step">
-            <strong>Analyse op basis van gekozen oorzaak:</strong><br>
-            • <strong>Gepland water / ${ingredientName}:</strong> ${Math.round(plannedWater)} kg / ${Math.round(baseForActualCalc - plannedWater)} kg<br>
-            • <strong>Werkelijk water / ${ingredientName}:</strong> ${Math.round(actualWater)} kg / ${Math.round(actualIngredient)} kg<br>
-            • <strong>Verschil in totale massa:</strong> <span style="color:${Math.abs(diffTotal) < 0.5 ? '#27ae60' : '#c0392b'}; font-weight:bold;">${diffTotal > 0 ? '+' : ''}${Math.round(diffTotal)} kg</span><br>
-            <em>Uitleg:</em> Berekend via de droge stof / vetbalans om te achterhalen hoeveel ${ingredientName} of water er door een weeg- of doseerfout feitelijk te weinig/te veel in de mixtank is gekomen.
-          </div>`;
-      }
-
-      actualBatchLabelEl.innerText = isApplied ? 'Origineel geplande batchgrootte:' : 'Vermoedelijke werkelijke batchgrootte:';
-      actualBatchValueEl.innerText = Math.round(isApplied ? originalBatchSize : computedActualTotal) + ' kg';
-    } else {
-      if (!isApplied) computedActualTotal = 0;
-      actualBatchLabelEl.innerText = isApplied ? 'Origineel geplande batchgrootte:' : 'Vermoedelijke werkelijke batchgrootte:';
-      actualBatchValueEl.innerText = (isApplied && originalBatchSize !== null) ? Math.round(originalBatchSize) + ' kg' : '0 kg';
-      detailsEl.innerHTML = '<p style="margin:0; font-style:italic; color:#666;">Vul vereiste velden in en klik op "Bereken correctie".</p>';
-    }
-
-    if (isApplied) {
-      applyButton.innerText = '↺ Herstel originele batchgrootte';
-      applyButton.style.background = '#dc3545'; applyButton.style.color = '#fff'; applyButton.style.borderColor = '#dc3545';
-    } else {
-      applyButton.innerText = '↺ Overnemen als geplande batch';
-      applyButton.style.background = ''; applyButton.style.color = ''; applyButton.style.borderColor = '';
-    }
   }
 
   window.addEventListener('DOMContentLoaded', () => {
