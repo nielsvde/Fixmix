@@ -82,6 +82,16 @@
     }
     textarea { resize: vertical; min-height: 100px; }
 
+    .input-with-button {
+      display: flex; gap: 8px; align-items: center;
+    }
+    .btn-paste {
+      background: #6c757d; color: white; border: none; border-radius: 8px;
+      padding: 12px 14px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+      white-space: nowrap; flex-shrink: 0; transition: background 0.2s;
+    }
+    .btn-paste:hover { background: #5a6268; }
+
     .lattiz-input-small {
       width: 90px !important;
       padding: 6px 8px !important;
@@ -454,7 +464,10 @@
 
       <div class="form-group" style="margin-top: 10px;">
         <label for="codeTextInput">Voer tekst of cijfercode in:</label>
-        <input type="text" id="codeTextInput" placeholder="Typ of scan een code..." oninput="generateCodes()">
+        <div class="input-with-button">
+          <input type="text" id="codeTextInput" placeholder="Typ of scan een code..." oninput="generateCodes()">
+          <button type="button" class="btn-paste" onclick="pasteClipboard()">📋 Plak</button>
+        </div>
       </div>
 
       <div class="code-display-box">
@@ -613,6 +626,23 @@
       document.getElementById('qrSection').classList.add('active');
     } else {
       document.getElementById('barcodeSection').classList.add('active');
+    }
+  }
+
+  /* KLEMBORD PLAK FUNCTIE */
+  async function pasteClipboard() {
+    try {
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          document.getElementById('codeTextInput').value = text;
+          generateCodes();
+        }
+      } else {
+        alert("Klembord toegang wordt niet ondersteund in deze browser.");
+      }
+    } catch (err) {
+      alert("Geen toestemming om het klembord te lezen.");
     }
   }
 
