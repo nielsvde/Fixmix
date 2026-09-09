@@ -8,7 +8,9 @@
   <link rel="icon" type="image/png" href="icon.png">
   <link rel="apple-touch-icon" href="icon.png">
   <meta name="theme-color" content="#007bff">
-  
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://api.qrserver.com">
+
   <style>
     :root {
       --primary: #007bff; --primary-hover: #0056b3;
@@ -169,8 +171,7 @@
     .code-section.active { display: block; }
   </style>
 
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-  <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
   <script>
     if ('serviceWorker' in navigator) {
@@ -189,8 +190,8 @@
 <div class="card">
   <div class="header-container">
     <div class="header-branding">
-      <img src="logo.png" alt="Logo" id="headerLogo" class="header-logo" onclick="cycleLogo()" onerror="this.style.display='none'">
-      <img src="logotekst.png" alt="Product correctie calculator" id="headerTextImg" class="header-text-img" onerror="this.style.display='none'">
+      <img src="logo.png" alt="Logo" id="headerLogo" class="header-logo" decoding="async" onclick="cycleLogo()" onerror="this.style.display='none'">
+      <img src="logotekst.png" alt="Product correctie calculator" id="headerTextImg" class="header-text-img" decoding="async" onerror="this.style.display='none'">
     </div>
     <div class="header-buttons">
       <button type="button" id="settingsBtn" class="btn-header-action" onclick="toggleSettings()" title="Instellingen factoren">⚙️</button>
@@ -490,10 +491,23 @@
   let logoIndex = 0;
   const logos = ['logo.png', 'logo3.png'];
 
+  const elementCache = new Map();
+  function $(id) {
+    let el = elementCache.get(id);
+    if (el === undefined) {
+      el = document.getElementById(id);
+      elementCache.set(id, el);
+    }
+    return el;
+  }
+
+  const nlNumber = new Intl.NumberFormat('nl-NL');
+  const SETTING_IDS = ['facYield', 'facWater', 'facEvap', 'facPkgMult', 'facBulkMult'];
+
   function cycleLogo() {
     logoIndex = (logoIndex + 1) % logos.length;
-    const logoImg = document.getElementById('headerLogo');
-    const textImg = document.getElementById('headerTextImg');
+    const logoImg = $('headerLogo');
+    const textImg = $('headerTextImg');
     
     logoImg.src = logos[logoIndex];
     
@@ -507,7 +521,7 @@
   function toggleSettings() {
     const password = prompt("Voer het wachtwoord in om de instellingen te openen:");
     if (password === "Pcc") {
-      const panel = document.getElementById('settingsPanel');
+      const panel = $('settingsPanel');
       panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
     } else if (password !== null) {
       alert("Onjuist wachtwoord!");
@@ -520,23 +534,18 @@
       input.value = input.value.replace(/,/g, '.');
       input.setSelectionRange(cursorPos, cursorPos);
     }
-    saveSettings();
+    if (SETTING_IDS.includes(input.id)) saveSettings();
   }
 
   function saveSettings() {
-    localStorage.setItem('facYield', document.getElementById('facYield').value);
-    localStorage.setItem('facWater', document.getElementById('facWater').value);
-    localStorage.setItem('facEvap', document.getElementById('facEvap').value);
-    localStorage.setItem('facPkgMult', document.getElementById('facPkgMult').value);
-    localStorage.setItem('facBulkMult', document.getElementById('facBulkMult').value);
+    SETTING_IDS.forEach(id => localStorage.setItem(id, $(id).value));
   }
 
   function loadSettings() {
-    if(localStorage.getItem('facYield')) document.getElementById('facYield').value = localStorage.getItem('facYield');
-    if(localStorage.getItem('facWater')) document.getElementById('facWater').value = localStorage.getItem('facWater');
-    if(localStorage.getItem('facEvap')) document.getElementById('facEvap').value = localStorage.getItem('facEvap');
-    if(localStorage.getItem('facPkgMult')) document.getElementById('facPkgMult').value = localStorage.getItem('facPkgMult');
-    if(localStorage.getItem('facBulkMult')) document.getElementById('facBulkMult').value = localStorage.getItem('facBulkMult');
+    SETTING_IDS.forEach(id => {
+      const stored = localStorage.getItem(id);
+      if (stored) $(id).value = stored;
+    });
   }
 
   function formatDecimals(input, decimals) {
@@ -553,7 +562,7 @@
   }
 
   function toggleTooltip(id) {
-    const el = document.getElementById(id);
+    const el = $(id);
     if (el) el.style.display = el.style.display === 'block' ? 'none' : 'block';
   }
 
@@ -561,17 +570,17 @@
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
-    document.getElementById(tabId).classList.add('active');
+    $(tabId).classList.add('active');
   }
 
   function switchMainTool(toolId, btn) {
     document.querySelectorAll('.main-tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.main-tool-content').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
-    document.getElementById(toolId).classList.add('active');
+    $(toolId).classList.add('active');
 
-    const settingsBtn = document.getElementById('settingsBtn');
-    const settingsPanel = document.getElementById('settingsPanel');
+    const settingsBtn = $('settingsBtn');
+    const settingsPanel = $('settingsPanel');
     if (toolId === 'tool2') {
       settingsBtn.classList.add('visible');
     } else {
@@ -585,31 +594,46 @@
     document.querySelectorAll('.code-section').forEach(s => s.classList.remove('active'));
     btn.classList.add('active');
     if (type === 'qr') {
-      document.getElementById('qrSection').classList.add('active');
+      $('qrSection').classList.add('active');
     } else {
-      document.getElementById('barcodeSection').classList.add('active');
+      $('barcodeSection').classList.add('active');
     }
   }
 
+  let tesseractLoader = null;
+  function loadTesseract() {
+    if (!tesseractLoader) {
+      tesseractLoader = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+        script.onload = resolve;
+        script.onerror = () => { tesseractLoader = null; reject(new Error('Tesseract kon niet geladen worden')); };
+        document.head.appendChild(script);
+      });
+    }
+    return tesseractLoader;
+  }
+
   function startCameraScan() {
-    document.getElementById('scanFileInput').click();
+    $('scanFileInput').click();
   }
 
   async function handleOCRScan(input) {
     const file = input.files[0];
     if (!file) return;
 
-    const scanBtn = document.getElementById('scanBtn');
+    const scanBtn = $('scanBtn');
     scanBtn.innerText = '⏳ Bezig met analyseren van foto...';
     scanBtn.disabled = true;
 
     try {
+      await loadTesseract();
       const { data: { text } } = await Tesseract.recognize(file, 'eng');
       const cleanText = text.replace(/[\r\n]+/g, ' ').trim();
       
       if (cleanText.length > 0) {
         const match = cleanText.match(/[A-Za-z0-9\-_]{3,}/);
-        document.getElementById('codeTextInput').value = match ? match[0] : cleanText;
+        $('codeTextInput').value = match ? match[0] : cleanText;
         generateCodes();
       } else {
         alert('Geen leesbare tekst of cijfers gevonden op de foto. Probeer het opnieuw.');
@@ -632,7 +656,7 @@
     const oneDay = 1000 * 60 * 60 * 24;
     const dayOfYear = Math.floor(diff / oneDay);
     
-    document.getElementById('julianDayValue').innerText = dayOfYear;
+    $('julianDayValue').innerText = dayOfYear;
 
     const futureDate = new Date();
     futureDate.setDate(now.getDate() + 25);
@@ -643,14 +667,14 @@
       year: 'numeric'
     });
     
-    document.getElementById('futureDateValue').innerText = formattedDate;
+    $('futureDateValue').innerText = formattedDate;
   }
 
   function onCauseChange() {
-    const cause = document.getElementById('missingComponent').value;
-    const creamFatGroup = document.getElementById('creamFatGroup');
-    const reprocessGroup = document.getElementById('reprocessFieldsGroup');
-    const addLabel = document.getElementById('addLabel');
+    const cause = $('missingComponent').value;
+    const creamFatGroup = $('creamFatGroup');
+    const reprocessGroup = $('reprocessFieldsGroup');
+    const addLabel = $('addLabel');
 
     if (cause === 'reprocess_missing') {
       reprocessGroup.style.display = 'block';
@@ -670,7 +694,7 @@
 
   function checkIfManuallyEdited() {
     if (isApplied) {
-      const currentInputVal = parseNum(document.getElementById('batchSize').value);
+      const currentInputVal = parseNum($('batchSize').value);
       if (currentInputVal !== Math.round(computedActualTotal)) {
         isApplied = false;
         originalBatchSize = null;
@@ -679,7 +703,7 @@
   }
 
   function toggleBatchSizeState() {
-    const batchInput = document.getElementById('batchSize');
+    const batchInput = $('batchSize');
     if (!isApplied && computedActualTotal > 0) {
       if (originalBatchSize === null) {
         originalBatchSize = parseNum(batchInput.value);
@@ -695,19 +719,19 @@
   }
 
   function executeCalculation() {
-    document.getElementById('resultsTabWrapper').style.display = 'block';
+    $('resultsTabWrapper').style.display = 'block';
     calculate();
   }
 
   function resetCalculator() {
     ['batchSize', 'currentFat', 'targetFat', 'creamFat', 'missingReprocessKg', 'reprocessFat', 'lattizInput', 'lattizPackagesInput', 'lattizReprocessInput', 'codeTextInput'].forEach(id => {
-      const el = document.getElementById(id);
+      const el = $(id);
       if(el) el.value = '';
     });
-    document.getElementById('missingComponent').value = 'unknown';
-    document.getElementById('resultsTabWrapper').style.display = 'none';
+    $('missingComponent').value = 'unknown';
+    $('resultsTabWrapper').style.display = 'none';
     ['batchTooltip', 'addTooltip', 'lattizTooltip', 'diffFatTooltip'].forEach(id => {
-      const el = document.getElementById(id);
+      const el = $(id);
       if(el) el.style.display = 'none';
     });
     originalBatchSize = null;
@@ -718,7 +742,7 @@
   }
 
   function calculateLattiz() {
-    const rawText = document.getElementById('lattizInput').value;
+    const rawText = $('lattizInput').value;
     const matches = rawText.match(/[0-9]+([.,][0-9]+)?/g);
     
     let totalLiters = 0;
@@ -730,39 +754,37 @@
     }
 
     if (matches) {
-      matches.forEach(m => {
-        totalLiters += parseNum(m);
-      });
+      for (const m of matches) totalLiters += parseNum(m);
     }
 
-    const fYield = parseNum(document.getElementById('facYield').value) || 1.08;
-    const fWater = parseNum(document.getElementById('facWater').value) || 0.01;
-    const fEvap = parseNum(document.getElementById('facEvap').value) || 0.99;
-    const fPkgMult = parseNum(document.getElementById('facPkgMult').value) || 4;
-    const fBulkMult = parseNum(document.getElementById('facBulkMult').value) || 1.1;
+    const fYield = parseNum($('facYield').value) || 1.08;
+    const fWater = parseNum($('facWater').value) || 0.01;
+    const fEvap = parseNum($('facEvap').value) || 0.99;
+    const fPkgMult = parseNum($('facPkgMult').value) || 4;
+    const fBulkMult = parseNum($('facBulkMult').value) || 1.1;
 
     const yieldKg = Math.round(totalLiters * fYield);
     const waterKg = Math.round(yieldKg * fWater);
     const evapKg = Math.round(yieldKg * fEvap);
     
-    const packagesVal = parseNum(document.getElementById('lattizPackagesInput').value);
-    const reprocessVal = parseNum(document.getElementById('lattizReprocessInput').value);
+    const packagesVal = parseNum($('lattizPackagesInput').value);
+    const reprocessVal = parseNum($('lattizReprocessInput').value);
 
     const bulkOrderVal = Math.round((packagesVal * fPkgMult) * fBulkMult + reprocessVal);
 
-    document.getElementById('lattizRuns').innerText = runCount;
-    document.getElementById('lattizTotalLiters').innerText = Math.round(totalLiters).toLocaleString('nl-NL') + ' L';
-    document.getElementById('lattizYieldKg').innerText = yieldKg.toLocaleString('nl-NL') + ' kg';
-    document.getElementById('lattizWater').innerText = waterKg.toLocaleString('nl-NL') + ' kg';
-    document.getElementById('lattizEvap').innerText = evapKg.toLocaleString('nl-NL') + ' kg';
-    document.getElementById('lattizBulkOrder').innerText = bulkOrderVal.toLocaleString('nl-NL') + ' kg';
+    $('lattizRuns').innerText = runCount;
+    $('lattizTotalLiters').innerText = nlNumber.format(Math.round(totalLiters)) + ' L';
+    $('lattizYieldKg').innerText = nlNumber.format(yieldKg) + ' kg';
+    $('lattizWater').innerText = nlNumber.format(waterKg) + ' kg';
+    $('lattizEvap').innerText = nlNumber.format(evapKg) + ' kg';
+    $('lattizBulkOrder').innerText = nlNumber.format(bulkOrderVal) + ' kg';
   }
 
   function generateCodes() {
-    const val = document.getElementById('codeTextInput').value.trim();
-    const qrContainer = document.getElementById('qrContainer');
-    const barcodeSvg = document.getElementById('barcodeSvg');
-    const barcodePlaceholder = document.getElementById('barcodePlaceholder');
+    const val = $('codeTextInput').value.trim();
+    const qrContainer = $('qrContainer');
+    const barcodeSvg = $('barcodeSvg');
+    const barcodePlaceholder = $('barcodePlaceholder');
 
     if (val === '') {
       qrContainer.innerHTML = 'Geen invoer opgegeven';
@@ -793,23 +815,23 @@
   }
 
   function calculate() {
-    const inputBatchSize = parseNum(document.getElementById('batchSize').value);
-    const currentFat = parseNum(document.getElementById('currentFat').value);
-    const targetFat = parseNum(document.getElementById('targetFat').value);
-    const missingComponent = document.getElementById('missingComponent').value;
+    const inputBatchSize = parseNum($('batchSize').value);
+    const currentFat = parseNum($('currentFat').value);
+    const targetFat = parseNum($('targetFat').value);
+    const missingComponent = $('missingComponent').value;
     
     const activeBatchSize = (isApplied && computedActualTotal > 0) ? computedActualTotal : inputBatchSize;
 
     let additionType = 'cream';
-    let effectiveCreamFat = parseNum(document.getElementById('creamFat').value);
+    let effectiveCreamFat = parseNum($('creamFat').value);
 
     if (missingComponent.startsWith('fat')) { additionType = 'fat'; effectiveCreamFat = 100; }
     else if (missingComponent.startsWith('water')) { additionType = 'water'; }
 
-    const rowAddIngredient = document.getElementById('rowAddIngredient');
-    const rowAddWater = document.getElementById('rowAddWater');
-    const rowHoldWaterNextBatch = document.getElementById('rowHoldWaterNextBatch');
-    const errorSection = document.getElementById('errorSection');
+    const rowAddIngredient = $('rowAddIngredient');
+    const rowAddWater = $('rowAddWater');
+    const rowHoldWaterNextBatch = $('rowHoldWaterNextBatch');
+    const errorSection = $('errorSection');
 
     let addAmount = 0, waterToAdd = 0, waterToHoldNext = 0, stepsHtml = '';
     const ingredientName = additionType === 'fat' ? 'vloeibaar vet' : 'room';
@@ -846,10 +868,10 @@
       diffFatKg = currentFatKg - targetFatKg;
     }
 
-    document.getElementById('currentFatKgVal').innerText = currentFatKg > 0 ? (currentFatKg.toFixed(2) + ' kg') : '0 kg';
-    document.getElementById('targetFatKgVal').innerText = targetFatKg > 0 ? (targetFatKg.toFixed(2) + ' kg') : '0 kg';
+    $('currentFatKgVal').innerText = currentFatKg > 0 ? (currentFatKg.toFixed(2) + ' kg') : '0 kg';
+    $('targetFatKgVal').innerText = targetFatKg > 0 ? (targetFatKg.toFixed(2) + ' kg') : '0 kg';
     
-    const diffFatEl = document.getElementById('diffFatKgVal');
+    const diffFatEl = $('diffFatKgVal');
     if (diffFatKg < 0) {
       diffFatEl.innerText = '-' + Math.abs(diffFatKg).toFixed(2) + ' kg';
       diffFatEl.style.color = '#c0392b';
@@ -928,15 +950,15 @@
       rowHoldWaterNextBatch.style.display = 'none';
     }
 
-    document.getElementById('addValue').innerText = Math.round(addAmount) + ' kg';
-    document.getElementById('waterToAdd').innerText = Math.round(waterToAdd) + ' kg';
-    document.getElementById('waterToHoldNextBatch').innerText = Math.round(waterToHoldNext) + ' kg';
-    document.getElementById('totalBatch').innerText = Math.round(activeBatchSize + addAmount + waterToAdd) + ' kg';
-    document.getElementById('calcSteps').innerHTML = stepsHtml || '<p style="margin:0; color:#666;">Vul gegevens in om de stappen te tonen.</p>';
+    $('addValue').innerText = Math.round(addAmount) + ' kg';
+    $('waterToAdd').innerText = Math.round(waterToAdd) + ' kg';
+    $('waterToHoldNextBatch').innerText = Math.round(waterToHoldNext) + ' kg';
+    $('totalBatch').innerText = Math.round(activeBatchSize + addAmount + waterToAdd) + ' kg';
+    $('calcSteps').innerHTML = stepsHtml || '<p style="margin:0; color:#666;">Vul gegevens in om de stappen te tonen.</p>';
 
-    const actualBatchLabelEl = document.getElementById('actualBatchLabel');
-    const actualBatchValueEl = document.getElementById('actualBatchValue');
-    const detailsEl = document.getElementById('actualBatchDetails');
+    const actualBatchLabelEl = $('actualBatchLabel');
+    const actualBatchValueEl = $('actualBatchValue');
+    const detailsEl = $('actualBatchDetails');
     const applyButton = document.querySelector('.btn-apply-batch');
 
     const baseForActualCalc = isApplied && originalBatchSize !== null ? originalBatchSize : inputBatchSize;
@@ -947,8 +969,8 @@
       let actualTotal = 0, actualIngredient = 0, actualWater = 0;
 
       if (missingComponent === 'reprocess_missing') {
-        const missingReprocessKg = parseNum(document.getElementById('missingReprocessKg').value);
-        const reprocessFat = parseNum(document.getElementById('reprocessFat').value);
+        const missingReprocessKg = parseNum($('missingReprocessKg').value);
+        const reprocessFat = parseNum($('reprocessFat').value);
         
         const missingFatKg = (missingReprocessKg * reprocessFat) / 100;
         actualTotal = baseForActualCalc - missingReprocessKg;
@@ -1029,8 +1051,8 @@
   });
 
   let deferredPrompt;
-  const installBtn = document.getElementById('installBtn');
-  const iosInstruction = document.getElementById('iosInstruction');
+  const installBtn = $('installBtn');
+  const iosInstruction = $('iosInstruction');
   const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
   const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
 
