@@ -82,6 +82,13 @@
     }
     textarea { resize: vertical; min-height: 100px; }
 
+    /* Kleuren voor de categorieën in de select dropdown */
+    select option.opt-cream { background-color: #ffe6f0; color: #333; }     /* Lichtroze voor room */
+    select option.opt-fat { background-color: #e6f9e6; color: #333; }       /* Lichtgroen voor vloeibaar vet */
+    select option.opt-water { background-color: #e6f2ff; color: #333; }     /* Lichtblauw voor water */
+    select option.opt-reprocess { background-color: #fffde6; color: #333; } /* Lichtgeel voor herverwerking */
+    select optgroup { font-weight: bold; font-style: normal; }
+
     .input-with-button {
       display: flex; gap: 8px; align-items: center;
     }
@@ -272,14 +279,26 @@
     <div class="form-group">
       <label for="missingComponent">Oorzaak afwijking:</label>
       <select id="missingComponent" onchange="onCauseChange(); hideTool1Results()">
-        <option value="unknown">Oorzaak onbekend</option>
-        <option value="cream_less">Te weinig room gedoseerd</option>
-        <option value="cream_more">Te veel room gedoseerd</option>
-        <option value="reprocess_missing">Ontbrekende <strong>room</strong> herverwerking</option>
-        <option value="fat_less">Te weinig vloeibaar vet gedoseerd</option>
-        <option value="fat_more">Te veel vloeibaar vet gedoseerd</option>
-        <option value="water_less">Te weinig water gedoseerd</option>
-        <option value="water_more">Te veel water gedoseerd</option>
+        <option value="unknown" class="opt-default">Oorzaak onbekend</option>
+        
+        <optgroup label="Room afwijkingen">
+          <option value="cream_less" class="opt-cream">Te weinig room gedoseerd</option>
+          <option value="cream_more" class="opt-cream">Te veel room gedoseerd</option>
+        </optgroup>
+        
+        <optgroup label="Vloeibaar vet afwijkingen">
+          <option value="fat_less" class="opt-fat">Te weinig vloeibaar vet gedoseerd</option>
+          <option value="fat_more" class="opt-fat">Te veel vloeibaar vet gedoseerd</option>
+        </optgroup>
+        
+        <optgroup label="Water afwijkingen">
+          <option value="water_less" class="opt-water">Te weinig water gedoseerd</option>
+          <option value="water_more" class="opt-water">Te veel water gedoseerd</option>
+        </optgroup>
+        
+        <optgroup label="Herverwerking">
+          <option value="reprocess_missing" class="opt-reprocess">Ontbrekende room herverwerking</option>
+        </optgroup>
       </select>
     </div>
 
