@@ -223,7 +223,7 @@
     <div class="section-title" style="margin-bottom: 8px;">Factoren Instellingen</div>
     <div class="settings-row">
       <span>Hoeveelheid waterinspoel bij room (kg):</span>
-      <input type="text" inputmode="decimal" id="facWaterFlush" value="10" oninput="formatInput(this); calculate()">
+      <input type="text" inputmode="decimal" id="facWaterFlush" value="70" oninput="formatInput(this); calculate()">
     </div>
     <hr style="border:0; border-top:1px dashed #e0c878; margin:8px 0;">
     <div class="settings-row">
@@ -970,9 +970,18 @@
         const actualTotal = inputBatchSize - missingReprocessKg;
         computedActualTotal = actualTotal;
 
-        addAmount = missingFatKg / (effectiveCreamFat / 100);
-        waterToAdd = (missingReprocessKg - addAmount) + (useWaterFlush ? waterFlushKg : 0);
-        if (waterToAdd < 0) waterToAdd = 0;
+        if (useWaterFlush && waterFlushKg > 0) {
+          // Bepaal benodigde room zodanig dat (room * effectiveCreamFat / 100) / (room + waterFlushKg) exact het gewenste vetgehalte oplevert ter vervanging van de massa.
+          // Vetanalyse behouden: room doseren met waterinspoel als één dosering
+          const pureCreamForFat = missingFatKg / (effectiveCreamFat / 100);
+          addAmount = pureCreamForFat + waterFlushKg;
+          waterToAdd = missingReprocessKg - addAmount;
+          if (waterToAdd < 0) waterToAdd = 0;
+        } else {
+          addAmount = missingFatKg / (effectiveCreamFat / 100);
+          waterToAdd = missingReprocessKg - addAmount;
+          if (waterToAdd < 0) waterToAdd = 0;
+        }
 
         const currentFatInTank = (inputBatchSize * targetFat / 100) - missingFatKg;
 
@@ -1006,10 +1015,9 @@
           <div class="calc-step">
             <strong>Stap 2: Bepaling dosering room en water</strong><br>
             Om de <strong>${missingFatKg.toFixed(2)} kg vet</strong> aan te vullen met room (${effectiveCreamFat.toFixed(2)}% vet):<br>
-            <span class="calc-formula">Room = ${missingFatKg.toFixed(2)} kg / (${effectiveCreamFat.toFixed(2)}% / 100) = ${Math.round(addAmount)} kg</span>
-            • Benodigde room: <strong>${Math.round(addAmount)} kg</strong><br>
-            • Aanvullend water (om massa op te vullen${useWaterFlush ? ' + ' + waterFlushKg + ' kg inspoel' : ''}): <strong>${Math.round(waterToAdd)} kg</strong><br>
-            👉 <strong>Dosering: Voeg ${Math.round(addAmount)} kg room ${waterToAdd > 0 ? 'én ' + Math.round(waterToAdd) + ' kg water' : ''} toe.</strong>
+            ${useWaterFlush ? `• Inclusief <strong>${waterFlushKg} kg waterinspoel</strong> bedraagt de totale roomdosering: <strong>${Math.round(addAmount)} kg</strong><br>` : `• Benodigde zuivere room: <strong>${Math.round(addAmount)} kg</strong><br>`}
+            • Aanvullend water (om de massa op te vullen): <strong>${Math.round(waterToAdd)} kg</strong><br>
+            👉 <strong>Dosering: Voeg ${Math.round(addAmount)} kg room ${useWaterFlush ? '(incl. ' + waterFlushKg + ' kg waterinspoel) ' : ''}${waterToAdd > 0 ? 'én ' + Math.round(waterToAdd) + ' kg water' : ''} toe.</strong>
           </div>
           <div class="calc-step">
             <strong>Stap 3: Resultaat na toevoeging</strong><br>
