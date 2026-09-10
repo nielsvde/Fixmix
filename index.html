@@ -82,12 +82,46 @@
     }
     textarea { resize: vertical; min-height: 100px; }
 
-    /* Kleuren voor de categorieën in de select dropdown */
-    select option.opt-cream { background-color: #ffe6f0; color: #333; }     /* Lichtroze voor room */
-    select option.opt-fat { background-color: #e6f9e6; color: #333; }       /* Lichtgroen voor vloeibaar vet */
-    select option.opt-water { background-color: #e6f2ff; color: #333; }     /* Lichtblauw voor water */
-    select option.opt-reprocess { background-color: #fffde6; color: #333; } /* Lichtgeel voor herverwerking */
-    select optgroup { font-weight: bold; font-style: normal; }
+    /* GEKLEURDE TEGELS RASTER */
+    .cause-tiles-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .cause-tile {
+      border: 2px solid transparent;
+      border-radius: 10px;
+      padding: 10px 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      box-sizing: border-box;
+      line-height: 1.25;
+      color: #212529;
+    }
+    .cause-tile:hover {
+      filter: brightness(0.95);
+      transform: translateY(-1px);
+    }
+    /* Kleurcategorieën */
+    .cause-tile.tile-neutral { background-color: #e9ecef; border-color: #ced4da; }
+    .cause-tile.tile-room { background-color: #fde8ed; border-color: #f8b4c4; color: #842029; }
+    .cause-tile.tile-fat { background-color: #e6f4ea; border-color: #a3e0b5; color: #0f5132; }
+    .cause-tile.tile-water { background-color: #e0f2fe; border-color: #bae6fd; color: #0369a1; }
+    .cause-tile.tile-reprocess { background-color: #fef9c3; border-color: #fde047; color: #713f12; grid-column: span 2; }
+
+    .cause-tile.active {
+      border-width: 2px;
+      box-shadow: 0 0 0 2px #007bff;
+      font-weight: 700;
+    }
 
     .input-with-button {
       display: flex; gap: 8px; align-items: center;
@@ -144,7 +178,7 @@
     
     .subtext-note { font-size: 0.78rem; color: #6c757d; font-style: italic; margin-top: -6px; margin-bottom: 8px; text-align: left; }
 
-    /* Aangepaste Footer Layout */
+    /* Footer Layout */
     .footer-actions { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; width: 100%; }
     .footer-buttons-row { display: flex; gap: 8px; width: 100%; justify-content: center; }
     .footer-btn {
@@ -276,41 +310,43 @@
       <input type="text" inputmode="decimal" id="creamFat" placeholder="bijv. 43.15" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
     </div>
 
+    <!-- GEKLEURDE TEGELS SELECTIE VOOR OORZAAK -->
     <div class="form-group">
-      <label for="missingComponent">Oorzaak afwijking:</label>
-      <select id="missingComponent" onchange="onCauseChange(); hideTool1Results()">
-        <option value="unknown" class="opt-default">Oorzaak onbekend</option>
-        
-        <optgroup label="Room afwijkingen">
-          <option value="cream_less" class="opt-cream">Te weinig room gedoseerd</option>
-          <option value="cream_more" class="opt-cream">Te veel room gedoseerd</option>
-        </optgroup>
-        
-        <optgroup label="Vloeibaar vet afwijkingen">
-          <option value="fat_less" class="opt-fat">Te weinig vloeibaar vet gedoseerd</option>
-          <option value="fat_more" class="opt-fat">Te veel vloeibaar vet gedoseerd</option>
-        </optgroup>
-        
-        <optgroup label="Water afwijkingen">
-          <option value="water_less" class="opt-water">Te weinig water gedoseerd</option>
-          <option value="water_more" class="opt-water">Te veel water gedoseerd</option>
-        </optgroup>
-        
-        <optgroup label="Herverwerking">
-          <option value="reprocess_missing" class="opt-reprocess">Ontbrekende room herverwerking</option>
-        </optgroup>
+      <label>Oorzaak afwijking:</label>
+      <select id="missingComponent" style="display:none;" onchange="onCauseChange(); hideTool1Results()">
+        <option value="unknown">Oorzaak onbekend</option>
+        <option value="cream_less">Te weinig room gedoseerd</option>
+        <option value="cream_more">Te veel room gedoseerd</option>
+        <option value="fat_less">Te weinig vloeibaar vet gedoseerd</option>
+        <option value="fat_more">Te veel vloeibaar vet gedoseerd</option>
+        <option value="water_less">Te weinig water gedoseerd</option>
+        <option value="water_more">Te veel water gedoseerd</option>
+        <option value="reprocess_missing">Ontbrekende room herverwerking</option>
       </select>
+
+      <div class="cause-tiles-grid" id="causeTilesGrid">
+        <div class="cause-tile tile-neutral active" data-value="unknown" onclick="selectCauseTile('unknown')">Oorzaak onbekend</div>
+        <div class="cause-tile tile-room" data-value="cream_less" onclick="selectCauseTile('cream_less')">Te weinig room</div>
+        <div class="cause-tile tile-room" data-value="cream_more" onclick="selectCauseTile('cream_more')">Te veel room</div>
+        <div class="cause-tile tile-fat" data-value="fat_less" onclick="selectCauseTile('fat_less')">Te weinig vloeibaar vet</div>
+        <div class="cause-tile tile-fat" data-value="fat_more" onclick="selectCauseTile('fat_more')">Te veel vloeibaar vet</div>
+        <div class="cause-tile tile-water" data-value="water_less" onclick="selectCauseTile('water_less')">Te weinig water</div>
+        <div class="cause-tile tile-water" data-value="water_more" onclick="selectCauseTile('water_more')">Te veel water</div>
+        <div class="cause-tile tile-reprocess" data-value="reprocess_missing" onclick="selectCauseTile('reprocess_missing')">Ontbrekende room herverwerking</div>
+      </div>
     </div>
 
     <!-- Extra velden bij 'Ontbrekende room herverwerking' -->
     <div id="reprocessFieldsGroup" style="display: none;">
-      <div class="form-group">
-        <label for="missingReprocessKg">Ontbrekende herverwerking (kg):</label>
-        <input type="text" inputmode="decimal" id="missingReprocessKg" placeholder="bijv. 250" oninput="formatInput(this); hideTool1Results()">
-      </div>
-      <div class="form-group">
-        <label for="reprocessFat">Vetgehalte herverwerking (%):</label>
-        <input type="text" inputmode="decimal" id="reprocessFat" placeholder="bijv. 35.00" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
+      <div class="form-row-2col">
+        <div class="form-group">
+          <label for="missingReprocessKg">Ontbrekend (kg):</label>
+          <input type="text" inputmode="decimal" id="missingReprocessKg" placeholder="bijv. 250" oninput="formatInput(this); hideTool1Results()">
+        </div>
+        <div class="form-group">
+          <label for="reprocessFat">Vetgehalte room (%):</label>
+          <input type="text" inputmode="decimal" id="reprocessFat" placeholder="bijv. 35.00" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
+        </div>
       </div>
     </div>
 
@@ -730,6 +766,21 @@
     document.getElementById('futureDateValue').innerText = formattedDate;
   }
 
+  function selectCauseTile(val) {
+    document.querySelectorAll('.cause-tile').forEach(tile => {
+      if (tile.getAttribute('data-value') === val) {
+        tile.classList.add('active');
+      } else {
+        tile.classList.remove('active');
+      }
+    });
+    
+    const select = document.getElementById('missingComponent');
+    select.value = val;
+    onCauseChange();
+    hideTool1Results();
+  }
+
   function onCauseChange() {
     const cause = document.getElementById('missingComponent').value;
     const creamFatGroup = document.getElementById('creamFatGroup');
@@ -765,7 +816,7 @@
       const el = document.getElementById(id);
       if(el) el.value = '';
     });
-    document.getElementById('missingComponent').value = 'unknown';
+    selectCauseTile('unknown');
     hideTool1Results();
     ['batchTooltip', 'addTooltip', 'evapTooltip', 'diffFatTooltip'].forEach(id => {
       const el = document.getElementById(id);
