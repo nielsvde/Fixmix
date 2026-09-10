@@ -954,7 +954,7 @@
     let addAmount = 0, addFatAmount = 0, waterToAdd = 0, waterToHoldNext = 0, stepsHtml = '';
     const ingredientName = additionType === 'fat' ? 'vloeibaar vet' : 'room';
 
-    // --- HERVERWERKING LOGICA (GECORRIGEERD) ---
+    // --- HERVERWERKING LOGICA (AUTOMATISCHE HERBEREKENING BIJ OVERTALLIG WATER/INSPOEL) ---
     if (missingComponent === 'reprocess_missing') {
       rowCurrentFatKg.style.display = 'none';
       standardResultsBlock.style.display = 'block';
@@ -971,13 +971,25 @@
         computedActualTotal = actualTotal;
 
         const pureCreamNeeded = missingFatKg / (effectiveCreamFat / 100);
+        let rawWaterNeeded = missingReprocessKg - pureCreamNeeded;
+
+        let extraCreamForExcessWater = 0;
 
         if (useWaterFlush && waterFlushKg > 0) {
-          addAmount = pureCreamNeeded + waterFlushKg; // Room-inspoelmengsel totaal
-          waterToAdd = missingReprocessKg - addAmount;
+          if (waterFlushKg > rawWaterNeeded) {
+            // De waterinspoel overstijgt het op te vullen watertekort (bijv. inspoel = 70 kg, nodig water = 15 kg -> 55 kg overschot).
+            const excessWater = waterFlushKg - rawWaterNeeded;
+            // Automatische massa-balans correctie voor overtallig water:
+            extraCreamForExcessWater = (excessWater * targetFat) / (effectiveCreamFat - targetFat);
+            addAmount = pureCreamNeeded + extraCreamForExcessWater + waterFlushKg;
+            waterToAdd = 0;
+          } else {
+            addAmount = pureCreamNeeded + waterFlushKg;
+            waterToAdd = rawWaterNeeded - waterFlushKg;
+          }
         } else {
           addAmount = pureCreamNeeded;
-          waterToAdd = missingReprocessKg - addAmount;
+          waterToAdd = rawWaterNeeded;
         }
 
         if (waterToAdd < 0) waterToAdd = 0;
@@ -999,7 +1011,8 @@
         rowAddWater.style.display = waterToAdd > 0 ? 'flex' : 'none';
         holdWaterBlock.style.display = 'none';
 
-        const targetFatKg = (inputBatchSize * targetFat) / 100;
+        const finalTotalBatch = actualTotal + addAmount + waterToAdd;
+        const targetFatKg = (finalTotalBatch * targetFat) / 100;
         document.getElementById('targetFatKgVal').innerText = targetFatKg.toFixed(2) + ' kg';
         
         const diffFatEl = document.getElementById('diffFatKgVal');
@@ -1013,21 +1026,28 @@
           </div>
           <div class="calc-step">
             <strong>Stap 2: Bepaling dosering room en water</strong><br>
-            Om de <strong>${missingFatKg.toFixed(2)} kg vet</strong> aan te vullen met room (${effectiveCreamFat.toFixed(2)}% vet):<br>
-            ${useWaterFlush ? `• Inclusief <strong>${waterFlushKg} kg waterinspoel</strong> bedraagt de totale roomdosering: <strong>${Math.round(addAmount)} kg</strong><br>` : `• Benodigde zuivere room: <strong>${Math.round(addAmount)} kg</strong><br>`}
-            • Aanvullend water (om de massa op te vullen): <strong>${Math.round(waterToAdd)} kg</strong><br>
-            👉 <strong>Dosering: Voeg ${Math.round(addAmount)} kg room ${useWaterFlush ? '(incl. ' + waterFlushKg + ' kg waterinspoel) ' : ''}${waterToAdd > 0 ? 'én ' + Math.round(waterToAdd) + ' kg water' : ''} toe.</strong>
+            • Benodigde zuivere room (voor vetmassa): <strong>${Math.round(pureCreamNeeded)} kg</strong><br>
+            • Aanvankelijk op te vullen watermassa: <strong>${Math.round(rawWaterNeeded)} kg</strong><br>
+            ${useWaterFlush ? (waterFlushKg > rawWaterNeeded ? 
+              `• ⚠️ <strong>Waterinspoel correctie:</strong> De ingestelde waterinspoel (<strong>${waterFlushKg} kg</strong>) is groter dan het op te vullen water (${Math.round(rawWaterNeeded)} kg). Er komt <strong>${Math.round(waterFlushKg - rawWaterNeeded)} kg extra water</strong> in de mix.<br>
+              • Om het doelvetgehalte van <strong>${targetFat.toFixed(2)}%</strong> te behouden, is er automatisch <strong>${Math.round(extraCreamForExcessWater)} kg extra room</strong> toegevoegd.<br>
+              • Totale roomdosering (incl. inspoel): <strong>${Math.round(addAmount)} kg</strong><br>
+              • Toe te voegen extra water: <strong>0 kg</strong>` : 
+              `• Inclusief <strong>${waterFlushKg} kg waterinspoel</strong> bedraagt de totale roomdosering: <strong>${Math.round(addAmount)} kg</strong><br>
+              • Resterend toe te voegen water: <strong>${Math.round(waterToAdd)} kg</strong>`) : 
+              `• Aanvullend water (om de massa op te vullen): <strong>${Math.round(waterToAdd)} kg</strong>`}
+            <br>👉 <strong>Dosering: Voeg ${Math.round(addAmount)} kg room ${useWaterFlush ? '(incl. ' + waterFlushKg + ' kg waterinspoel) ' : ''}${waterToAdd > 0 ? 'én ' + Math.round(waterToAdd) + ' kg water' : ''} toe.</strong>
           </div>
           <div class="calc-step">
             <strong>Stap 3: Resultaat na toevoeging</strong><br>
             • Aanwezige inhoud: <strong>${Math.round(actualTotal)} kg</strong><br>
             • Toegevoegd (room + water): <strong>${Math.round(addAmount + waterToAdd)} kg</strong><br>
-            • Totale nieuwe batchgrootte: <strong>${Math.round(actualTotal + addAmount + waterToAdd)} kg</strong>
+            • Totale nieuwe batchgrootte: <strong>${Math.round(finalTotalBatch)} kg</strong>
           </div>`;
 
         document.getElementById('addValue').innerText = Math.round(addAmount) + ' kg';
         document.getElementById('waterToAdd').innerText = Math.round(waterToAdd) + ' kg';
-        document.getElementById('totalBatch').innerText = Math.round(actualTotal + addAmount + waterToAdd) + ' kg';
+        document.getElementById('totalBatch').innerText = Math.round(finalTotalBatch) + ' kg';
         document.getElementById('calcSteps').innerHTML = stepsHtml;
         return;
       } else if (effectiveCreamFat <= targetFat && effectiveCreamFat > 0) {
