@@ -1113,7 +1113,7 @@
     const isMoreCause = ['cream_more', 'fat_more', 'water_less'].includes(missingComponent);
     const isLessCause = ['cream_less', 'fat_less', 'water_more'].includes(missingComponent);
 
-    if (inputBatchSize > 0 && currentFat > 0 && targetFat > 0) {
+    if (inputBatchSize > 0 && targetFat > 0 && missingComponent !== 'reprocess_missing') {
       if (isMoreCause && currentFat < targetFat) {
         hasError = true;
         errorSection.innerHTML = `<div class="error-box"><strong>⚠️ Onmogelijke combinatie!</strong><br>Gemeten vetgehalte (${currentFat.toFixed(2)}%) is te laag voor deze oorzaak. Moet hoger zijn dan ${targetFat.toFixed(2)}%.</div>`;
@@ -1131,8 +1131,8 @@
     }
 
     // --- BEREKENING DIVERSE TOEVOEGINGEN ---
-    if (!hasError && activeBatchSize > 0 && currentFat > 0 && targetFat > 0) {
-      if (currentFat < targetFat) {
+    if (!hasError && activeBatchSize > 0 && targetFat > 0) {
+      if (currentFat < targetFat && missingComponent !== 'reprocess_missing') {
         if (additionType === 'cream' && effectiveCreamFat > targetFat) {
           if (useWaterFlush && waterFlushKg > 0) {
             addAmount = ((targetFat - currentFat) * activeBatchSize + waterFlushKg * targetFat) / (effectiveCreamFat - targetFat) + waterFlushKg;
@@ -1151,7 +1151,7 @@
           }
           addFatAmount = ((targetFat - currentFat) / (100 - targetFat)) * activeBatchSize;
         }
-      } else if (currentFat > targetFat) {
+      } else if (currentFat > targetFat && missingComponent !== 'reprocess_missing') {
         waterToAdd = ((currentFat / targetFat) - 1) * activeBatchSize;
       }
     }
@@ -1164,7 +1164,7 @@
     let currentFatKg = 0, targetFatKgStandard = 0, targetFatKgCream = 0, targetFatKgFat = 0;
     let diffFatKgStandard = 0, diffFatKgCream = 0, diffFatKgFat = 0;
 
-    if (activeBatchSize > 0 && currentFat > 0 && targetFat > 0) {
+    if (activeBatchSize > 0 && targetFat > 0) {
       currentFatKg = (activeBatchSize * currentFat) / 100;
       
       targetFatKgStandard = (finalBatchSizeStandard * targetFat) / 100;
@@ -1185,7 +1185,7 @@
     if (addTooltipIcon) addTooltipIcon.style.display = (additionType === 'cream' || missingComponent === 'water_more') ? 'inline-flex' : 'none';
 
     if (!hasError && activeBatchSize > 0) {
-      if (currentFat > 0 && targetFat > currentFat) {
+      if (targetFat > currentFat && missingComponent !== 'reprocess_missing') {
 
         if (isUnknown) {
           standardFatBlock.style.display = 'none';
@@ -1292,7 +1292,7 @@
               </div>`;
           }
         }
-      } else if (currentFat > targetFat && targetFat > 0) {
+      } else if (currentFat > targetFat && missingComponent !== 'reprocess_missing') {
         standardFatBlock.style.display = 'block';
         unknownFatBlock.style.display = 'none';
 
@@ -1325,7 +1325,7 @@
             • Toegevoegd water: <strong>${Math.round(waterToAdd)} kg</strong><br>
             • Totale nieuwe batchgrootte: <strong>${Math.round(finalBatchSizeStandard)} kg</strong>
           </div>`;
-      } else {
+      } else if (missingComponent !== 'reprocess_missing') {
         standardFatBlock.style.display = 'block';
         unknownFatBlock.style.display = 'none';
         standardResultsBlock.style.display = 'block';
@@ -1334,19 +1334,23 @@
         holdWaterBlock.style.display = 'none';
       }
     } else {
-      standardFatBlock.style.display = 'block';
-      unknownFatBlock.style.display = 'none';
-      standardResultsBlock.style.display = 'block';
-      unknownCauseOptionsBlock.style.display = 'none';
-      if (waterFlushToggleContainer) waterFlushToggleContainer.style.display = 'none';
-      holdWaterBlock.style.display = 'none';
+      if (missingComponent !== 'reprocess_missing') {
+        standardFatBlock.style.display = 'block';
+        unknownFatBlock.style.display = 'none';
+        standardResultsBlock.style.display = 'block';
+        unknownCauseOptionsBlock.style.display = 'none';
+        if (waterFlushToggleContainer) waterFlushToggleContainer.style.display = 'none';
+        holdWaterBlock.style.display = 'none';
+      }
     }
 
-    document.getElementById('addValue').innerText = Math.round(addAmount) + ' kg';
-    document.getElementById('waterToAdd').innerText = Math.round(waterToAdd) + ' kg';
-    document.getElementById('waterToHoldNextBatch').innerText = Math.round(waterToHoldNext) + ' kg';
-    document.getElementById('totalBatch').innerText = Math.round(finalBatchSizeStandard) + ' kg';
-    document.getElementById('calcSteps').innerHTML = stepsHtml || '<p style="margin:0; color:#666;">Vul gegevens in om de stappen te tonen.</p>';
+    if (missingComponent !== 'reprocess_missing') {
+      document.getElementById('addValue').innerText = Math.round(addAmount) + ' kg';
+      document.getElementById('waterToAdd').innerText = Math.round(waterToAdd) + ' kg';
+      document.getElementById('waterToHoldNextBatch').innerText = Math.round(waterToHoldNext) + ' kg';
+      document.getElementById('totalBatch').innerText = Math.round(finalBatchSizeStandard) + ' kg';
+      document.getElementById('calcSteps').innerHTML = stepsHtml || '<p style="margin:0; color:#666;">Vul gegevens in om de stappen te tonen.</p>';
+    }
   }
 
   window.addEventListener('DOMContentLoaded', () => {
