@@ -436,7 +436,7 @@
 
               <!-- GEEL INFORMATIEVAK INCLUSIEF SLIDER VOOR OPTIE A -->
               <div id="optACreamTooltip" class="info-tooltip" style="margin: 8px 0;">
-                <span id="optACreamTooltipText">Kies of de roomtoevoeging inclusief waterinspoel moet worden berekend.</span>
+                <span id="optACreamTooltipText">100% room doseren zonder waterinspoel.</span>
                 <div class="toggle-container" id="waterFlushToggleContainerUnknown">
                   <div class="toggle-option active" id="optNoFlushUnk" onclick="setWaterFlush(false)">Zonder waterinspoel</div>
                   <div class="toggle-option" id="optWithFlushUnk" onclick="setWaterFlush(true)">Met waterinspoel</div>
@@ -910,6 +910,7 @@
     const actualBatchDetailsSection = document.getElementById('actualBatchDetailsSection');
     const step2Title = document.getElementById('step2Title');
     const addTooltipText = document.getElementById('addTooltipText');
+    const optACreamTooltipText = document.getElementById('optACreamTooltipText');
     const addTooltipIcon = document.getElementById('addTooltipIcon');
     const standardResultsBlock = document.getElementById('standardResultsBlock');
     const unknownCauseOptionsBlock = document.getElementById('unknownCauseOptionsBlock');
@@ -922,6 +923,22 @@
     const detailsEl = document.getElementById('actualBatchDetails');
     const actualBatchValueEl = document.getElementById('actualBatchValue');
     let hasError = false;
+
+    // --- BIJWERKEN TOOLTIP TEKSTEN GELE VAKKEN ---
+    if (addTooltipText) {
+      if (additionType === 'fat') {
+        addTooltipText.innerText = '100% vet: Bulkvet of gesmolten blokken';
+      } else {
+        addTooltipText.innerText = useWaterFlush 
+          ? `Room doseren met ${waterFlushKg} kg waterinspoel.` 
+          : '100% room doseren zonder waterinspoel.';
+      }
+    }
+    if (optACreamTooltipText) {
+      optACreamTooltipText.innerText = useWaterFlush 
+        ? `Room doseren met ${waterFlushKg} kg waterinspoel.` 
+        : '100% room doseren zonder waterinspoel.';
+    }
 
     // --- CONTROLE OF ALLE VELDEN ZIJN INGEVULD ---
     let missingFields = [];
@@ -954,7 +971,7 @@
     let addAmount = 0, addFatAmount = 0, waterToAdd = 0, waterToHoldNext = 0, stepsHtml = '';
     const ingredientName = additionType === 'fat' ? 'vloeibaar vet' : 'room';
 
-    // --- HERVERWERKING LOGICA (AUTOMATISCHE HERBEREKENING BIJ OVERTALLIG WATER/INSPOEL) ---
+    // --- HERVERWERKING LOGICA ---
     if (missingComponent === 'reprocess_missing') {
       rowCurrentFatKg.style.display = 'none';
       standardResultsBlock.style.display = 'block';
@@ -977,9 +994,7 @@
 
         if (useWaterFlush && waterFlushKg > 0) {
           if (waterFlushKg > rawWaterNeeded) {
-            // De waterinspoel overstijgt het op te vullen watertekort (bijv. inspoel = 70 kg, nodig water = 15 kg -> 55 kg overschot).
             const excessWater = waterFlushKg - rawWaterNeeded;
-            // Automatische massa-balans correctie voor overtallig water:
             extraCreamForExcessWater = (excessWater * targetFat) / (effectiveCreamFat - targetFat);
             addAmount = pureCreamNeeded + extraCreamForExcessWater + waterFlushKg;
             waterToAdd = 0;
@@ -1008,6 +1023,7 @@
 
         rowAddIngredient.style.display = 'flex';
         if (waterFlushToggleContainer) waterFlushToggleContainer.style.display = 'flex';
+        if (addTooltipIcon) addTooltipIcon.style.display = 'inline-flex';
         rowAddWater.style.display = waterToAdd > 0 ? 'flex' : 'none';
         holdWaterBlock.style.display = 'none';
 
@@ -1213,16 +1229,6 @@
           
           if (waterFlushToggleContainer) waterFlushToggleContainer.style.display = (additionType === 'cream') ? 'flex' : 'none';
           rowAddWater.style.display = 'none';
-
-          if (addTooltipText) {
-            if (additionType === 'fat') {
-              addTooltipText.innerText = '100% vet: Bulkvet of gesmolten blokken';
-            } else {
-              addTooltipText.innerText = useWaterFlush 
-                ? `Room doseren met ${waterFlushKg} kg waterinspoel.` 
-                : '100% room doseren zonder waterinspoel.';
-            }
-          }
         }
         
         const hideHoldWaterCauses = ['cream_less', 'fat_less', 'reprocess_missing'];
