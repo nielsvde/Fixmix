@@ -82,46 +82,97 @@
     }
     textarea { resize: vertical; min-height: 100px; }
 
-    /* GEKLEURDE TEGELS RASTER */
+    /* GLAS LOOK TEGELS RASTER */
     .cause-tiles-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
+      gap: 10px;
       margin-top: 6px;
       margin-bottom: 16px;
     }
     .cause-tile {
-      border: 2px solid transparent;
-      border-radius: 10px;
-      padding: 10px 8px;
+      border-radius: 12px;
+      padding: 10px 10px;
       font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
       text-align: center;
-      transition: all 0.2s ease;
+      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 48px;
+      min-height: 52px;
       box-sizing: border-box;
       line-height: 1.25;
-      color: #212529;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      position: relative;
+      overflow: hidden;
     }
     .cause-tile:hover {
-      filter: brightness(0.95);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
     }
-    /* Kleurcategorieën */
-    .cause-tile.tile-neutral { background-color: #e9ecef; border-color: #ced4da; }
-    .cause-tile.tile-room { background-color: #fde8ed; border-color: #f8b4c4; color: #842029; }
-    .cause-tile.tile-fat { background-color: #e6f4ea; border-color: #a3e0b5; color: #0f5132; }
-    .cause-tile.tile-water { background-color: #e0f2fe; border-color: #bae6fd; color: #0369a1; }
-    .cause-tile.tile-reprocess { background-color: #fef9c3; border-color: #fde047; color: #713f12; grid-column: span 2; }
+    .cause-tile:active {
+      transform: translateY(0);
+    }
 
+    /* Glasstijl Kleurcategorieën */
+    .cause-tile.tile-room { 
+      background: rgba(253, 232, 237, 0.65); 
+      border: 1px solid rgba(248, 180, 196, 0.8); 
+      color: #721c24; 
+      box-shadow: 0 4px 12px rgba(248, 180, 196, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+    }
+    .cause-tile.tile-room:hover {
+      box-shadow: 0 6px 16px rgba(248, 180, 196, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+    }
+
+    .cause-tile.tile-fat { 
+      background: rgba(230, 244, 234, 0.65); 
+      border: 1px solid rgba(163, 224, 181, 0.8); 
+      color: #0f5132; 
+      box-shadow: 0 4px 12px rgba(163, 224, 181, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+    }
+    .cause-tile.tile-fat:hover {
+      box-shadow: 0 6px 16px rgba(163, 224, 181, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+    }
+
+    .cause-tile.tile-water { 
+      background: rgba(224, 242, 254, 0.65); 
+      border: 1px solid rgba(186, 230, 253, 0.8); 
+      color: #0369a1; 
+      box-shadow: 0 4px 12px rgba(186, 230, 253, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+    }
+    .cause-tile.tile-water:hover {
+      box-shadow: 0 6px 16px rgba(186, 230, 253, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+    }
+
+    .cause-tile.tile-reprocess { 
+      background: rgba(254, 249, 195, 0.65); 
+      border: 1px solid rgba(253, 224, 71, 0.8); 
+      color: #713f12; 
+      box-shadow: 0 4px 12px rgba(253, 224, 71, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+    }
+    .cause-tile.tile-reprocess:hover {
+      box-shadow: 0 6px 16px rgba(253, 224, 71, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+    }
+
+    .cause-tile.tile-neutral { 
+      background: rgba(233, 236, 239, 0.65); 
+      border: 1px solid rgba(206, 212, 218, 0.8); 
+      color: #343a40; 
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+    }
+    .cause-tile.tile-neutral:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.09), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+    }
+
+    /* Actieve status met blauwe glas-glow */
     .cause-tile.active {
-      border-width: 2px;
-      box-shadow: 0 0 0 2px #007bff;
+      border: 2px solid #007bff !important;
       font-weight: 700;
+      box-shadow: 0 0 14px rgba(0, 123, 255, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.9) !important;
+      transform: translateY(-1px);
     }
 
     /* Dynamische invoer container */
@@ -299,7 +350,6 @@
       <label style="font-size: 0.95rem; display: block; margin-bottom: 8px; color: var(--primary);">1. Kies de oorzaak van de afwijking:</label>
       <select id="missingComponent" style="display:none;" onchange="onCauseChange(); hideTool1Results()">
         <option value="">-- Kies een oorzaak --</option>
-        <option value="unknown">Oorzaak onbekend</option>
         <option value="cream_less">Te weinig room gedoseerd</option>
         <option value="cream_more">Te veel room gedoseerd</option>
         <option value="fat_less">Te weinig vloeibaar vet gedoseerd</option>
@@ -307,10 +357,10 @@
         <option value="water_less">Te weinig water gedoseerd</option>
         <option value="water_more">Te veel water gedoseerd</option>
         <option value="reprocess_missing">Ontbrekende room herverwerking</option>
+        <option value="unknown">Oorzaak onbekend</option>
       </select>
 
       <div class="cause-tiles-grid" id="causeTilesGrid">
-        <div class="cause-tile tile-neutral" data-value="unknown" onclick="selectCauseTile('unknown')">Oorzaak onbekend</div>
         <div class="cause-tile tile-room" data-value="cream_less" onclick="selectCauseTile('cream_less')">Te weinig room</div>
         <div class="cause-tile tile-room" data-value="cream_more" onclick="selectCauseTile('cream_more')">Te veel room</div>
         <div class="cause-tile tile-fat" data-value="fat_less" onclick="selectCauseTile('fat_less')">Te weinig vloeibaar vet</div>
@@ -318,6 +368,7 @@
         <div class="cause-tile tile-water" data-value="water_less" onclick="selectCauseTile('water_less')">Te weinig water</div>
         <div class="cause-tile tile-water" data-value="water_more" onclick="selectCauseTile('water_more')">Te veel water</div>
         <div class="cause-tile tile-reprocess" data-value="reprocess_missing" onclick="selectCauseTile('reprocess_missing')">Ontbrekende room herverwerking</div>
+        <div class="cause-tile tile-neutral" data-value="unknown" onclick="selectCauseTile('unknown')">Oorzaak onbekend</div>
       </div>
     </div>
 
@@ -976,9 +1027,8 @@
         const actualTotal = inputBatchSize - missingReprocessKg;
         computedActualTotal = actualTotal;
 
-        // Omrekenen naar benodigde room en water op basis van doel vetgehalte
-        addAmount = (missingFatKg / (targetFat / 100)); // Roomtoevoeging op basis van recept/doelvet
-        waterToAdd = missingReprocessKg - addAmount; // Restant opvullen met water
+        addAmount = (missingFatKg / (targetFat / 100));
+        waterToAdd = missingReprocessKg - addAmount;
 
         actualBatchValueEl.innerText = Math.round(computedActualTotal) + ' kg';
         detailsEl.innerHTML = `
@@ -1085,7 +1135,6 @@
       errorSection.innerHTML = '';
     }
 
-    // Eerst de nodige toevoegingen berekenen om de eindmassa van de batch te bepalen
     if (!hasError && activeBatchSize > 0 && currentFat > 0 && targetFat > 0) {
       if (currentFat < targetFat && effectiveCreamFat > targetFat) {
         addAmount = ((targetFat - currentFat) / (effectiveCreamFat - targetFat)) * activeBatchSize;
@@ -1096,7 +1145,6 @@
 
     const finalBatchSize = activeBatchSize + addAmount + waterToAdd;
 
-    // Vetberekeningen op basis van HUIDIGE batch versus EIND BATCH NA CORRECTIE
     let currentFatKg = 0;
     let targetFatKg = 0;
     let diffFatKg = 0;
