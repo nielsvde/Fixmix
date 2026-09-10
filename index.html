@@ -88,6 +88,7 @@
       grid-template-columns: repeat(2, 1fr);
       gap: 8px;
       margin-top: 6px;
+      margin-bottom: 16px;
     }
     .cause-tile {
       border: 2px solid transparent;
@@ -121,6 +122,14 @@
       border-width: 2px;
       box-shadow: 0 0 0 2px #007bff;
       font-weight: 700;
+    }
+
+    /* Dynamische invoer container */
+    #dynamicInputFields {
+      display: none;
+      border-top: 1px dashed var(--border-blue);
+      padding-top: 16px;
+      margin-top: 10px;
     }
 
     .input-with-button {
@@ -284,36 +293,12 @@
 
   <!-- CONTAINER VOOR TOOL 1: FIXMIX -->
   <div id="tool1" class="main-tool-content tab-content-container active">
+    
+    <!-- STAP 1: KIES OORZAAK VAN AFWIJKING -->
     <div class="form-group">
-      <div class="label-container">
-        <label for="batchSize">Geplande batchgrootte (kg):</label>
-        <span class="info-icon" onclick="toggleTooltip('batchTooltip')">?</span>
-      </div>
-      <input type="text" inputmode="decimal" id="batchSize" placeholder="bijv. 6000" oninput="formatInput(this); hideTool1Results()">
-      <div id="batchTooltip" class="info-tooltip"><strong>Let op:</strong> De werkelijke batchgrootte kan afwijken als een grondstof onvolledig is gedoseerd in de mixtank!</div>
-    </div>
-
-    <!-- Gemeten vet % en Doel vet % naast elkaar -->
-    <div class="form-row-2col">
-      <div class="form-group" id="currentFatGroup">
-        <label for="currentFat">Gemeten vet (%):</label>
-        <input type="text" inputmode="decimal" id="currentFat" placeholder="bijv. 29.75" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
-      </div>
-      <div class="form-group" id="targetFatGroup">
-        <label for="targetFat">Doel vet (%):</label>
-        <input type="text" inputmode="decimal" id="targetFat" placeholder="bijv. 30.50" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
-      </div>
-    </div>
-
-    <div class="form-group" id="creamFatGroup">
-      <label id="creamFatLabel" for="creamFat">Vetgehalte beschikbare room (%):</label>
-      <input type="text" inputmode="decimal" id="creamFat" placeholder="bijv. 43.15" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
-    </div>
-
-    <!-- GEKLEURDE TEGELS SELECTIE VOOR OORZAAK -->
-    <div class="form-group">
-      <label>Oorzaak afwijking:</label>
+      <label style="font-size: 0.95rem; display: block; margin-bottom: 8px; color: var(--primary);">1. Kies de oorzaak van de afwijking:</label>
       <select id="missingComponent" style="display:none;" onchange="onCauseChange(); hideTool1Results()">
+        <option value="">-- Kies een oorzaak --</option>
         <option value="unknown">Oorzaak onbekend</option>
         <option value="cream_less">Te weinig room gedoseerd</option>
         <option value="cream_more">Te veel room gedoseerd</option>
@@ -325,7 +310,7 @@
       </select>
 
       <div class="cause-tiles-grid" id="causeTilesGrid">
-        <div class="cause-tile tile-neutral active" data-value="unknown" onclick="selectCauseTile('unknown')">Oorzaak onbekend</div>
+        <div class="cause-tile tile-neutral" data-value="unknown" onclick="selectCauseTile('unknown')">Oorzaak onbekend</div>
         <div class="cause-tile tile-room" data-value="cream_less" onclick="selectCauseTile('cream_less')">Te weinig room</div>
         <div class="cause-tile tile-room" data-value="cream_more" onclick="selectCauseTile('cream_more')">Te veel room</div>
         <div class="cause-tile tile-fat" data-value="fat_less" onclick="selectCauseTile('fat_less')">Te weinig vloeibaar vet</div>
@@ -336,21 +321,51 @@
       </div>
     </div>
 
-    <!-- Extra velden bij 'Ontbrekende room herverwerking' -->
-    <div id="reprocessFieldsGroup" style="display: none;">
-      <div class="form-row-2col">
-        <div class="form-group">
-          <label for="missingReprocessKg">Ontbrekend (kg):</label>
-          <input type="text" inputmode="decimal" id="missingReprocessKg" placeholder="bijv. 250" oninput="formatInput(this); hideTool1Results()">
+    <!-- STAP 2: INVOERVELDEN (VERSCHIJNEN PAS NA SELECTIE VAN EEN TEGEL) -->
+    <div id="dynamicInputFields">
+      
+      <div class="form-group">
+        <div class="label-container">
+          <label for="batchSize">Geplande batchgrootte (kg):</label>
+          <span class="info-icon" onclick="toggleTooltip('batchTooltip')">?</span>
         </div>
-        <div class="form-group">
-          <label for="reprocessFat">Vetgehalte room (%):</label>
-          <input type="text" inputmode="decimal" id="reprocessFat" placeholder="bijv. 35.00" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
+        <input type="text" inputmode="decimal" id="batchSize" placeholder="bijv. 6000" oninput="formatInput(this); hideTool1Results()">
+        <div id="batchTooltip" class="info-tooltip"><strong>Let op:</strong> De werkelijke batchgrootte kan afwijken als een grondstof onvolledig is gedoseerd in de mixtank!</div>
+      </div>
+
+      <!-- Gemeten vet % en Doel vet % -->
+      <div class="form-row-2col">
+        <div class="form-group" id="currentFatGroup">
+          <label for="currentFat">Gemeten vet (%):</label>
+          <input type="text" inputmode="decimal" id="currentFat" placeholder="bijv. 29.75" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
+        </div>
+        <div class="form-group" id="targetFatGroup">
+          <label for="targetFat">Doel vet (%):</label>
+          <input type="text" inputmode="decimal" id="targetFat" placeholder="bijv. 30.50" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
         </div>
       </div>
-    </div>
 
-    <button type="button" class="btn-calc-action" onclick="executeCalculation()">Bereken correctie</button>
+      <div class="form-group" id="creamFatGroup">
+        <label id="creamFatLabel" for="creamFat">Vetgehalte beschikbare room (%):</label>
+        <input type="text" inputmode="decimal" id="creamFat" placeholder="bijv. 43.15" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
+      </div>
+
+      <!-- Extra velden bij 'Ontbrekende room herverwerking' -->
+      <div id="reprocessFieldsGroup" style="display: none;">
+        <div class="form-row-2col">
+          <div class="form-group">
+            <label for="missingReprocessKg">Ontbrekend (kg):</label>
+            <input type="text" inputmode="decimal" id="missingReprocessKg" placeholder="bijv. 250" oninput="formatInput(this); hideTool1Results()">
+          </div>
+          <div class="form-group">
+            <label for="reprocessFat">Vetgehalte room (%):</label>
+            <input type="text" inputmode="decimal" id="reprocessFat" placeholder="bijv. 35.00" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="btn-calc-action" onclick="executeCalculation()">Bereken correctie</button>
+    </div>
 
     <div class="tabs-wrapper" id="resultsTabWrapper">
       <div class="tab-buttons">
@@ -783,10 +798,18 @@
 
   function onCauseChange() {
     const cause = document.getElementById('missingComponent').value;
+    const dynamicContainer = document.getElementById('dynamicInputFields');
     const creamFatGroup = document.getElementById('creamFatGroup');
     const currentFatGroup = document.getElementById('currentFatGroup');
     const reprocessGroup = document.getElementById('reprocessFieldsGroup');
     const addLabel = document.getElementById('addLabel');
+
+    if (!cause) {
+      dynamicContainer.style.display = 'none';
+      return;
+    }
+
+    dynamicContainer.style.display = 'block';
 
     if (cause === 'reprocess_missing') {
       reprocessGroup.style.display = 'block';
@@ -816,13 +839,16 @@
       const el = document.getElementById(id);
       if(el) el.value = '';
     });
-    selectCauseTile('unknown');
+    
+    document.querySelectorAll('.cause-tile').forEach(tile => tile.classList.remove('active'));
+    document.getElementById('missingComponent').value = '';
+    document.getElementById('dynamicInputFields').style.display = 'none';
+
     hideTool1Results();
     ['batchTooltip', 'addTooltip', 'evapTooltip', 'diffFatTooltip'].forEach(id => {
       const el = document.getElementById(id);
       if(el) el.style.display = 'none';
     });
-    onCauseChange();
     calculateEvap();
     generateCodes();
   }
@@ -1180,7 +1206,6 @@
 
   window.addEventListener('DOMContentLoaded', () => {
     loadSettings();
-    onCauseChange();
     generateCodes();
     updateDateInformation();
 
