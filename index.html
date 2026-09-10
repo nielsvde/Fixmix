@@ -896,7 +896,7 @@
       additionType = 'fat'; 
       effectiveCreamFat = 100; 
     } else if (missingComponent.startsWith('water')) { 
-      additionType = 'water'; 
+      additionType = (missingComponent === 'water_more' && currentFat < targetFat) ? 'cream' : 'water'; 
     }
 
     const rowAddIngredient = document.getElementById('rowAddIngredient');
@@ -1110,7 +1110,7 @@
     const standardFatBlock = document.getElementById('standardFatAnalysisBlock');
     const unknownFatBlock = document.getElementById('unknownFatAnalysisBlock');
 
-    if (addTooltipIcon) addTooltipIcon.style.display = (additionType === 'cream') ? 'inline-flex' : 'none';
+    if (addTooltipIcon) addTooltipIcon.style.display = (additionType === 'cream' || missingComponent === 'water_more') ? 'inline-flex' : 'none';
 
     if (!hasError && activeBatchSize > 0) {
       if (currentFat > 0 && targetFat > currentFat) {
