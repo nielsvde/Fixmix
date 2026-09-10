@@ -954,7 +954,7 @@
     let addAmount = 0, addFatAmount = 0, waterToAdd = 0, waterToHoldNext = 0, stepsHtml = '';
     const ingredientName = additionType === 'fat' ? 'vloeibaar vet' : 'room';
 
-    // --- HERVERWERKING LOGICA ---
+    // --- HERVERWERKING LOGICA (GECORRIGEERD) ---
     if (missingComponent === 'reprocess_missing') {
       rowCurrentFatKg.style.display = 'none';
       standardResultsBlock.style.display = 'block';
@@ -970,18 +970,17 @@
         const actualTotal = inputBatchSize - missingReprocessKg;
         computedActualTotal = actualTotal;
 
+        const pureCreamNeeded = missingFatKg / (effectiveCreamFat / 100);
+
         if (useWaterFlush && waterFlushKg > 0) {
-          // Bepaal benodigde room zodanig dat (room * effectiveCreamFat / 100) / (room + waterFlushKg) exact het gewenste vetgehalte oplevert ter vervanging van de massa.
-          // Vetanalyse behouden: room doseren met waterinspoel als één dosering
-          const pureCreamForFat = missingFatKg / (effectiveCreamFat / 100);
-          addAmount = pureCreamForFat + waterFlushKg;
+          addAmount = pureCreamNeeded + waterFlushKg; // Room-inspoelmengsel totaal
           waterToAdd = missingReprocessKg - addAmount;
-          if (waterToAdd < 0) waterToAdd = 0;
         } else {
-          addAmount = missingFatKg / (effectiveCreamFat / 100);
+          addAmount = pureCreamNeeded;
           waterToAdd = missingReprocessKg - addAmount;
-          if (waterToAdd < 0) waterToAdd = 0;
         }
+
+        if (waterToAdd < 0) waterToAdd = 0;
 
         const currentFatInTank = (inputBatchSize * targetFat / 100) - missingFatKg;
 
