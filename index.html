@@ -140,7 +140,7 @@
 
     .subtext-note { font-size: 0.78rem; color: #6c757d; font-style: italic; margin-top: -6px; margin-bottom: 8px; text-align: left; }
 
-    /* Aangepaste Footer Layout */
+    /* Footer Layout */
     .footer-actions { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; width: 100%; }
     .footer-buttons-row { display: flex; gap: 8px; width: 100%; justify-content: center; }
     .footer-btn {
@@ -169,22 +169,15 @@
       background: #ffffff; border: 1px solid var(--border-blue); border-radius: 12px;
       padding: 24px 16px; text-align: center; min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box;
     }
-    .code-display-box img {
-      max-width: 240px; width: 100%; height: auto; display: block; margin: 0 auto;
-    }
-    .code-display-box svg {
-      max-width: 100%; width: 100%; height: auto; display: block; margin: 0 auto;
-    }
-    .code-placeholder {
-      color: #888; font-style: italic; font-size: 0.9rem;
-    }
+    .code-display-box img { max-width: 240px; width: 100%; height: auto; display: block; margin: 0 auto; }
+    .code-display-box svg { max-width: 100%; width: 100%; height: auto; display: block; margin: 0 auto; }
+    .code-placeholder { color: #888; font-style: italic; font-size: 0.9rem; }
     .code-section { display: none; }
     .code-section.active { display: block; }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
-  <!-- LIVE BARCODE / QR CAMERA SCANNER -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
   <script>
@@ -255,7 +248,6 @@
       <div id="batchTooltip" class="info-tooltip"><strong>Let op:</strong> De werkelijke batchgrootte kan afwijken als een grondstof onvolledig is gedoseerd in de mixtank!</div>
     </div>
 
-    <!-- Gemeten vet % en Doel vet % naast elkaar -->
     <div class="form-row-2col">
       <div class="form-group" id="currentFatGroup">
         <label for="currentFat">Gemeten vet (%):</label>
@@ -286,7 +278,6 @@
       </select>
     </div>
 
-    <!-- Extra velden bij 'Ontbrekende room herverwerking' -->
     <div id="reprocessFieldsGroup" style="display: none;">
       <div class="form-group">
         <label for="missingReprocessKg">Ontbrekende herverwerking (kg):</label>
@@ -311,7 +302,6 @@
         <div id="tab-resultat" class="tab-content active">
           <div id="errorSection"></div>
           
-          <!-- VERMOEDELIJKE WERKELIJKE BATCHGROOTTE BLOCK (Verborgen bij 'Oorzaak onbekend') -->
           <div id="actualBatchBlock" style="margin-bottom: 12px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <span id="actualBatchLabel" style="font-size: 0.85rem; color: #555;">Vermoedelijke werkelijke batchgrootte:</span>
@@ -325,24 +315,56 @@
             <span>Vet in huidige batch:</span>
             <span id="currentFatKgVal" class="result-value">0 kg</span>
           </div>
-          <div class="result-row" id="rowTargetFatKg">
-            <span>Gewenst vet in batch (na correctie):</span>
-            <span id="targetFatKgVal" class="result-value">0 kg</span>
-          </div>
-          <div class="result-row" id="rowDiffFatKg" style="margin-bottom: 12px;">
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <span>Verschil in vet:</span>
-              <span class="info-icon" onclick="toggleTooltip('diffFatTooltip')">?</span>
+
+          <!-- Standaard vetanalyse (Bekende oorzaak) -->
+          <div id="standardFatAnalysisBlock">
+            <div class="result-row" id="rowTargetFatKg">
+              <span>Gewenst vet in batch (na correctie):</span>
+              <span id="targetFatKgVal" class="result-value">0 kg</span>
             </div>
-            <span id="diffFatKgVal" class="result-value" style="color: var(--primary);">0 kg</span>
+            <div class="result-row" id="rowDiffFatKg" style="margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span>Verschil in vet:</span>
+                <span class="info-icon" onclick="toggleTooltip('diffFatTooltip')">?</span>
+              </div>
+              <span id="diffFatKgVal" class="result-value" style="color: var(--primary);">0 kg</span>
+            </div>
           </div>
+
+          <!-- Opsplitsing vetanalyse bij Oorzaak Onbekend -->
+          <div id="unknownFatAnalysisBlock" style="display: none;">
+            <div class="option-box" style="margin-top: 8px; margin-bottom: 8px; background: #fafafa; border-color: #d1d5db;">
+              <div class="option-title" style="font-size: 0.85rem; color: #444;">Vetanalyse Optie A (Room)</div>
+              <div class="result-row">
+                <span>Gewenst vet na roomcorrectie:</span>
+                <span id="targetFatKgCreamVal" class="result-value">0 kg</span>
+              </div>
+              <div class="result-row">
+                <span>Vettekort (met room aan te vullen):</span>
+                <span id="diffFatKgCreamVal" class="result-value" style="color: #c0392b;">0 kg</span>
+              </div>
+            </div>
+
+            <div class="option-box" style="margin-bottom: 12px; background: #fafafa; border-color: #d1d5db;">
+              <div class="option-title" style="font-size: 0.85rem; color: #444;">Vetanalyse Optie B (Vloeibaar Vet)</div>
+              <div class="result-row">
+                <span>Gewenst vet na vetcorrectie:</span>
+                <span id="targetFatKgFatVal" class="result-value">0 kg</span>
+              </div>
+              <div class="result-row">
+                <span>Vettekort (met vet aan te vullen):</span>
+                <span id="diffFatKgFatVal" class="result-value" style="color: #c0392b;">0 kg</span>
+              </div>
+            </div>
+          </div>
+
           <div id="diffFatTooltip" class="info-tooltip" style="margin-bottom: 10px;">
-            <strong>Toelichting:</strong> Het verschil tussen aanwezig vet in de huidige batch en het totaal gewenste vet na correctie.
+            <strong>Toelichting:</strong> Het verschil tussen aanwezig vet in de huidige batch en het totaal gewenste vet na de gekozen correctie.
           </div>
 
           <hr id="fatAnalysisDivider" style="border:0; border-top: 1px solid var(--border-blue); margin: 14px 0;">
 
-          <!-- STANDAARD RESULTATEN (bij bekende oorzaak of verdunning) -->
+          <!-- STANDAARD RESULTATEN (bekende oorzaak / verdunning) -->
           <div id="standardResultsBlock">
             <div class="result-row" id="rowAddIngredient">
               <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
@@ -360,7 +382,6 @@
               <span id="waterToAdd" class="result-value">0 kg</span>
             </div>
 
-            <!-- WATER INHOUDEN VOLGENDE BATCH -->
             <div id="holdWaterBlock" style="display: none;">
               <div class="result-row" id="rowHoldWaterNextBatch" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-blue);">
                 <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
@@ -379,7 +400,6 @@
 
           <!-- OORZAAK ONBEKEND DUBBELE OPTIES -->
           <div id="unknownCauseOptionsBlock" style="display: none;">
-            <!-- Optie A: Room -->
             <div class="option-box">
               <div class="option-title">Optie A: Correctie met Room</div>
               <div class="result-row">
@@ -392,7 +412,6 @@
               </div>
             </div>
 
-            <!-- Optie B: Vloeibaar Vet -->
             <div class="option-box" style="margin-bottom: 0;">
               <div class="option-title">Optie B: Correctie met Vloeibaar Vet</div>
               <div class="result-row">
@@ -492,7 +511,6 @@
 
     <div style="background: #ffffff; border: 1px solid var(--border-blue); border-radius: 0 0 12px 12px; padding: 16px; margin-top: -1px;">
       
-      <!-- INGESLOTEN LIVE CAMERA VAK -->
       <div id="cameraContainer" style="display:none; margin-bottom: 12px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-blue);">
         <div id="reader" style="width: 100%;"></div>
       </div>
@@ -671,7 +689,6 @@
     }
   }
 
-  /* KLEMBORD PLAK FUNCTIE */
   async function pasteClipboard() {
     try {
       if (navigator.clipboard && navigator.clipboard.readText) {
@@ -688,7 +705,6 @@
     }
   }
 
-  /* EMBEDDED CAMERA SCANNER FUNCTIE */
   function toggleEmbeddedCamera() {
     const cameraContainer = document.getElementById('cameraContainer');
     const scanBtn = document.getElementById('scanBtn');
@@ -920,6 +936,8 @@
       rowCurrentFatKg.style.display = 'none';
       standardResultsBlock.style.display = 'block';
       unknownCauseOptionsBlock.style.display = 'none';
+      document.getElementById('standardFatAnalysisBlock').style.display = 'block';
+      document.getElementById('unknownFatAnalysisBlock').style.display = 'none';
 
       const missingReprocessKg = parseNum(document.getElementById('missingReprocessKg').value);
       const reprocessFat = parseNum(document.getElementById('reprocessFat').value);
@@ -1055,7 +1073,6 @@
           addAmount = ((targetFat - currentFat) / (100 - targetFat)) * activeBatchSize;
         }
 
-        // Bereken ook vloeibaar vet alternatief bij 'Oorzaak Onbekend'
         if (missingComponent === 'unknown') {
           addFatAmount = ((targetFat - currentFat) / (100 - targetFat)) * activeBatchSize;
         }
@@ -1068,37 +1085,46 @@
     const finalBatchSizeCream = activeBatchSize + addAmount;
     const finalBatchSizeFat = activeBatchSize + addFatAmount;
 
-    // --- VET-ANALYSE ---
+    // --- VET-ANALYSE BEREKENING ---
     let currentFatKg = 0;
-    let targetFatKg = 0;
-    let diffFatKg = 0;
+    let targetFatKgStandard = 0;
+    let targetFatKgCream = 0;
+    let targetFatKgFat = 0;
+    let diffFatKgStandard = 0;
+    let diffFatKgCream = 0;
+    let diffFatKgFat = 0;
 
     if (activeBatchSize > 0 && currentFat > 0 && targetFat > 0) {
       currentFatKg = (activeBatchSize * currentFat) / 100;
-      targetFatKg = (finalBatchSizeStandard * targetFat) / 100;
-      diffFatKg = currentFatKg - (activeBatchSize * targetFat / 100);
+      
+      targetFatKgStandard = (finalBatchSizeStandard * targetFat) / 100;
+      diffFatKgStandard = currentFatKg - (activeBatchSize * targetFat / 100);
+
+      targetFatKgCream = (finalBatchSizeCream * targetFat) / 100;
+      diffFatKgCream = currentFatKg - targetFatKgCream;
+
+      targetFatKgFat = (finalBatchSizeFat * targetFat) / 100;
+      diffFatKgFat = currentFatKg - targetFatKgFat;
     }
 
     document.getElementById('currentFatKgVal').innerText = currentFatKg > 0 ? (currentFatKg.toFixed(2) + ' kg') : '0 kg';
-    document.getElementById('targetFatKgVal').innerText = targetFatKg > 0 ? (targetFatKg.toFixed(2) + ' kg') : '0 kg';
-    
-    const diffFatEl = document.getElementById('diffFatKgVal');
-    if (diffFatKg < 0) {
-      diffFatEl.innerText = '-' + Math.abs(diffFatKg).toFixed(2) + ' kg';
-      diffFatEl.style.color = '#c0392b';
-    } else if (diffFatKg > 0) {
-      diffFatEl.innerText = '+' + diffFatKg.toFixed(2) + ' kg';
-      diffFatEl.style.color = '#27ae60';
-    } else {
-      diffFatEl.innerText = '0 kg';
-      diffFatEl.style.color = 'var(--primary)';
-    }
+
+    const standardFatBlock = document.getElementById('standardFatAnalysisBlock');
+    const unknownFatBlock = document.getElementById('unknownFatAnalysisBlock');
 
     if (!hasError && activeBatchSize > 0) {
       if (currentFat > 0 && targetFat > currentFat) {
 
-        // WEERGAVE LOGICA OORZAAK ONBEKEND VS BEKENDE OORZAAK
         if (missingComponent === 'unknown') {
+          standardFatBlock.style.display = 'none';
+          unknownFatBlock.style.display = 'block';
+
+          document.getElementById('targetFatKgCreamVal').innerText = targetFatKgCream.toFixed(2) + ' kg';
+          document.getElementById('diffFatKgCreamVal').innerText = diffFatKgCream.toFixed(2) + ' kg';
+
+          document.getElementById('targetFatKgFatVal').innerText = targetFatKgFat.toFixed(2) + ' kg';
+          document.getElementById('diffFatKgFatVal').innerText = diffFatKgFat.toFixed(2) + ' kg';
+
           standardResultsBlock.style.display = 'none';
           unknownCauseOptionsBlock.style.display = 'block';
 
@@ -1108,6 +1134,23 @@
           document.getElementById('optFatAddVal').innerText = Math.round(addFatAmount) + ' kg';
           document.getElementById('optFatTotalVal').innerText = Math.round(finalBatchSizeFat) + ' kg';
         } else {
+          standardFatBlock.style.display = 'block';
+          unknownFatBlock.style.display = 'none';
+
+          document.getElementById('targetFatKgVal').innerText = targetFatKgStandard.toFixed(2) + ' kg';
+          
+          const diffFatEl = document.getElementById('diffFatKgVal');
+          if (diffFatKgStandard < 0) {
+            diffFatEl.innerText = '-' + Math.abs(diffFatKgStandard).toFixed(2) + ' kg';
+            diffFatEl.style.color = '#c0392b';
+          } else if (diffFatKgStandard > 0) {
+            diffFatEl.innerText = '+' + diffFatKgStandard.toFixed(2) + ' kg';
+            diffFatEl.style.color = '#27ae60';
+          } else {
+            diffFatEl.innerText = '0 kg';
+            diffFatEl.style.color = 'var(--primary)';
+          }
+
           standardResultsBlock.style.display = 'block';
           unknownCauseOptionsBlock.style.display = 'none';
           rowAddIngredient.style.display = 'flex';
@@ -1138,7 +1181,7 @@
               <div class="calc-step">
                 <strong>Stap 1: Huidige situatie</strong><br>
                 • Tankinhoud: <strong>${Math.round(activeBatchSize)} kg</strong> met <strong>${currentFat.toFixed(2)}%</strong> vet = <strong>${currentFatKg.toFixed(2)} kg vet</strong><br>
-                • Vettekort t.o.v. doel (${targetFat.toFixed(2)}%): <strong>${Math.abs(diffFatKg).toFixed(2)} kg vet</strong>
+                • Vettekort t.o.v. doel (${targetFat.toFixed(2)}%): <strong>${Math.abs(diffFatKgStandard).toFixed(2)} kg vet</strong>
               </div>
               <div class="calc-step">
                 <strong>Optie A: Correctie met Room (${effectiveCreamFat.toFixed(2)}% vet)</strong><br>
@@ -1163,8 +1206,8 @@
                 • Huidige tankinhoud: <strong>${Math.round(activeBatchSize)} kg</strong> met <strong>${currentFat.toFixed(2)}%</strong> vet = <strong>${currentFatKg.toFixed(2)} kg vet</strong><br>
                 • Berekende toevoeging: <strong>${Math.round(addAmount)} kg ${ingredientName}</strong><br>
                 • Totale batch na correctie: <strong>${Math.round(finalBatchSizeStandard)} kg</strong> met <strong>${targetFat.toFixed(2)}%</strong> vet<br>
-                • Gewenst vet in totale batch: <strong>${targetFatKg.toFixed(2)} kg vet</strong><br>
-                • Toe te voegen vet massa via ${ingredientName}: <strong>${Math.abs(diffFatKg).toFixed(2)} kg vet</strong>
+                • Gewenst vet in totale batch: <strong>${targetFatKgStandard.toFixed(2)} kg vet</strong><br>
+                • Toe te voegen vet massa via ${ingredientName}: <strong>${Math.abs(diffFatKgStandard).toFixed(2)} kg vet</strong>
               </div>
               <div class="calc-step">
                 <strong>Stap 2: Bepaling toe te voegen ${ingredientName}</strong><br>
@@ -1186,6 +1229,11 @@
           }
         }
       } else if (currentFat > targetFat && targetFat > 0) {
+        standardFatBlock.style.display = 'block';
+        unknownFatBlock.style.display = 'none';
+
+        document.getElementById('targetFatKgVal').innerText = targetFatKgStandard.toFixed(2) + ' kg';
+
         standardResultsBlock.style.display = 'block';
         unknownCauseOptionsBlock.style.display = 'none';
         rowAddIngredient.style.display = 'none';
@@ -1198,7 +1246,7 @@
             • Huidige tankinhoud: <strong>${Math.round(activeBatchSize)} kg</strong> met <strong>${currentFat.toFixed(2)}%</strong> vet = <strong>${currentFatKg.toFixed(2)} kg vet</strong><br>
             • Berekende water toevoeging: <strong>${Math.round(waterToAdd)} kg water</strong><br>
             • Totale batch na verdunning: <strong>${Math.round(finalBatchSizeStandard)} kg</strong> met <strong>${targetFat.toFixed(2)}%</strong> vet<br>
-            • Gewenst vet in totale batch: <strong>${targetFatKg.toFixed(2)} kg vet</strong>
+            • Gewenst vet in totale batch: <strong>${targetFatKgStandard.toFixed(2)} kg vet</strong>
           </div>
           <div class="calc-step">
             <strong>Stap 2: Bepaling toe te voegen water (Verdunning)</strong><br>
@@ -1213,11 +1261,15 @@
             • Totale nieuwe batchgrootte: <strong>${Math.round(finalBatchSizeStandard)} kg</strong>
           </div>`;
       } else {
+        standardFatBlock.style.display = 'block';
+        unknownFatBlock.style.display = 'none';
         standardResultsBlock.style.display = 'block';
         unknownCauseOptionsBlock.style.display = 'none';
         holdWaterBlock.style.display = 'none';
       }
     } else {
+      standardFatBlock.style.display = 'block';
+      unknownFatBlock.style.display = 'none';
       standardResultsBlock.style.display = 'block';
       unknownCauseOptionsBlock.style.display = 'none';
       holdWaterBlock.style.display = 'none';
