@@ -803,6 +803,7 @@
   }
 
   function executeCalculation() {
+    setWaterFlush(false);
     document.getElementById('resultsTabWrapper').style.display = 'block';
     calculate();
   }
@@ -921,6 +922,34 @@
     const detailsEl = document.getElementById('actualBatchDetails');
     const actualBatchValueEl = document.getElementById('actualBatchValue');
     let hasError = false;
+
+    // --- CONTROLE OF ALLE VELDEN ZIJN INGEVULD ---
+    let missingFields = [];
+    if (!inputBatchSize) missingFields.push('Geplande batchgrootte');
+    if (!targetFat) missingFields.push('Doel vet');
+
+    if (missingComponent === 'reprocess_missing') {
+      const missingReprocessKg = parseNum(document.getElementById('missingReprocessKg').value);
+      const reprocessFat = parseNum(document.getElementById('reprocessFat').value);
+      if (!missingReprocessKg) missingFields.push('Ontbrekende herverwerking (kg)');
+      if (!reprocessFat) missingFields.push('Gepland vetgehalte herverwerking');
+      if (!effectiveCreamFat) missingFields.push('Vetgehalte beschikbare room');
+    } else {
+      if (!currentFat) missingFields.push('Gemeten vet');
+      if ((missingComponent.startsWith('cream') || missingComponent === 'unknown' || missingComponent === 'water_more') && !effectiveCreamFat) {
+        missingFields.push('Vetgehalte beschikbare room');
+      }
+    }
+
+    if (missingFields.length > 0) {
+      errorSection.innerHTML = `<div class="error-box"><strong>⚠️ Niet alle verplichte velden zijn ingevuld!</strong><br>Vul a.u.b. de volgende gegevens in: <strong>${missingFields.join(', ')}</strong>.</div>`;
+      standardResultsBlock.style.display = 'none';
+      unknownCauseOptionsBlock.style.display = 'none';
+      document.getElementById('standardFatAnalysisBlock').style.display = 'none';
+      document.getElementById('unknownFatAnalysisBlock').style.display = 'none';
+      document.getElementById('calcSteps').innerHTML = '<p style="margin:0; color:#666;">Vul alle vereiste velden in om de stappen te tonen.</p>';
+      return;
+    }
 
     let addAmount = 0, addFatAmount = 0, waterToAdd = 0, waterToHoldNext = 0, stepsHtml = '';
     const ingredientName = additionType === 'fat' ? 'vloeibaar vet' : 'room';
