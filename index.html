@@ -82,9 +82,9 @@
     }
     textarea { resize: vertical; min-height: 100px; }
 
-    /* Toggle Switch Style onder resultaat */
+    /* Toggle Switch Style binnen geel informatievak */
     .toggle-container {
-      display: flex; background: #e9ecef; border: 1px solid #ced4da; border-radius: 8px; padding: 3px; margin-top: 8px; margin-bottom: 8px; gap: 2px;
+      display: flex; background: #ffffff; border: 1px solid #ffeeba; border-radius: 8px; padding: 3px; margin-top: 8px; gap: 2px;
     }
     .toggle-option {
       flex: 1; text-align: center; padding: 6px 4px; font-size: 0.8rem; font-weight: 600; color: #495057; border-radius: 6px; cursor: pointer; transition: all 0.2s; user-select: none;
@@ -390,14 +390,13 @@
               <span id="addValue" class="result-value">0 kg</span>
             </div>
 
-            <!-- TOGGLE MET/ZONDER WATERINSPOEL DIRECT ONDER RESULTAAT ROOM -->
-            <div class="toggle-container" id="waterFlushToggleContainer" style="display: none;">
-              <div class="toggle-option active" id="optNoFlush" onclick="setWaterFlush(false)">Zonder waterinspoel</div>
-              <div class="toggle-option" id="optWithFlush" onclick="setWaterFlush(true)">Met waterinspoel</div>
-            </div>
-
+            <!-- GEEL INFORMATIEVAK MET SWITCHOVER INSTELLING VOOR WATERINSPOEL -->
             <div id="addTooltip" class="info-tooltip" style="margin-bottom: 10px;">
               <span id="addTooltipText">100% room doseren zonder waterinspoel.</span>
+              <div class="toggle-container" id="waterFlushToggleContainer" style="display: none;">
+                <div class="toggle-option active" id="optNoFlush" onclick="setWaterFlush(false)">Zonder waterinspoel</div>
+                <div class="toggle-option" id="optWithFlush" onclick="setWaterFlush(true)">Met waterinspoel</div>
+              </div>
             </div>
 
             <div class="result-row" id="rowAddWater">
@@ -424,16 +423,22 @@
           <!-- OORZAAK ONBEKEND DUBBELE OPTIES -->
           <div id="unknownCauseOptionsBlock" style="display: none;">
             <div class="option-box">
-              <div class="option-title">Optie A: Correctie met Room</div>
+              <div class="option-title" style="display: flex; align-items: center; justify-content: space-between;">
+                <span>Optie A: Correctie met Room</span>
+                <span class="info-icon" onclick="toggleTooltip('optACreamTooltip')">?</span>
+              </div>
               <div class="result-row">
                 <span>Room toevoegen:</span>
                 <span id="optCreamAddVal" class="result-value">0 kg</span>
               </div>
-              
-              <!-- TOGGLE VOOR WATERINSPOEL IN OPTIE A (OORZAAK ONBEKEND) -->
-              <div class="toggle-container" id="waterFlushToggleContainerUnknown">
-                <div class="toggle-option active" id="optNoFlushUnk" onclick="setWaterFlush(false)">Zonder waterinspoel</div>
-                <div class="toggle-option" id="optWithFlushUnk" onclick="setWaterFlush(true)">Met waterinspoel</div>
+
+              <!-- GEEL INFORMATIEVAK INCLUSIEF SLIDER VOOR OPTIE A -->
+              <div id="optACreamTooltip" class="info-tooltip" style="margin-top: 8px; margin-bottom: 8px;">
+                <span id="optACreamTooltipText">Kies of de roomtoevoeging inclusief waterinspoel moet worden berekend.</span>
+                <div class="toggle-container" id="waterFlushToggleContainerUnknown">
+                  <div class="toggle-option active" id="optNoFlushUnk" onclick="setWaterFlush(false)">Zonder waterinspoel</div>
+                  <div class="toggle-option" id="optWithFlushUnk" onclick="setWaterFlush(true)">Met waterinspoel</div>
+                </div>
               </div>
 
               <div class="result-row" style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #cce5ff;">
@@ -851,7 +856,7 @@
     document.getElementById('missingComponent').value = 'unknown';
     setWaterFlush(false);
     hideTool1Results();
-    ['batchTooltip', 'addTooltip', 'evapTooltip', 'diffFatTooltip'].forEach(id => {
+    ['batchTooltip', 'addTooltip', 'evapTooltip', 'diffFatTooltip', 'optACreamTooltip'].forEach(id => {
       const el = document.getElementById(id);
       if(el) el.style.display = 'none';
     });
