@@ -374,7 +374,7 @@
               <span id="addValue" class="result-value">0 kg</span>
             </div>
             <div id="addTooltip" class="info-tooltip" style="margin-bottom: 10px;">
-              <span id="addTooltipText">Let op! 100% room doseren zonder waterinspoel.</span>
+              <span id="addTooltipText">100% vet: Bulkvet of gesmolten blokken</span>
             </div>
 
             <div class="result-row" id="rowAddWater">
@@ -1098,7 +1098,7 @@
       currentFatKg = (activeBatchSize * currentFat) / 100;
       
       targetFatKgStandard = (finalBatchSizeStandard * targetFat) / 100;
-      diffFatKgStandard = currentFatKg - (activeBatchSize * targetFat / 100);
+      diffFatKgStandard = currentFatKg - targetFatKgStandard;
 
       targetFatKgCream = (finalBatchSizeCream * targetFat) / 100;
       diffFatKgCream = currentFatKg - targetFatKgCream;
@@ -1141,13 +1141,13 @@
           
           const diffFatEl = document.getElementById('diffFatKgVal');
           if (diffFatKgStandard < 0) {
-            diffFatEl.innerText = '-' + Math.abs(diffFatKgStandard).toFixed(2) + ' kg';
+            diffFatEl.innerText = diffFatKgStandard.toFixed(2) + ' kg';
             diffFatEl.style.color = '#c0392b';
           } else if (diffFatKgStandard > 0) {
             diffFatEl.innerText = '+' + diffFatKgStandard.toFixed(2) + ' kg';
             diffFatEl.style.color = '#27ae60';
           } else {
-            diffFatEl.innerText = '0 kg';
+            diffFatEl.innerText = '0.00 kg';
             diffFatEl.style.color = 'var(--primary)';
           }
 
@@ -1158,7 +1158,7 @@
 
           if (addTooltipText) {
             if (additionType === 'fat') {
-              addTooltipText.innerText = 'Let op! Vloeibaar vet doseren volgens specificaties.';
+              addTooltipText.innerText = '100% vet: Bulkvet of gesmolten blokken';
             } else {
               addTooltipText.innerText = 'Let op! 100% room doseren zonder waterinspoel.';
             }
