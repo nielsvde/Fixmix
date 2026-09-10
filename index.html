@@ -92,7 +92,7 @@
     }
     .btn-paste:hover { background: #5a6268; }
 
-    .lattiz-input-small {
+    .evap-input-small {
       width: 90px !important;
       padding: 6px 8px !important;
       font-size: 0.9rem !important;
@@ -212,34 +212,34 @@
     <div class="section-title" style="margin-bottom: 8px;">Factoren Instellingen</div>
     <div class="settings-row">
       <span>Factor Product Opbrengst (standaard 1.08):</span>
-      <input type="text" inputmode="decimal" id="facYield" value="1.08" oninput="formatInput(this); calculateLattiz()">
+      <input type="text" inputmode="decimal" id="facYield" value="1.08" oninput="formatInput(this); calculateEvap()">
     </div>
     <div class="settings-row">
       <span>Factor Water te boeken (standaard 0.01):</span>
-      <input type="text" inputmode="decimal" id="facWater" value="0.01" oninput="formatInput(this); calculateLattiz()">
+      <input type="text" inputmode="decimal" id="facWater" value="0.01" oninput="formatInput(this); calculateEvap()">
     </div>
     <div class="settings-row">
       <span>Factor Evap te boeken (standaard 0.99):</span>
-      <input type="text" inputmode="decimal" id="facEvap" value="0.99" oninput="formatInput(this); calculateLattiz()">
+      <input type="text" inputmode="decimal" id="facEvap" value="0.99" oninput="formatInput(this); calculateEvap()">
     </div>
     <div class="settings-row">
       <span>Factor Verpakking naar Bulk (standaard 4):</span>
-      <input type="text" inputmode="decimal" id="facPkgMult" value="4" oninput="formatInput(this); calculateLattiz()">
+      <input type="text" inputmode="decimal" id="facPkgMult" value="4" oninput="formatInput(this); calculateEvap()">
     </div>
     <div class="settings-row">
       <span>Factor Marge/Toeslag Bulk (standaard 1.1):</span>
-      <input type="text" inputmode="decimal" id="facBulkMult" value="1.1" oninput="formatInput(this); calculateLattiz()">
+      <input type="text" inputmode="decimal" id="facBulkMult" value="1.1" oninput="formatInput(this); calculateEvap()">
     </div>
   </div>
   
   <!-- Hoofdnavigatie voor de tools -->
   <div class="main-tabs">
-    <button class="main-tab-btn active" onclick="switchMainTool('tool1', this)">Product correctie</button>
-    <button class="main-tab-btn" onclick="switchMainTool('tool2', this)">Evap / Lattiz</button>
+    <button class="main-tab-btn active" onclick="switchMainTool('tool1', this)">FixMix</button>
+    <button class="main-tab-btn" onclick="switchMainTool('tool2', this)">Evap</button>
     <button class="main-tab-btn" onclick="switchMainTool('tool3', this)">Code Generator</button>
   </div>
 
-  <!-- CONTAINER VOOR TOOL 1 -->
+  <!-- CONTAINER VOOR TOOL 1: FIXMIX -->
   <div id="tool1" class="main-tool-content tab-content-container active">
     <div class="form-group">
       <div class="label-container">
@@ -383,62 +383,62 @@
     </div>
   </div>
 
-  <!-- CONTAINER VOOR TOOL 2: EVAP / LATTIZ -->
+  <!-- CONTAINER VOOR TOOL 2: EVAP -->
   <div id="tool2" class="main-tool-content tab-content-container">
     <div class="form-group">
       <div class="label-container">
-        <label for="lattizInput">Plak Excel gegevens (productie runs):</label>
-        <span class="info-icon" onclick="toggleTooltip('lattizTooltip')">?</span>
+        <label for="evapInput">Plak Excel gegevens (productie runs):</label>
+        <span class="info-icon" onclick="toggleTooltip('evapTooltip')">?</span>
       </div>
-      <textarea id="lattizInput" placeholder="Plak hier je getallen uit Excel (kolom of rij)..." oninput="calculateLattiz()"></textarea>
-      <div id="lattizTooltip" class="info-tooltip"><strong>Instructie:</strong> Kopieer je getallen uit Excel en plak ze direct hierin. Alle getallen worden automatisch opgeteld.</div>
+      <textarea id="evapInput" placeholder="Plak hier je getallen uit Excel (kolom of rij)..." oninput="calculateEvap()"></textarea>
+      <div id="evapTooltip" class="info-tooltip"><strong>Instructie:</strong> Kopieer je getallen uit Excel en plak ze direct hierin. Alle getallen worden automatisch opgeteld.</div>
     </div>
 
     <div class="tab-content-container" style="border-radius: 12px; margin-top: 10px; background: #ffffff; border: 1px solid var(--border-blue);">
-      <div class="section-title">Overzicht Lattiz Productie</div>
+      <div class="section-title">Overzicht Evap Productie</div>
       
       <div class="result-row" style="margin-bottom: 10px;">
         <span>Aantal productie runs:</span>
-        <span id="lattizRuns" class="result-value" style="color: var(--primary);">0</span>
+        <span id="evapRuns" class="result-value" style="color: var(--primary);">0</span>
       </div>
 
       <div class="result-row" style="margin-bottom: 12px;">
         <span>Totaal geproduceerd product:</span>
-        <span id="lattizTotalLiters" class="result-value" style="font-size: 1.05rem; color: var(--primary);">0 L</span>
+        <span id="evapTotalLiters" class="result-value" style="font-size: 1.05rem; color: var(--primary);">0 L</span>
       </div>
       
       <div class="result-row" style="margin-bottom: 12px; padding-top: 8px; border-top: 1px solid var(--border-blue);">
         <span>Totaal opbrengst product:</span>
-        <span id="lattizYieldKg" class="result-value" style="font-size: 1.1rem; color: var(--primary);">0 kg</span>
+        <span id="evapYieldKg" class="result-value" style="font-size: 1.1rem; color: var(--primary);">0 kg</span>
       </div>
 
       <hr style="border:0; border-top: 1px solid var(--border-blue); margin: 12px 0;">
 
       <div class="result-row" style="margin-bottom: 10px;">
         <span>Hoeveelheid water te boeken:</span>
-        <span id="lattizWater" class="result-value">0 kg</span>
+        <span id="evapWater" class="result-value">0 kg</span>
       </div>
 
       <div class="result-row" style="margin-bottom: 12px;">
         <span>Hoeveelheid evap te boeken:</span>
-        <span id="lattizEvap" class="result-value">0 kg</span>
+        <span id="evapEvap" class="result-value">0 kg</span>
       </div>
 
       <hr style="border:0; border-top: 1px solid var(--border-blue); margin: 12px 0;">
 
       <div class="result-row" style="margin-bottom: 10px;">
         <span>Totaal hoeveelheid verpakkingen afgevuld:</span>
-        <input type="text" inputmode="numeric" maxlength="6" id="lattizPackagesInput" class="lattiz-input-small" placeholder="0" oninput="calculateLattiz()">
+        <input type="text" inputmode="numeric" maxlength="6" id="evapPackagesInput" class="evap-input-small" placeholder="0" oninput="calculateEvap()">
       </div>
 
       <div class="result-row" style="margin-bottom: 12px;">
         <span>Totaal hoeveelheid herverwerking:</span>
-        <input type="text" inputmode="decimal" id="lattizReprocessInput" class="lattiz-input-small" placeholder="0" oninput="formatInput(this); calculateLattiz()">
+        <input type="text" inputmode="decimal" id="evapReprocessInput" class="evap-input-small" placeholder="0" oninput="formatInput(this); calculateEvap()">
       </div>
 
       <div class="result-row" style="padding-top: 8px; border-top: 1px solid var(--border-blue);">
         <span>Hoeveelheid bulk boeken op vulorder:</span>
-        <span id="lattizBulkOrder" class="result-value" style="color: var(--primary);">0 kg</span>
+        <span id="evapBulkOrder" class="result-value" style="color: var(--primary);">0 kg</span>
       </div>
     </div>
   </div>
@@ -495,7 +495,7 @@
   </div>
 
   <div class="footer-actions">
-    <a href="mailto:nielsvde@hotmail.com?subject=Feedback%20Correctie%20Calculator&body=Beste%20Niels,%0A%0AIk%20heb%20een%20vraag,%20tip%20of%20fout%20ontdekt%20in%20de%20Correctie%20Calculator:%0A%0A" class="feedback-link">
+    <a href="mailto:nielsvde@hotmail.com?subject=Feedback%20FixMix&body=Beste%20Niels,%0A%0AIk%20heb%20een%20vraag,%20tip%20of%20fout%20ontdekt%20in%20FixMix:%0A%0A" class="feedback-link">
       💡 Tip of fout melden
     </a>
     <button id="installBtn" class="btn-install">📲 Installeer app</button>
@@ -733,23 +733,23 @@
   }
 
   function resetCalculator() {
-    ['batchSize', 'currentFat', 'targetFat', 'creamFat', 'missingReprocessKg', 'reprocessFat', 'lattizInput', 'lattizPackagesInput', 'lattizReprocessInput', 'codeTextInput'].forEach(id => {
+    ['batchSize', 'currentFat', 'targetFat', 'creamFat', 'missingReprocessKg', 'reprocessFat', 'evapInput', 'evapPackagesInput', 'evapReprocessInput', 'codeTextInput'].forEach(id => {
       const el = document.getElementById(id);
       if(el) el.value = '';
     });
     document.getElementById('missingComponent').value = 'unknown';
     hideTool1Results();
-    ['batchTooltip', 'addTooltip', 'lattizTooltip', 'diffFatTooltip'].forEach(id => {
+    ['batchTooltip', 'addTooltip', 'evapTooltip', 'diffFatTooltip'].forEach(id => {
       const el = document.getElementById(id);
       if(el) el.style.display = 'none';
     });
     onCauseChange();
-    calculateLattiz();
+    calculateEvap();
     generateCodes();
   }
 
-  function calculateLattiz() {
-    const rawText = document.getElementById('lattizInput').value;
+  function calculateEvap() {
+    const rawText = document.getElementById('evapInput').value;
     const matches = rawText.match(/[0-9]+([.,][0-9]+)?/g);
     
     let totalLiters = 0;
@@ -776,17 +776,17 @@
     const waterKg = Math.round(yieldKg * fWater);
     const evapKg = Math.round(yieldKg * fEvap);
     
-    const packagesVal = parseNum(document.getElementById('lattizPackagesInput').value);
-    const reprocessVal = parseNum(document.getElementById('lattizReprocessInput').value);
+    const packagesVal = parseNum(document.getElementById('evapPackagesInput').value);
+    const reprocessVal = parseNum(document.getElementById('evapReprocessInput').value);
 
     const bulkOrderVal = Math.round((packagesVal * fPkgMult) * fBulkMult + reprocessVal);
 
-    document.getElementById('lattizRuns').innerText = runCount;
-    document.getElementById('lattizTotalLiters').innerText = Math.round(totalLiters).toLocaleString('nl-NL') + ' L';
-    document.getElementById('lattizYieldKg').innerText = yieldKg.toLocaleString('nl-NL') + ' kg';
-    document.getElementById('lattizWater').innerText = waterKg.toLocaleString('nl-NL') + ' kg';
-    document.getElementById('lattizEvap').innerText = evapKg.toLocaleString('nl-NL') + ' kg';
-    document.getElementById('lattizBulkOrder').innerText = bulkOrderVal.toLocaleString('nl-NL') + ' kg';
+    document.getElementById('evapRuns').innerText = runCount;
+    document.getElementById('evapTotalLiters').innerText = Math.round(totalLiters).toLocaleString('nl-NL') + ' L';
+    document.getElementById('evapYieldKg').innerText = yieldKg.toLocaleString('nl-NL') + ' kg';
+    document.getElementById('evapWater').innerText = waterKg.toLocaleString('nl-NL') + ' kg';
+    document.getElementById('evapEvap').innerText = evapKg.toLocaleString('nl-NL') + ' kg';
+    document.getElementById('evapBulkOrder').innerText = bulkOrderVal.toLocaleString('nl-NL') + ' kg';
   }
 
   function generateCodes() {
