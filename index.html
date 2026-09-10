@@ -36,11 +36,11 @@
     .header-text-img { height: 38px; width: auto; object-fit: contain; }
     .header-buttons { display: flex; gap: 6px; }
     .btn-header-action {
-      background: #f1f3f5; border: 1px solid #ced4da; color: #495057; border-radius: 8px;
+      background: #f1f3f5; border: 1px solid #ced4da; color: #000000; border-radius: 8px;
       padding: 6px 10px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: none; align-items: center; gap: 4px;
     }
     .btn-header-action.visible { display: flex; }
-    .btn-header-action:hover { background: #e9ecef; color: #212529; }
+    .btn-header-action:hover { background: #e9ecef; color: #000000; }
 
     /* Instellingen paneel */
     #settingsPanel {
@@ -55,7 +55,7 @@
     .main-tabs { display: flex; gap: 0; margin-bottom: 0; width: 100%; box-sizing: border-box; }
     .main-tab-btn {
       flex: 1; padding: 12px 4px; border: 1px solid var(--border-blue); 
-      background: #e1eeef; font-size: 0.78rem; font-weight: 600; color: #555; cursor: pointer; border-radius: 10px 10px 0 0; transition: all 0.2s;
+      background: #e1eeef; font-size: 0.78rem; font-weight: 600; color: #000000; cursor: pointer; border-radius: 10px 10px 0 0; transition: all 0.2s;
       text-align: center;
     }
     .main-tab-btn.active { background: var(--card-blue-bg); color: var(--primary); font-weight: 700; border-bottom: none; }
@@ -108,6 +108,8 @@
       -webkit-backdrop-filter: blur(8px);
       position: relative;
       overflow: hidden;
+      border: 1px solid #000000 !important; /* Randkleur gewijzigd naar zwart */
+      color: #000000 !important; /* Tekstkleur gewijzigd naar zwart */
     }
     .cause-tile:hover {
       transform: translateY(-2px);
@@ -116,11 +118,9 @@
       transform: translateY(0);
     }
 
-    /* Glasstijl Kleurcategorieën */
+    /* Glasstijl Kleurcategorieën met zwarte randen */
     .cause-tile.tile-room { 
       background: rgba(253, 232, 237, 0.65); 
-      border: 1px solid rgba(248, 180, 196, 0.8); 
-      color: #721c24; 
       box-shadow: 0 4px 12px rgba(248, 180, 196, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.8);
     }
     .cause-tile.tile-room:hover {
@@ -129,8 +129,6 @@
 
     .cause-tile.tile-fat { 
       background: rgba(230, 244, 234, 0.65); 
-      border: 1px solid rgba(163, 224, 181, 0.8); 
-      color: #0f5132; 
       box-shadow: 0 4px 12px rgba(163, 224, 181, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.8);
     }
     .cause-tile.tile-fat:hover {
@@ -139,8 +137,6 @@
 
     .cause-tile.tile-water { 
       background: rgba(224, 242, 254, 0.65); 
-      border: 1px solid rgba(186, 230, 253, 0.8); 
-      color: #0369a1; 
       box-shadow: 0 4px 12px rgba(186, 230, 253, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.8);
     }
     .cause-tile.tile-water:hover {
@@ -149,8 +145,6 @@
 
     .cause-tile.tile-reprocess { 
       background: rgba(254, 249, 195, 0.65); 
-      border: 1px solid rgba(253, 224, 71, 0.8); 
-      color: #713f12; 
       box-shadow: 0 4px 12px rgba(253, 224, 71, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.8);
     }
     .cause-tile.tile-reprocess:hover {
@@ -159,8 +153,6 @@
 
     .cause-tile.tile-neutral { 
       background: rgba(233, 236, 239, 0.65); 
-      border: 1px solid rgba(206, 212, 218, 0.8); 
-      color: #343a40; 
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.8);
     }
     .cause-tile.tile-neutral:hover {
@@ -187,7 +179,7 @@
       display: flex; gap: 8px; align-items: center;
     }
     .btn-paste {
-      background: #6c757d; color: white; border: none; border-radius: 8px;
+      background: #6c757d; color: #ffffff; border: none; border-radius: 8px;
       padding: 12px 14px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
       white-space: nowrap; flex-shrink: 0; transition: background 0.2s;
     }
@@ -201,7 +193,7 @@
     }
 
     .btn-calc-action {
-      background: var(--primary); color: white; border: none; border-radius: 8px;
+      background: var(--primary); color: #ffffff; border: none; border-radius: 8px;
       padding: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%;
       margin-top: 8px; margin-bottom: 12px; box-sizing: border-box; transition: background 0.2s;
     }
@@ -211,7 +203,7 @@
     .tab-buttons { display: flex; gap: 0; margin-bottom: 0; width: 100%; box-sizing: border-box; }
     .tab-btn {
       flex: 1; padding: 10px 4px; border: 1px solid var(--border-blue); 
-      background: #e1eeef; font-size: 0.85rem; font-weight: 600; color: #555; cursor: pointer; border-radius: 8px 8px 0 0;
+      background: #e1eeef; font-size: 0.85rem; font-weight: 600; color: #000000; cursor: pointer; border-radius: 8px 8px 0 0;
       text-align: center;
     }
     .tab-btn.active { background: #ffffff; color: var(--primary); font-weight: 700; border-bottom: 0px solid #ffffff; }
@@ -243,21 +235,21 @@
     .footer-buttons-row { display: flex; gap: 8px; width: 100%; justify-content: center; }
     .footer-btn {
       flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-      font-size: 0.82rem; font-weight: 600; color: #495057; text-decoration: none; padding: 10px 8px;
+      font-size: 0.82rem; font-weight: 600; color: #000000; text-decoration: none; padding: 10px 8px;
       border-radius: 8px; background: #e9ecef; border: 1px solid #ced4da; cursor: pointer; transition: background 0.2s; box-sizing: border-box; text-align: center;
     }
-    .footer-btn:hover { background: #dee2e6; color: #212529; }
+    .footer-btn:hover { background: #dee2e6; color: #000000; }
     .ios-box { background: #e9ecef; color: #333; font-size: 0.85rem; text-align: center; line-height: 1.4; display: none; margin-top: 8px; border-radius: 8px; padding: 12px; box-sizing: border-box; }
 
     .code-type-selector { display: flex; gap: 0; margin-bottom: 0; width: 100%; box-sizing: border-box; }
     .code-type-btn {
       flex: 1; padding: 10px; border: 1px solid var(--border-blue); background: #e9ecef;
-      font-size: 0.85rem; font-weight: 600; color: #495057; cursor: pointer; border-radius: 8px 8px 0 0; transition: all 0.2s;
+      font-size: 0.85rem; font-weight: 600; color: #000000; cursor: pointer; border-radius: 8px 8px 0 0; transition: all 0.2s;
     }
     .code-type-btn.active { background: #ffffff; color: var(--primary); border-color: var(--border-blue); border-bottom: 1px solid #ffffff; }
 
     .btn-scan {
-      background: #28a745; color: white; border: none; border-radius: 8px;
+      background: #28a745; color: #ffffff; border: none; border-radius: 8px;
       padding: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; width: 100%; box-sizing: border-box;
       margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 6px;
     }
