@@ -137,14 +137,16 @@
     
     .subtext-note { font-size: 0.78rem; color: #6c757d; font-style: italic; margin-top: -6px; margin-bottom: 8px; text-align: left; }
 
-    .footer-actions { margin-top: 24px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
-    .feedback-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #6c757d; text-decoration: none; padding: 6px 12px; border-radius: 6px; }
-    .feedback-link:hover { background: #e9ecef; color: var(--primary); }
-    
-    .btn-install, .ios-box { width: 100%; padding: 12px; border-radius: 8px; box-sizing: border-box; display: block; }
-    .btn-install { background: var(--primary); color: white; border: none; font-size: 0.95rem; font-weight: bold; cursor: pointer; }
-    .btn-install:hover { background: var(--primary-hover); }
-    .ios-box { background: #e9ecef; color: #333; font-size: 0.85rem; text-align: center; line-height: 1.4; display: none; margin-top: 8px; }
+    /* Aangepaste Footer Layout */
+    .footer-actions { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; width: 100%; }
+    .footer-buttons-row { display: flex; gap: 8px; width: 100%; justify-content: center; }
+    .footer-btn {
+      flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      font-size: 0.82rem; font-weight: 600; color: #495057; text-decoration: none; padding: 10px 8px;
+      border-radius: 8px; background: #e9ecef; border: 1px solid #ced4da; cursor: pointer; transition: background 0.2s; box-sizing: border-box; text-align: center;
+    }
+    .footer-btn:hover { background: #dee2e6; color: #212529; }
+    .ios-box { background: #e9ecef; color: #333; font-size: 0.85rem; text-align: center; line-height: 1.4; display: none; margin-top: 8px; border-radius: 8px; padding: 12px; box-sizing: border-box; }
 
     .code-type-selector { display: flex; gap: 0; margin-bottom: 0; width: 100%; box-sizing: border-box; }
     .code-type-btn {
@@ -252,11 +254,11 @@
 
     <!-- Gemeten vet % en Doel vet % naast elkaar -->
     <div class="form-row-2col">
-      <div class="form-group">
+      <div class="form-group" id="currentFatGroup">
         <label for="currentFat">Gemeten vet (%):</label>
         <input type="text" inputmode="decimal" id="currentFat" placeholder="bijv. 29.75" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
       </div>
-      <div class="form-group">
+      <div class="form-group" id="targetFatGroup">
         <label for="targetFat">Doel vet (%):</label>
         <input type="text" inputmode="decimal" id="targetFat" placeholder="bijv. 30.50" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
       </div>
@@ -316,7 +318,7 @@
           </div>
 
           <!-- VET-ANALYSE BLOCK -->
-          <div class="result-row">
+          <div class="result-row" id="rowCurrentFatKg">
             <span>Vet in huidige batch:</span>
             <span id="currentFatKgVal" class="result-value">0 kg</span>
           </div>
@@ -495,10 +497,14 @@
   </div>
 
   <div class="footer-actions">
-    <a href="mailto:nielsvde@hotmail.com?subject=Feedback%20FixMix&body=Beste%20Niels,%0A%0AIk%20heb%20een%20vraag,%20tip%20of%20fout%20ontdekt%20in%20FixMix:%0A%0A" class="feedback-link">
-      💡 Tip of fout melden
-    </a>
-    <button id="installBtn" class="btn-install">📲 Installeer app</button>
+    <div class="footer-buttons-row">
+      <a href="mailto:nielsvde@hotmail.com?subject=Feedback%20FixMix&body=Beste%20Niels,%0A%0AIk%20heb%20een%20vraag,%20tip%20of%20fout%20ontdekt%20in%20FixMix:%0A%0A" class="footer-btn">
+        💡 Tip / fout melden
+      </a>
+      <button id="installBtn" class="footer-btn">
+        📲 App installeren
+      </button>
+    </div>
     <div id="iosInstruction" class="ios-box">
       <strong>Instructie voor iPhone/iPad:</strong><br>
       Tik onderaan in Safari op het <strong>Deel-icoon</strong> <span style="font-size: 1.1rem;">⎋</span> en kies <strong>'Zet op beginscherm'</strong>.
@@ -708,15 +714,18 @@
   function onCauseChange() {
     const cause = document.getElementById('missingComponent').value;
     const creamFatGroup = document.getElementById('creamFatGroup');
+    const currentFatGroup = document.getElementById('currentFatGroup');
     const reprocessGroup = document.getElementById('reprocessFieldsGroup');
     const addLabel = document.getElementById('addLabel');
 
     if (cause === 'reprocess_missing') {
       reprocessGroup.style.display = 'block';
-      creamFatGroup.style.display = 'block';
+      currentFatGroup.style.display = 'none';
+      creamFatGroup.style.display = 'none';
       addLabel.innerHTML = 'Hoeveelheid room <strong>toevoegen</strong>:';
     } else {
       reprocessGroup.style.display = 'none';
+      currentFatGroup.style.display = 'block';
       if (cause.startsWith('cream') || cause === 'unknown' || cause === 'water_more') {
         creamFatGroup.style.display = 'block';
         addLabel.innerHTML = 'Hoeveelheid room <strong>toevoegen</strong>:';
@@ -837,6 +846,7 @@
 
     const rowAddIngredient = document.getElementById('rowAddIngredient');
     const rowAddWater = document.getElementById('rowAddWater');
+    const rowCurrentFatKg = document.getElementById('rowCurrentFatKg');
     const holdWaterBlock = document.getElementById('holdWaterBlock');
     const errorSection = document.getElementById('errorSection');
     const actualBatchBlock = document.getElementById('actualBatchBlock');
@@ -857,51 +867,99 @@
     const actualBatchValueEl = document.getElementById('actualBatchValue');
     let hasError = false;
 
-    if (missingComponent !== 'unknown' && inputBatchSize > 0 && currentFat > 0 && targetFat > 0 && (effectiveCreamFat > 0 || missingComponent.startsWith('water') || missingComponent === 'reprocess_missing')) {
+    let addAmount = 0, waterToAdd = 0, waterToHoldNext = 0, stepsHtml = '';
+    const ingredientName = additionType === 'fat' ? 'vloeibaar vet' : 'room';
+
+    if (missingComponent === 'reprocess_missing') {
+      rowCurrentFatKg.style.display = 'none';
+      const missingReprocessKg = parseNum(document.getElementById('missingReprocessKg').value);
+      const reprocessFat = parseNum(document.getElementById('reprocessFat').value);
+
+      if (inputBatchSize > 0 && targetFat > 0 && missingReprocessKg > 0 && reprocessFat > 0) {
+        const missingFatKg = (missingReprocessKg * reprocessFat) / 100;
+        const actualTotal = inputBatchSize - missingReprocessKg;
+        computedActualTotal = actualTotal;
+
+        // Omrekenen naar benodigde room en water op basis van doel vetgehalte
+        addAmount = (missingFatKg / (targetFat / 100)); // Roomtoevoeging op basis van recept/doelvet
+        waterToAdd = missingReprocessKg - addAmount; // Restant opvullen met water
+
+        actualBatchValueEl.innerText = Math.round(computedActualTotal) + ' kg';
+        detailsEl.innerHTML = `
+          <div class="calc-step">
+            <strong>Analyse van de ontbrekende herverwerking:</strong><br>
+            • Geplande batchgrootte: <strong>${inputBatchSize} kg</strong><br>
+            • Ontbrekende herverwerking: <strong>${missingReprocessKg} kg</strong> (${reprocessFat.toFixed(2)}% vet)<br>
+            • Aanwezige massa in tank: <strong>${Math.round(actualTotal)} kg</strong><br>
+            • Ontbrekende vetmassa: <strong>${missingFatKg.toFixed(2)} kg vet</strong>
+          </div>`;
+
+        rowAddIngredient.style.display = 'flex';
+        rowAddWater.style.display = 'flex';
+        holdWaterBlock.style.display = 'none';
+
+        const targetFatKg = (inputBatchSize * targetFat) / 100;
+        document.getElementById('targetFatKgVal').innerText = targetFatKg.toFixed(2) + ' kg';
+        
+        const diffFatEl = document.getElementById('diffFatKgVal');
+        diffFatEl.innerText = '-' + missingFatKg.toFixed(2) + ' kg';
+        diffFatEl.style.color = '#c0392b';
+
+        stepsHtml = `
+          <div class="calc-step">
+            <strong>Stap 1: Vervanging ontbrekende herverwerking</strong><br>
+            Om de ontbrekende herverwerking van <strong>${missingReprocessKg} kg</strong> (${reprocessFat.toFixed(2)}% vet = <strong>${missingFatKg.toFixed(2)} kg vet</strong>) op te vangen volgens het originele recept (doelvet <strong>${targetFat.toFixed(2)}%</strong>):
+          </div>
+          <div class="calc-step">
+            <strong>Stap 2: Bepaling dosering room en water</strong><br>
+            • Benodigde room (${targetFat.toFixed(2)}% vet): <strong>${Math.round(addAmount)} kg</strong><br>
+            • Benodigd water: <strong>${Math.round(waterToAdd)} kg</strong><br>
+            👉 <strong>Dosering: Voeg ${Math.round(addAmount)} kg room én ${Math.round(waterToAdd)} kg water toe.</strong>
+          </div>
+          <div class="calc-step">
+            <strong>Stap 3: Resultaat na toevoeging</strong><br>
+            • Aanwezige inhoud: <strong>${Math.round(actualTotal)} kg</strong><br>
+            • Toegevoegd (room + water): <strong>${Math.round(missingReprocessKg)} kg</strong><br>
+            • Totale nieuwe batchgrootte: <strong>${inputBatchSize} kg</strong>
+          </div>`;
+
+        document.getElementById('addValue').innerText = Math.round(addAmount) + ' kg';
+        document.getElementById('waterToAdd').innerText = Math.round(waterToAdd) + ' kg';
+        document.getElementById('totalBatch').innerText = inputBatchSize + ' kg';
+        document.getElementById('calcSteps').innerHTML = stepsHtml;
+        return;
+      }
+    } else {
+      rowCurrentFatKg.style.display = 'flex';
+    }
+
+    if (missingComponent !== 'unknown' && inputBatchSize > 0 && currentFat > 0 && targetFat > 0 && (effectiveCreamFat > 0 || missingComponent.startsWith('water'))) {
       let calcCreamFat = (missingComponent.startsWith('water') && effectiveCreamFat === 0) ? 43 : effectiveCreamFat;
       let actualTotal = 0, actualIngredient = 0, actualWater = 0;
 
-      if (missingComponent === 'reprocess_missing') {
-        const missingReprocessKg = parseNum(document.getElementById('missingReprocessKg').value);
-        const reprocessFat = parseNum(document.getElementById('reprocessFat').value);
-        
-        const missingFatKg = (missingReprocessKg * reprocessFat) / 100;
-        actualTotal = inputBatchSize - missingReprocessKg;
-        
-        detailsEl.innerHTML = `
-          <div class="calc-step">
-            <strong>Analyse van de afwijking (Herverwerking ontbreekt):</strong><br>
-            • Geplande batchgrootte: <strong>${inputBatchSize} kg</strong><br>
-            • Niet-gedoseerde herverwerking: <strong>${missingReprocessKg} kg</strong><br>
-            • Werkelijk aanwezige massa in tank: <strong>${Math.round(actualTotal)} kg</strong><br>
-            • Ontbrekende hoeveelheid vetmassa: <strong>${missingFatKg.toFixed(2)} kg vet</strong>
-          </div>`;
-        computedActualTotal = actualTotal;
+      const plannedWater = inputBatchSize - (((inputBatchSize * targetFat) / 100) / calcCreamFat) * 100;
+      
+      if (['cream_less', 'cream_more', 'fat_less', 'fat_more'].includes(missingComponent)) {
+        actualWater = plannedWater;
+        actualTotal = actualWater / (1 - (currentFat / calcCreamFat));
+        actualIngredient = actualTotal - actualWater;
       } else {
-        const plannedWater = inputBatchSize - (((inputBatchSize * targetFat) / 100) / calcCreamFat) * 100;
-        
-        if (['cream_less', 'cream_more', 'fat_less', 'fat_more'].includes(missingComponent)) {
-          actualWater = plannedWater;
-          actualTotal = actualWater / (1 - (currentFat / calcCreamFat));
-          actualIngredient = actualTotal - actualWater;
-        } else {
-          actualIngredient = (((inputBatchSize * targetFat) / 100) / calcCreamFat) * 100;
-          actualTotal = ((actualIngredient * calcCreamFat) / 100) / (currentFat / 100);
-          actualWater = actualTotal - actualIngredient;
-        }
-        computedActualTotal = actualTotal;
-
-        const diffTotal = actualTotal - inputBatchSize;
-        const ingredName = additionType === 'fat' ? 'vloeibaar vet' : 'room';
-
-        detailsEl.innerHTML = `
-          <div class="calc-step">
-            <strong>Analyse van de actuele tankinhoud:</strong><br>
-            • Geplande batchgrootte: <strong>${inputBatchSize} kg</strong><br>
-            • Berekende werkelijke inhoud: <strong>${Math.round(actualTotal)} kg</strong> (${diffTotal > 0 ? '+' + Math.round(diffTotal) + ' kg afwijking' : Math.round(diffTotal) + ' kg afwijking'})<br>
-            • Samenstelling Huidige Tank: <strong>${Math.round(actualIngredient)} kg</strong> ${ingredName} en <strong>${Math.round(actualWater)} kg</strong> water.
-          </div>`;
+        actualIngredient = (((inputBatchSize * targetFat) / 100) / calcCreamFat) * 100;
+        actualTotal = ((actualIngredient * calcCreamFat) / 100) / (currentFat / 100);
+        actualWater = actualTotal - actualIngredient;
       }
+      computedActualTotal = actualTotal;
+
+      const diffTotal = actualTotal - inputBatchSize;
+      const ingredName = additionType === 'fat' ? 'vloeibaar vet' : 'room';
+
+      detailsEl.innerHTML = `
+        <div class="calc-step">
+          <strong>Analyse van de actuele tankinhoud:</strong><br>
+          • Geplande batchgrootte: <strong>${inputBatchSize} kg</strong><br>
+          • Berekende werkelijke inhoud: <strong>${Math.round(actualTotal)} kg</strong> (${diffTotal > 0 ? '+' + Math.round(diffTotal) + ' kg afwijking' : Math.round(diffTotal) + ' kg afwijking'})<br>
+          • Samenstelling Huidige Tank: <strong>${Math.round(actualIngredient)} kg</strong> ${ingredName} en <strong>${Math.round(actualWater)} kg</strong> water.
+        </div>`;
       actualBatchValueEl.innerText = Math.round(computedActualTotal) + ' kg';
     } else {
       computedActualTotal = 0;
@@ -930,9 +988,6 @@
     } else {
       errorSection.innerHTML = '';
     }
-
-    let addAmount = 0, waterToAdd = 0, waterToHoldNext = 0, stepsHtml = '';
-    const ingredientName = additionType === 'fat' ? 'vloeibaar vet' : 'room';
 
     // Eerst de nodige toevoegingen berekenen om de eindmassa van de batch te bepalen
     if (!hasError && activeBatchSize > 0 && currentFat > 0 && targetFat > 0) {
