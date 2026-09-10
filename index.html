@@ -135,6 +135,9 @@
     .calc-formula { background: #eef5ff; padding: 6px 10px; border-radius: 6px; font-family: monospace; font-size: 0.85rem; margin: 6px 0; display: block; border-left: 3px solid var(--primary); }
     .error-box { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 12px; border-radius: 8px; font-size: 0.85rem; line-height: 1.4; margin-bottom: 14px; }
     
+    .option-box { background: #f0f7ff; border: 1px solid #cce5ff; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+    .option-title { font-weight: 700; color: var(--primary); font-size: 0.9rem; margin-bottom: 8px; }
+
     .subtext-note { font-size: 0.78rem; color: #6c757d; font-style: italic; margin-top: -6px; margin-bottom: 8px; text-align: left; }
 
     /* Aangepaste Footer Layout */
@@ -322,11 +325,11 @@
             <span>Vet in huidige batch:</span>
             <span id="currentFatKgVal" class="result-value">0 kg</span>
           </div>
-          <div class="result-row">
+          <div class="result-row" id="rowTargetFatKg">
             <span>Gewenst vet in batch (na correctie):</span>
             <span id="targetFatKgVal" class="result-value">0 kg</span>
           </div>
-          <div class="result-row" style="margin-bottom: 12px;">
+          <div class="result-row" id="rowDiffFatKg" style="margin-bottom: 12px;">
             <div style="display: flex; align-items: center; gap: 6px;">
               <span>Verschil in vet:</span>
               <span class="info-icon" onclick="toggleTooltip('diffFatTooltip')">?</span>
@@ -337,47 +340,72 @@
             <strong>Toelichting:</strong> Het verschil tussen aanwezig vet in de huidige batch en het totaal gewenste vet na correctie.
           </div>
 
-          <hr style="border:0; border-top: 1px solid var(--border-blue); margin: 14px 0;">
+          <hr id="fatAnalysisDivider" style="border:0; border-top: 1px solid var(--border-blue); margin: 14px 0;">
 
-          <div class="result-row" id="rowAddIngredient">
-            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-              <span id="addLabel">Hoeveelheid room <strong>toevoegen</strong>:</span>
-              <span class="info-icon" id="addTooltipIcon" onclick="toggleTooltip('addTooltip')">?</span>
-            </div>
-            <span id="addValue" class="result-value">0 kg</span>
-          </div>
-          <div id="addTooltip" class="info-tooltip" style="margin-bottom: 10px;">
-            <span id="addTooltipText">Let op! 100% room doseren zonder waterinspoel.</span>
-          </div>
-
-          <!-- Extra rij voor vet wanneer 'Oorzaak onbekend' is geselecteerd -->
-          <div class="result-row" id="rowAddFatUnknown" style="display: none; margin-top: 8px;">
-            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-              <span>Of hoeveelheid vloeibaar vet <strong>toevoegen</strong>:</span>
-            </div>
-            <span id="addFatValue" class="result-value" style="color: var(--primary);">0 kg</span>
-          </div>
-
-          <div class="result-row" id="rowAddWater">
-            <span>Hoeveelheid water <strong>toevoegen</strong>:</span>
-            <span id="waterToAdd" class="result-value">0 kg</span>
-          </div>
-
-          <!-- WATER INHOUDEN VOLGENDE BATCH -->
-          <div id="holdWaterBlock" style="display: none;">
-            <div class="result-row" id="rowHoldWaterNextBatch" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-blue);">
+          <!-- STANDAARD RESULTATEN (bij bekende oorzaak of verdunning) -->
+          <div id="standardResultsBlock">
+            <div class="result-row" id="rowAddIngredient">
               <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                <span>Water <strong>inhouden</strong> op volgende batch:</span>
+                <span id="addLabel">Hoeveelheid room <strong>toevoegen</strong>:</span>
+                <span class="info-icon" id="addTooltipIcon" onclick="toggleTooltip('addTooltip')">?</span>
               </div>
-              <span id="waterToHoldNextBatch" class="result-value" style="color: #d9534f;">0 kg</span>
+              <span id="addValue" class="result-value">0 kg</span>
             </div>
-            <div class="subtext-note">Alleen toepassen als de huidige batch niet met room/vet wordt gecorrigeerd.</div>
+            <div id="addTooltip" class="info-tooltip" style="margin-bottom: 10px;">
+              <span id="addTooltipText">Let op! 100% room doseren zonder waterinspoel.</span>
+            </div>
+
+            <div class="result-row" id="rowAddWater">
+              <span>Hoeveelheid water <strong>toevoegen</strong>:</span>
+              <span id="waterToAdd" class="result-value">0 kg</span>
+            </div>
+
+            <!-- WATER INHOUDEN VOLGENDE BATCH -->
+            <div id="holdWaterBlock" style="display: none;">
+              <div class="result-row" id="rowHoldWaterNextBatch" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-blue);">
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                  <span>Water <strong>inhouden</strong> op volgende batch:</span>
+                </div>
+                <span id="waterToHoldNextBatch" class="result-value" style="color: #d9534f;">0 kg</span>
+              </div>
+              <div class="subtext-note">Alleen toepassen als de huidige batch niet met room/vet wordt gecorrigeerd.</div>
+            </div>
+
+            <div class="result-row" id="rowTotalBatchStandard" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-blue);">
+              <span>Totale grootte batch na correctie:</span>
+              <span id="totalBatch" class="result-value">0 kg</span>
+            </div>
           </div>
 
-          <div class="result-row" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-blue);">
-            <span>Totale grootte batch na correctie:</span>
-            <span id="totalBatch" class="result-value">0 kg</span>
+          <!-- OORZAAK ONBEKEND DUBBELE OPTIES -->
+          <div id="unknownCauseOptionsBlock" style="display: none;">
+            <!-- Optie A: Room -->
+            <div class="option-box">
+              <div class="option-title">Optie A: Correctie met Room</div>
+              <div class="result-row">
+                <span>Room toevoegen:</span>
+                <span id="optCreamAddVal" class="result-value">0 kg</span>
+              </div>
+              <div class="result-row" style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #cce5ff;">
+                <span>Totale batch na room-correctie:</span>
+                <span id="optCreamTotalVal" class="result-value" style="color: var(--primary);">0 kg</span>
+              </div>
+            </div>
+
+            <!-- Optie B: Vloeibaar Vet -->
+            <div class="option-box" style="margin-bottom: 0;">
+              <div class="option-title">Optie B: Correctie met Vloeibaar Vet</div>
+              <div class="result-row">
+                <span>Vloeibaar vet toevoegen:</span>
+                <span id="optFatAddVal" class="result-value">0 kg</span>
+              </div>
+              <div class="result-row" style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #cce5ff;">
+                <span>Totale batch na vet-correctie:</span>
+                <span id="optFatTotalVal" class="result-value" style="color: var(--primary);">0 kg</span>
+              </div>
+            </div>
           </div>
+
         </div>
 
         <!-- Tab 2 -->
@@ -727,9 +755,6 @@
     const currentFatGroup = document.getElementById('currentFatGroup');
     const reprocessGroup = document.getElementById('reprocessFieldsGroup');
     const addLabel = document.getElementById('addLabel');
-    const rowAddFatUnknown = document.getElementById('rowAddFatUnknown');
-
-    if (rowAddFatUnknown) rowAddFatUnknown.style.display = 'none';
 
     if (cause === 'reprocess_missing') {
       reprocessGroup.style.display = 'block';
@@ -869,8 +894,9 @@
     const actualBatchBlock = document.getElementById('actualBatchBlock');
     const actualBatchDetailsSection = document.getElementById('actualBatchDetailsSection');
     const step2Title = document.getElementById('step2Title');
-    const rowAddFatUnknown = document.getElementById('rowAddFatUnknown');
     const addTooltipText = document.getElementById('addTooltipText');
+    const standardResultsBlock = document.getElementById('standardResultsBlock');
+    const unknownCauseOptionsBlock = document.getElementById('unknownCauseOptionsBlock');
 
     if (missingComponent === 'unknown') {
       actualBatchBlock.style.display = 'none';
@@ -892,7 +918,9 @@
     // --- HERVERWERKING LOGICA ---
     if (missingComponent === 'reprocess_missing') {
       rowCurrentFatKg.style.display = 'none';
-      if (rowAddFatUnknown) rowAddFatUnknown.style.display = 'none';
+      standardResultsBlock.style.display = 'block';
+      unknownCauseOptionsBlock.style.display = 'none';
+
       const missingReprocessKg = parseNum(document.getElementById('missingReprocessKg').value);
       const reprocessFat = parseNum(document.getElementById('reprocessFat').value);
 
@@ -1036,7 +1064,9 @@
       }
     }
 
-    const finalBatchSize = activeBatchSize + addAmount + waterToAdd;
+    const finalBatchSizeStandard = activeBatchSize + addAmount + waterToAdd;
+    const finalBatchSizeCream = activeBatchSize + addAmount;
+    const finalBatchSizeFat = activeBatchSize + addFatAmount;
 
     // --- VET-ANALYSE ---
     let currentFatKg = 0;
@@ -1045,8 +1075,8 @@
 
     if (activeBatchSize > 0 && currentFat > 0 && targetFat > 0) {
       currentFatKg = (activeBatchSize * currentFat) / 100;
-      targetFatKg = (finalBatchSize * targetFat) / 100;
-      diffFatKg = currentFatKg - targetFatKg;
+      targetFatKg = (finalBatchSizeStandard * targetFat) / 100;
+      diffFatKg = currentFatKg - (activeBatchSize * targetFat / 100);
     }
 
     document.getElementById('currentFatKgVal').innerText = currentFatKg > 0 ? (currentFatKg.toFixed(2) + ' kg') : '0 kg';
@@ -1066,24 +1096,30 @@
 
     if (!hasError && activeBatchSize > 0) {
       if (currentFat > 0 && targetFat > currentFat) {
-        rowAddIngredient.style.display = 'flex';
-        rowAddWater.style.display = 'none';
 
-        // Tooltip tekst instellen afhankelijk van de grondstof
-        if (addTooltipText) {
-          if (additionType === 'fat') {
-            addTooltipText.innerText = 'Let op! Vloeibaar vet doseren volgens specificaties.';
-          } else {
-            addTooltipText.innerText = 'Let op! 100% room doseren zonder waterinspoel.';
-          }
-        }
+        // WEERGAVE LOGICA OORZAAK ONBEKEND VS BEKENDE OORZAAK
+        if (missingComponent === 'unknown') {
+          standardResultsBlock.style.display = 'none';
+          unknownCauseOptionsBlock.style.display = 'block';
 
-        // Bij Oorzaak Onbekend: Toon de alternatieve hoeveelheid voor vloeibaar vet
-        if (missingComponent === 'unknown' && addFatAmount > 0) {
-          if (rowAddFatUnknown) rowAddFatUnknown.style.display = 'flex';
-          document.getElementById('addFatValue').innerText = Math.round(addFatAmount) + ' kg';
+          document.getElementById('optCreamAddVal').innerText = Math.round(addAmount) + ' kg';
+          document.getElementById('optCreamTotalVal').innerText = Math.round(finalBatchSizeCream) + ' kg';
+
+          document.getElementById('optFatAddVal').innerText = Math.round(addFatAmount) + ' kg';
+          document.getElementById('optFatTotalVal').innerText = Math.round(finalBatchSizeFat) + ' kg';
         } else {
-          if (rowAddFatUnknown) rowAddFatUnknown.style.display = 'none';
+          standardResultsBlock.style.display = 'block';
+          unknownCauseOptionsBlock.style.display = 'none';
+          rowAddIngredient.style.display = 'flex';
+          rowAddWater.style.display = 'none';
+
+          if (addTooltipText) {
+            if (additionType === 'fat') {
+              addTooltipText.innerText = 'Let op! Vloeibaar vet doseren volgens specificaties.';
+            } else {
+              addTooltipText.innerText = 'Let op! 100% room doseren zonder waterinspoel.';
+            }
+          }
         }
         
         const hideHoldWaterCauses = ['cream_less', 'fat_less', 'reprocess_missing'];
@@ -1097,37 +1133,62 @@
         waterToHoldNext = Math.abs(uncorrectedDiffFat) / (targetFat / 100);
 
         if (effectiveCreamFat > targetFat || additionType === 'fat') {
-          stepsHtml = `
-            <div class="calc-step">
-              <strong>Stap 1: Huidige vs. verwachte situatie na correctie</strong><br>
-              • Huidige tankinhoud: <strong>${Math.round(activeBatchSize)} kg</strong> met <strong>${currentFat.toFixed(2)}%</strong> vet = <strong>${currentFatKg.toFixed(2)} kg vet</strong><br>
-              • Berekende toevoeging: <strong>${Math.round(addAmount)} kg ${ingredientName}</strong><br>
-              • Totale batch na correctie: <strong>${Math.round(finalBatchSize)} kg</strong> met <strong>${targetFat.toFixed(2)}%</strong> vet<br>
-              • Gewenst vet in totale batch: <strong>${targetFatKg.toFixed(2)} kg vet</strong><br>
-              • Toe te voegen vet massa via ${ingredientName}: <strong>${Math.abs(diffFatKg).toFixed(2)} kg vet</strong>
-            </div>
-            <div class="calc-step">
-              <strong>Stap 2: Bepaling toe te voegen ${ingredientName}</strong><br>
-              Om het vetgehalte te verhogen naar de doelwaarde van <strong>${targetFat.toFixed(2)}%</strong>, wordt ${ingredientName} toegevoegd met een vetgehalte van <strong>${effectiveCreamFat.toFixed(2)}%</strong>.<br>
-              <span class="calc-formula">Toevoegen = ((${targetFat.toFixed(2)}% - ${currentFat.toFixed(2)}%) / (${effectiveCreamFat.toFixed(2)}% - ${targetFat.toFixed(2)}%)) × ${Math.round(activeBatchSize)} kg</span>
-              👉 <strong>Dosering: Voeg exact ${Math.round(addAmount)} kg ${ingredientName} toe.</strong>
-              ${missingComponent === 'unknown' ? `<br><br>💡 <strong>Alternatief vloeibaar vet (100% vet):</strong><br>Voeg <strong>${Math.round(addFatAmount)} kg</strong> vloeibaar vet toe om het vetgehalte te corrigeren.` : ''}
-            </div>` +
-            (!hideHoldWaterCauses.includes(missingComponent) ? `
-            <div class="calc-step">
-              <strong>Alternatieve correctie (Water inhouden op volgende batch):</strong><br>
-              Indien de huidige batch niet direct wordt gecorrigeerd met extra ${ingredientName}, kan het vettekort op de huidige batchgrootte (<strong>${Math.abs(uncorrectedDiffFat).toFixed(2)} kg</strong>) worden gecompenseerd door bij de <i>volgende batch</i> <strong>${Math.round(waterToHoldNext)} kg minder water</strong> te doseren.
-            </div>` : '') + `
-            <div class="calc-step">
-              <strong>Stap 3: Resultaat na correctie</strong><br>
-              • Oorspronkelijke inhoud: <strong>${Math.round(activeBatchSize)} kg</strong><br>
-              • Correctiedosering: <strong>${Math.round(addAmount)} kg ${ingredientName}</strong><br>
-              • Totale nieuwe batchgrootte: <strong>${Math.round(finalBatchSize)} kg</strong>
-            </div>`;
+          if (missingComponent === 'unknown') {
+            stepsHtml = `
+              <div class="calc-step">
+                <strong>Stap 1: Huidige situatie</strong><br>
+                • Tankinhoud: <strong>${Math.round(activeBatchSize)} kg</strong> met <strong>${currentFat.toFixed(2)}%</strong> vet = <strong>${currentFatKg.toFixed(2)} kg vet</strong><br>
+                • Vettekort t.o.v. doel (${targetFat.toFixed(2)}%): <strong>${Math.abs(diffFatKg).toFixed(2)} kg vet</strong>
+              </div>
+              <div class="calc-step">
+                <strong>Optie A: Correctie met Room (${effectiveCreamFat.toFixed(2)}% vet)</strong><br>
+                <span class="calc-formula">Room = ((${targetFat.toFixed(2)}% - ${currentFat.toFixed(2)}%) / (${effectiveCreamFat.toFixed(2)}% - ${targetFat.toFixed(2)}%)) × ${Math.round(activeBatchSize)} kg</span>
+                👉 <strong>Toevoegen: ${Math.round(addAmount)} kg room</strong><br>
+                • Totale nieuwe batchgrootte: <strong>${Math.round(finalBatchSizeCream)} kg</strong>
+              </div>
+              <div class="calc-step">
+                <strong>Optie B: Correctie met Vloeibaar Vet (100% vet)</strong><br>
+                <span class="calc-formula">Vet = ((${targetFat.toFixed(2)}% - ${currentFat.toFixed(2)}%) / (100% - ${targetFat.toFixed(2)}%)) × ${Math.round(activeBatchSize)} kg</span>
+                👉 <strong>Toevoegen: ${Math.round(addFatAmount)} kg vloeibaar vet</strong><br>
+                • Totale nieuwe batchgrootte: <strong>${Math.round(finalBatchSizeFat)} kg</strong>
+              </div>
+              <div class="calc-step">
+                <strong>Alternatieve correctie (Water inhouden op volgende batch):</strong><br>
+                Indien de huidige batch niet direct wordt gecorrigeerd, kan het vettekort (<strong>${Math.abs(uncorrectedDiffFat).toFixed(2)} kg</strong>) worden gecompenseerd door bij de <i>volgende batch</i> <strong>${Math.round(waterToHoldNext)} kg minder water</strong> te doseren.
+              </div>`;
+          } else {
+            stepsHtml = `
+              <div class="calc-step">
+                <strong>Stap 1: Huidige vs. verwachte situatie na correctie</strong><br>
+                • Huidige tankinhoud: <strong>${Math.round(activeBatchSize)} kg</strong> met <strong>${currentFat.toFixed(2)}%</strong> vet = <strong>${currentFatKg.toFixed(2)} kg vet</strong><br>
+                • Berekende toevoeging: <strong>${Math.round(addAmount)} kg ${ingredientName}</strong><br>
+                • Totale batch na correctie: <strong>${Math.round(finalBatchSizeStandard)} kg</strong> met <strong>${targetFat.toFixed(2)}%</strong> vet<br>
+                • Gewenst vet in totale batch: <strong>${targetFatKg.toFixed(2)} kg vet</strong><br>
+                • Toe te voegen vet massa via ${ingredientName}: <strong>${Math.abs(diffFatKg).toFixed(2)} kg vet</strong>
+              </div>
+              <div class="calc-step">
+                <strong>Stap 2: Bepaling toe te voegen ${ingredientName}</strong><br>
+                Om het vetgehalte te verhogen naar de doelwaarde van <strong>${targetFat.toFixed(2)}%</strong>, wordt ${ingredientName} toegevoegd met een vetgehalte van <strong>${effectiveCreamFat.toFixed(2)}%</strong>.<br>
+                <span class="calc-formula">Toevoegen = ((${targetFat.toFixed(2)}% - ${currentFat.toFixed(2)}%) / (${effectiveCreamFat.toFixed(2)}% - ${targetFat.toFixed(2)}%)) × ${Math.round(activeBatchSize)} kg</span>
+                👉 <strong>Dosering: Voeg exact ${Math.round(addAmount)} kg ${ingredientName} toe.</strong>
+              </div>` +
+              (!hideHoldWaterCauses.includes(missingComponent) ? `
+              <div class="calc-step">
+                <strong>Alternatieve correctie (Water inhouden op volgende batch):</strong><br>
+                Indien de huidige batch niet direct wordt gecorrigeerd met extra ${ingredientName}, kan het vettekort op de huidige batchgrootte (<strong>${Math.abs(uncorrectedDiffFat).toFixed(2)} kg</strong>) worden gecompenseerd door bij de <i>volgende batch</i> <strong>${Math.round(waterToHoldNext)} kg minder water</strong> te doseren.
+              </div>` : '') + `
+              <div class="calc-step">
+                <strong>Stap 3: Resultaat na correctie</strong><br>
+                • Oorspronkelijke inhoud: <strong>${Math.round(activeBatchSize)} kg</strong><br>
+                • Correctiedosering: <strong>${Math.round(addAmount)} kg ${ingredientName}</strong><br>
+                • Totale nieuwe batchgrootte: <strong>${Math.round(finalBatchSizeStandard)} kg</strong>
+              </div>`;
+          }
         }
       } else if (currentFat > targetFat && targetFat > 0) {
+        standardResultsBlock.style.display = 'block';
+        unknownCauseOptionsBlock.style.display = 'none';
         rowAddIngredient.style.display = 'none';
-        if (rowAddFatUnknown) rowAddFatUnknown.style.display = 'none';
         rowAddWater.style.display = 'flex';
         holdWaterBlock.style.display = 'none';
         
@@ -1136,7 +1197,7 @@
             <strong>Stap 1: Huidige vs. verwachte situatie na verdunning</strong><br>
             • Huidige tankinhoud: <strong>${Math.round(activeBatchSize)} kg</strong> met <strong>${currentFat.toFixed(2)}%</strong> vet = <strong>${currentFatKg.toFixed(2)} kg vet</strong><br>
             • Berekende water toevoeging: <strong>${Math.round(waterToAdd)} kg water</strong><br>
-            • Totale batch na verdunning: <strong>${Math.round(finalBatchSize)} kg</strong> met <strong>${targetFat.toFixed(2)}%</strong> vet<br>
+            • Totale batch na verdunning: <strong>${Math.round(finalBatchSizeStandard)} kg</strong> met <strong>${targetFat.toFixed(2)}%</strong> vet<br>
             • Gewenst vet in totale batch: <strong>${targetFatKg.toFixed(2)} kg vet</strong>
           </div>
           <div class="calc-step">
@@ -1149,21 +1210,23 @@
             <strong>Stap 3: Resultaat na verdunning</strong><br>
             • Oorspronkelijke inhoud: <strong>${Math.round(activeBatchSize)} kg</strong><br>
             • Toegevoegd water: <strong>${Math.round(waterToAdd)} kg</strong><br>
-            • Totale nieuwe batchgrootte: <strong>${Math.round(finalBatchSize)} kg</strong>
+            • Totale nieuwe batchgrootte: <strong>${Math.round(finalBatchSizeStandard)} kg</strong>
           </div>`;
       } else {
+        standardResultsBlock.style.display = 'block';
+        unknownCauseOptionsBlock.style.display = 'none';
         holdWaterBlock.style.display = 'none';
-        if (rowAddFatUnknown) rowAddFatUnknown.style.display = 'none';
       }
     } else {
+      standardResultsBlock.style.display = 'block';
+      unknownCauseOptionsBlock.style.display = 'none';
       holdWaterBlock.style.display = 'none';
-      if (rowAddFatUnknown) rowAddFatUnknown.style.display = 'none';
     }
 
     document.getElementById('addValue').innerText = Math.round(addAmount) + ' kg';
     document.getElementById('waterToAdd').innerText = Math.round(waterToAdd) + ' kg';
     document.getElementById('waterToHoldNextBatch').innerText = Math.round(waterToHoldNext) + ' kg';
-    document.getElementById('totalBatch').innerText = Math.round(finalBatchSize) + ' kg';
+    document.getElementById('totalBatch').innerText = Math.round(finalBatchSizeStandard) + ' kg';
     document.getElementById('calcSteps').innerHTML = stepsHtml || '<p style="margin:0; color:#666;">Vul gegevens in om de stappen te tonen.</p>';
   }
 
