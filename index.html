@@ -11,10 +11,15 @@
   
   <style>
     :root {
-      --primary: #007bff; --primary-hover: #0056b3;
-      --bg: #f4f6f9; --card-bg: #ffffff; --text: #333333;
-      --card-blue-bg: #f0f7ff; --border-blue: #cce5ff;
+      --primary: #007bff;
+      --primary-hover: #0056b3;
+      --bg: #f4f6f9;
+      --card-bg: #ffffff;
+      --text: #333333;
+      --card-blue-bg: #f0f7ff;
+      --border-blue: #cce5ff;
     }
+    * { box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: var(--bg); color: var(--text);
@@ -22,12 +27,12 @@
     }
 
     .card {
-      background: var(--card-bg); padding: 8px 12px 16px 12px; border-radius: 0;
-      box-shadow: none; width: 100%; max-width: 100%; box-sizing: border-box; text-align: center;
+      background: var(--card-bg); padding: 8px 12px 16px; border-radius: 0;
+      box-shadow: none; width: 100%; max-width: 100%; text-align: center;
     }
     @media (min-width: 480px) { 
-      body { padding: 0px 10px 10px 10px; } 
-      .card { padding: 12px 24px 24px 24px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); max-width: 480px; } 
+      body { padding: 0 10px 10px; } 
+      .card { padding: 12px 24px 24px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); max-width: 480px; } 
     }
     
     .header-container { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 5px; text-align: left; }
@@ -52,7 +57,7 @@
     .settings-row input { width: 80px !important; padding: 6px !important; font-size: 0.85rem !important; text-align: right; }
 
     /* Hoofdnavigatie tabbladen */
-    .main-tabs { display: flex; gap: 0; margin-bottom: 0; width: 100%; box-sizing: border-box; }
+    .main-tabs { display: flex; gap: 0; margin-bottom: 0; width: 100%; }
     .main-tab-btn {
       flex: 1; padding: 12px 4px; border: 1px solid var(--border-blue); 
       background: #e1eeef; font-size: 0.78rem; font-weight: 600; color: #555; cursor: pointer; border-radius: 10px 10px 0 0; transition: all 0.2s;
@@ -78,7 +83,7 @@
       border: 1px solid #ffeeba; border-radius: 8px; font-size: 0.82rem; line-height: 1.4;
     }
     input, select, textarea {
-      width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; box-sizing: border-box; background: #fff; font-family: inherit;
+      width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; background: #fff; font-family: inherit;
     }
     textarea { resize: vertical; min-height: 100px; }
 
@@ -93,9 +98,7 @@
       background: var(--primary); color: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    .input-with-button {
-      display: flex; gap: 8px; align-items: center;
-    }
+    .input-with-button { display: flex; gap: 8px; align-items: center; }
     .btn-paste {
       background: #6c757d; color: white; border: none; border-radius: 8px;
       padding: 12px 14px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
@@ -104,34 +107,30 @@
     .btn-paste:hover { background: #5a6268; }
 
     .evap-input-small {
-      width: 90px !important;
-      padding: 6px 8px !important;
-      font-size: 0.9rem !important;
-      text-align: right;
+      width: 90px !important; padding: 6px 8px !important; font-size: 0.9rem !important; text-align: right;
     }
 
     .btn-calc-action {
       background: var(--primary); color: white; border: none; border-radius: 8px;
       padding: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%;
-      margin-top: 8px; margin-bottom: 12px; box-sizing: border-box; transition: background 0.2s;
+      margin-top: 8px; margin-bottom: 12px; transition: background 0.2s;
     }
     .btn-calc-action:hover { background: var(--primary-hover); }
 
     .tabs-wrapper { margin-top: 16px; display: none; }
-    .tab-buttons { display: flex; gap: 0; margin-bottom: 0; width: 100%; box-sizing: border-box; }
+    .tab-buttons { display: flex; gap: 0; margin-bottom: 0; width: 100%; }
     .tab-btn {
       flex: 1; padding: 10px 4px; border: 1px solid var(--border-blue); 
       background: #e1eeef; font-size: 0.85rem; font-weight: 600; color: #555; cursor: pointer; border-radius: 8px 8px 0 0;
       text-align: center;
     }
-    .tab-btn.active { background: #ffffff; color: var(--primary); font-weight: 700; border-bottom: 0px solid #ffffff; }
+    .tab-btn.active { background: #ffffff; color: var(--primary); font-weight: 700; border-bottom: 0; }
     
-    .tab-content-container {
-      background: var(--card-blue-bg); border: 1px solid var(--border-blue); border-radius: 0 0 12px 12px; padding: 20px 16px; text-align: left; box-sizing: border-box; width: 100%; margin-top: -1px; position: relative; z-index: 2;
+    .tab-content-container, .sub-content-container {
+      border: 1px solid var(--border-blue); border-radius: 0 0 12px 12px; padding: 20px 16px; text-align: left; width: 100%; margin-top: -1px; position: relative; z-index: 2;
     }
-    .sub-content-container {
-      background: #ffffff; border: 1px solid var(--border-blue); border-radius: 0 0 12px 12px; padding: 20px 16px; text-align: left; box-sizing: border-box; width: 100%; margin-top: -1px; position: relative; z-index: 2;
-    }
+    .tab-content-container { background: var(--card-blue-bg); }
+    .sub-content-container { background: #ffffff; }
 
     .tab-content { display: none; }
     .tab-content.active { display: block; }
@@ -157,12 +156,12 @@
     .footer-btn {
       flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
       font-size: 0.82rem; font-weight: 600; color: #495057; text-decoration: none; padding: 10px 8px;
-      border-radius: 8px; background: #e9ecef; border: 1px solid #ced4da; cursor: pointer; transition: background 0.2s; box-sizing: border-box; text-align: center;
+      border-radius: 8px; background: #e9ecef; border: 1px solid #ced4da; cursor: pointer; transition: background 0.2s; text-align: center;
     }
     .footer-btn:hover { background: #dee2e6; color: #212529; }
-    .ios-box { background: #e9ecef; color: #333; font-size: 0.85rem; text-align: center; line-height: 1.4; display: none; margin-top: 8px; border-radius: 8px; padding: 12px; box-sizing: border-box; }
+    .ios-box { background: #e9ecef; color: #333; font-size: 0.85rem; text-align: center; line-height: 1.4; display: none; margin-top: 8px; border-radius: 8px; padding: 12px; }
 
-    .code-type-selector { display: flex; gap: 0; margin-bottom: 0; width: 100%; box-sizing: border-box; }
+    .code-type-selector { display: flex; gap: 0; margin-bottom: 0; width: 100%; }
     .code-type-btn {
       flex: 1; padding: 10px; border: 1px solid var(--border-blue); background: #e9ecef;
       font-size: 0.85rem; font-weight: 600; color: #495057; cursor: pointer; border-radius: 8px 8px 0 0; transition: all 0.2s;
@@ -171,24 +170,27 @@
 
     .btn-scan {
       background: #28a745; color: white; border: none; border-radius: 8px;
-      padding: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; width: 100%; box-sizing: border-box;
+      padding: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; width: 100%;
       margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 6px;
     }
     .btn-scan:hover { background: #218838; }
 
     .code-display-box {
       background: #ffffff; border: 1px solid var(--border-blue); border-radius: 12px;
-      padding: 24px 16px; text-align: center; min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box;
+      padding: 24px 16px; text-align: center; min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
-    .code-display-box img { max-width: 240px; width: 100%; height: auto; display: block; margin: 0 auto; }
-    .code-display-box svg { max-width: 100%; width: 100%; height: auto; display: block; margin: 0 auto; }
+    .code-display-box img, .code-display-box svg { max-width: 100%; width: 100%; height: auto; display: block; margin: 0 auto; }
+    .code-display-box img { max-width: 240px; }
     .code-placeholder { color: #888; font-style: italic; font-size: 0.9rem; }
     .code-section { display: none; }
     .code-section.active { display: block; }
+    
+    .divider { border: 0; border-top: 1px solid var(--border-blue); margin: 12px 0; }
+    .divider-dashed { border: 0; border-top: 1px dashed var(--border-blue); margin: 10px 0; }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-  <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
   <script>
@@ -323,7 +325,7 @@
               <span id="actualBatchLabel" style="font-size: 0.85rem; color: #555;">Vermoedelijke werkelijke batchgrootte:</span>
               <span id="actualBatchValue" class="result-value" style="font-size: 1.1rem; color: var(--primary);">0 kg</span>
             </div>
-            <hr style="border:0; border-top: 1px solid var(--border-blue); margin: 14px 0;">
+            <hr class="divider" style="margin: 14px 0;">
           </div>
 
           <!-- VET-ANALYSE BLOCK -->
@@ -349,7 +351,7 @@
 
           <!-- Opsplitsing vetanalyse bij Oorzaak Onbekend -->
           <div id="unknownFatAnalysisBlock" style="display: none;">
-            <div class="option-box" style="margin-top: 8px; margin-bottom: 8px; background: #fafafa; border-color: #d1d5db;">
+            <div class="option-box" style="margin: 8px 0; background: #fafafa; border-color: #d1d5db;">
               <div class="option-title" style="font-size: 0.85rem; color: #444;">Vetanalyse Optie A (Room)</div>
               <div class="result-row">
                 <span>Gewenst vet na roomcorrectie:</span>
@@ -378,7 +380,7 @@
             <strong>Toelichting:</strong> Het verschil tussen aanwezig vet in de huidige batch en het totaal gewenste vet na de gekozen correctie.
           </div>
 
-          <hr id="fatAnalysisDivider" style="border:0; border-top: 1px solid var(--border-blue); margin: 14px 0;">
+          <hr id="fatAnalysisDivider" class="divider" style="margin: 14px 0;">
 
           <!-- STANDAARD RESULTATEN (bekende oorzaak / verdunning) -->
           <div id="standardResultsBlock">
@@ -405,7 +407,7 @@
             </div>
 
             <div id="holdWaterBlock" style="display: none;">
-              <div class="result-row" id="rowHoldWaterNextBatch" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-blue);">
+              <div class="result-row divider-dashed" id="rowHoldWaterNextBatch" style="margin-top: 10px; padding-top: 10px;">
                 <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                   <span>Water <strong>inhouden</strong> op volgende batch:</span>
                 </div>
@@ -414,7 +416,7 @@
               <div class="subtext-note">Alleen toepassen als de huidige batch niet met room/vet wordt gecorrigeerd.</div>
             </div>
 
-            <div class="result-row" id="rowTotalBatchStandard" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-blue);">
+            <div class="result-row divider" id="rowTotalBatchStandard" style="margin-top: 10px; padding-top: 10px;">
               <span>Totale grootte batch na correctie:</span>
               <span id="totalBatch" class="result-value">0 kg</span>
             </div>
@@ -433,7 +435,7 @@
               </div>
 
               <!-- GEEL INFORMATIEVAK INCLUSIEF SLIDER VOOR OPTIE A -->
-              <div id="optACreamTooltip" class="info-tooltip" style="margin-top: 8px; margin-bottom: 8px;">
+              <div id="optACreamTooltip" class="info-tooltip" style="margin: 8px 0;">
                 <span id="optACreamTooltipText">Kies of de roomtoevoeging inclusief waterinspoel moet worden berekend.</span>
                 <div class="toggle-container" id="waterFlushToggleContainerUnknown">
                   <div class="toggle-option active" id="optNoFlushUnk" onclick="setWaterFlush(false)">Zonder waterinspoel</div>
@@ -441,7 +443,7 @@
                 </div>
               </div>
 
-              <div class="result-row" style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #cce5ff;">
+              <div class="result-row divider-dashed" style="margin-top: 6px; padding-top: 6px;">
                 <span>Totale batch na room-correctie:</span>
                 <span id="optCreamTotalVal" class="result-value" style="color: var(--primary);">0 kg</span>
               </div>
@@ -453,7 +455,7 @@
                 <span>Vloeibaar vet toevoegen:</span>
                 <span id="optFatAddVal" class="result-value">0 kg</span>
               </div>
-              <div class="result-row" style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #cce5ff;">
+              <div class="result-row divider-dashed" style="margin-top: 6px; padding-top: 6px;">
                 <span>Totale batch na vet-correctie:</span>
                 <span id="optFatTotalVal" class="result-value" style="color: var(--primary);">0 kg</span>
               </div>
@@ -488,49 +490,49 @@
       <div id="evapTooltip" class="info-tooltip"><strong>Instructie:</strong> Kopieer je getallen uit Excel en plak ze direct hierin. Alle getallen worden automatisch opgeteld.</div>
     </div>
 
-    <div class="tab-content-container" style="border-radius: 12px; margin-top: 10px; background: #ffffff; border: 1px solid var(--border-blue);">
+    <div class="sub-content-container" style="border-radius: 12px; margin-top: 10px;">
       <div class="section-title">Overzicht Evap Productie</div>
       
-      <div class="result-row" style="margin-bottom: 10px;">
+      <div class="result-row">
         <span>Aantal productie runs:</span>
         <span id="evapRuns" class="result-value" style="color: var(--primary);">0</span>
       </div>
 
-      <div class="result-row" style="margin-bottom: 12px;">
+      <div class="result-row">
         <span>Totaal geproduceerd product:</span>
         <span id="evapTotalLiters" class="result-value" style="font-size: 1.05rem; color: var(--primary);">0 L</span>
       </div>
       
-      <div class="result-row" style="margin-bottom: 12px; padding-top: 8px; border-top: 1px solid var(--border-blue);">
+      <div class="result-row divider" style="padding-top: 8px;">
         <span>Totaal opbrengst product:</span>
         <span id="evapYieldKg" class="result-value" style="font-size: 1.1rem; color: var(--primary);">0 kg</span>
       </div>
 
-      <hr style="border:0; border-top: 1px solid var(--border-blue); margin: 12px 0;">
+      <hr class="divider">
 
-      <div class="result-row" style="margin-bottom: 10px;">
+      <div class="result-row">
         <span>Hoeveelheid water te boeken:</span>
         <span id="evapWater" class="result-value">0 kg</span>
       </div>
 
-      <div class="result-row" style="margin-bottom: 12px;">
+      <div class="result-row">
         <span>Hoeveelheid evap te boeken:</span>
         <span id="evapEvap" class="result-value">0 kg</span>
       </div>
 
-      <hr style="border:0; border-top: 1px solid var(--border-blue); margin: 12px 0;">
+      <hr class="divider">
 
-      <div class="result-row" style="margin-bottom: 10px;">
+      <div class="result-row">
         <span>Totaal hoeveelheid verpakkingen afgevuld:</span>
         <input type="text" inputmode="numeric" maxlength="6" id="evapPackagesInput" class="evap-input-small" placeholder="0" oninput="calculateEvap()">
       </div>
 
-      <div class="result-row" style="margin-bottom: 12px;">
+      <div class="result-row">
         <span>Totaal hoeveelheid herverwerking:</span>
         <input type="text" inputmode="decimal" id="evapReprocessInput" class="evap-input-small" placeholder="0" oninput="formatInput(this); calculateEvap()">
       </div>
 
-      <div class="result-row" style="padding-top: 8px; border-top: 1px solid var(--border-blue);">
+      <div class="result-row divider" style="padding-top: 8px;">
         <span>Hoeveelheid bulk boeken op vulorder:</span>
         <span id="evapBulkOrder" class="result-value" style="color: var(--primary);">0 kg</span>
       </div>
@@ -544,8 +546,7 @@
       <button type="button" class="code-type-btn" onclick="switchCodeType('qr', this)">QR-code</button>
     </div>
 
-    <div style="background: #ffffff; border: 1px solid var(--border-blue); border-radius: 0 0 12px 12px; padding: 16px; margin-top: -1px;">
-      
+    <div class="sub-content-container">
       <div id="cameraContainer" style="display:none; margin-bottom: 12px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-blue);">
         <div id="reader" style="width: 100%;"></div>
       </div>
@@ -573,9 +574,9 @@
       </div>
     </div>
 
-    <hr style="border:0; border-top: 1px solid var(--border-blue); margin: 16px 0;">
+    <hr class="divider" style="margin: 16px 0;">
 
-    <div style="background: #ffffff; border: 1px solid var(--border-blue); border-radius: 12px; padding: 14px 16px;">
+    <div class="sub-content-container" style="border-radius: 12px; padding: 14px 16px;">
       <div class="result-row" style="margin-bottom: 8px;">
         <span>Juliaanse dag (dag van het jaar):</span>
         <span id="julianDayValue" class="result-value" style="color: var(--primary);">0</span>
@@ -612,22 +613,14 @@
 
   function setWaterFlush(enable) {
     useWaterFlush = enable;
-    const optNo = document.getElementById('optNoFlush');
-    const optWith = document.getElementById('optWithFlush');
-    const optNoUnk = document.getElementById('optNoFlushUnk');
-    const optWithUnk = document.getElementById('optWithFlushUnk');
-
-    if (enable) {
-      if (optNo) optNo.classList.remove('active');
-      if (optWith) optWith.classList.add('active');
-      if (optNoUnk) optNoUnk.classList.remove('active');
-      if (optWithUnk) optWithUnk.classList.add('active');
-    } else {
-      if (optNo) optNo.classList.add('active');
-      if (optWith) optWith.classList.remove('active');
-      if (optNoUnk) optNoUnk.classList.add('active');
-      if (optWithUnk) optWithUnk.classList.remove('active');
-    }
+    ['optNoFlush', 'optNoFlushUnk'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.classList.toggle('active', !enable);
+    });
+    ['optWithFlush', 'optWithFlushUnk'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.classList.toggle('active', enable);
+    });
     calculate();
   }
 
@@ -637,12 +630,7 @@
     const textImg = document.getElementById('headerTextImg');
     
     logoImg.src = logos[logoIndex];
-    
-    if (logoIndex === 0) {
-      if (textImg) textImg.style.display = 'inline-block';
-    } else {
-      if (textImg) textImg.style.display = 'none';
-    }
+    if (textImg) textImg.style.display = logoIndex === 0 ? 'inline-block' : 'none';
   }
 
   function toggleSettings() {
@@ -657,9 +645,7 @@
 
   function hideTool1Results() {
     const resultsWrapper = document.getElementById('resultsTabWrapper');
-    if (resultsWrapper) {
-      resultsWrapper.style.display = 'none';
-    }
+    if (resultsWrapper) resultsWrapper.style.display = 'none';
   }
 
   function formatInput(input) {
@@ -671,35 +657,31 @@
     saveSettings();
   }
 
+  const settingIds = ['facWaterFlush', 'facYield', 'facWater', 'facEvap', 'facPkgMult', 'facBulkMult'];
+
   function saveSettings() {
-    if(document.getElementById('facWaterFlush')) localStorage.setItem('facWaterFlush', document.getElementById('facWaterFlush').value);
-    if(document.getElementById('facYield')) localStorage.setItem('facYield', document.getElementById('facYield').value);
-    if(document.getElementById('facWater')) localStorage.setItem('facWater', document.getElementById('facWater').value);
-    if(document.getElementById('facEvap')) localStorage.setItem('facEvap', document.getElementById('facEvap').value);
-    if(document.getElementById('facPkgMult')) localStorage.setItem('facPkgMult', document.getElementById('facPkgMult').value);
-    if(document.getElementById('facBulkMult')) localStorage.setItem('facBulkMult', document.getElementById('facBulkMult').value);
+    settingIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) localStorage.setItem(id, el.value);
+    });
   }
 
   function loadSettings() {
-    if(localStorage.getItem('facWaterFlush')) document.getElementById('facWaterFlush').value = localStorage.getItem('facWaterFlush');
-    if(localStorage.getItem('facYield')) document.getElementById('facYield').value = localStorage.getItem('facYield');
-    if(localStorage.getItem('facWater')) document.getElementById('facWater').value = localStorage.getItem('facWater');
-    if(localStorage.getItem('facEvap')) document.getElementById('facEvap').value = localStorage.getItem('facEvap');
-    if(localStorage.getItem('facPkgMult')) document.getElementById('facPkgMult').value = localStorage.getItem('facPkgMult');
-    if(localStorage.getItem('facBulkMult')) document.getElementById('facBulkMult').value = localStorage.getItem('facBulkMult');
+    settingIds.forEach(id => {
+      const val = localStorage.getItem(id);
+      const el = document.getElementById(id);
+      if (val !== null && el) el.value = val;
+    });
   }
 
   function formatDecimals(input, decimals) {
     const val = parseNum(input.value);
-    if (val > 0) {
-      input.value = val.toFixed(decimals);
-    }
+    if (val > 0) input.value = val.toFixed(decimals);
   }
 
   function parseNum(val) {
     if (!val) return 0;
-    const cleanVal = val.toString().replace(/,/g, '.');
-    return parseFloat(cleanVal) || 0;
+    return parseFloat(val.toString().replace(/,/g, '.')) || 0;
   }
 
   function toggleTooltip(id) {
@@ -720,8 +702,7 @@
     btn.classList.add('active');
     document.getElementById(toolId).classList.add('active');
 
-    const settingsPanel = document.getElementById('settingsPanel');
-    settingsPanel.style.display = 'none';
+    document.getElementById('settingsPanel').style.display = 'none';
     
     if (toolId !== 'tool3' && html5QrCode) {
       const cameraContainer = document.getElementById('cameraContainer');
@@ -735,11 +716,7 @@
     document.querySelectorAll('.code-type-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.code-section').forEach(s => s.classList.remove('active'));
     btn.classList.add('active');
-    if (type === 'qr') {
-      document.getElementById('qrSection').classList.add('active');
-    } else {
-      document.getElementById('barcodeSection').classList.add('active');
-    }
+    document.getElementById(type === 'qr' ? 'qrSection' : 'barcodeSection').classList.add('active');
   }
 
   async function pasteClipboard() {
@@ -773,22 +750,18 @@
       cameraContainer.style.display = 'block';
       scanBtn.innerText = '❌ Sluit Camera';
 
-      if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode("reader");
-      }
-
-      const config = { fps: 10, qrbox: { width: 250, height: 150 } };
+      if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
 
       html5QrCode.start(
         { facingMode: "environment" },
-        config,
-        (decodedText, decodedResult) => {
+        { fps: 10, qrbox: { width: 250, height: 150 } },
+        (decodedText) => {
           document.getElementById('codeTextInput').value = decodedText;
           generateCodes();
           toggleEmbeddedCamera();
         },
-        (errorMessage) => {}
-      ).catch(err => {
+        () => {}
+      ).catch(() => {
         alert("Kan camera niet openen. Controleer camerarechten.");
         cameraContainer.style.display = 'none';
         scanBtn.innerText = '📷 Open Live Scanner';
@@ -798,24 +771,15 @@
 
   function updateDateInformation() {
     const now = new Date();
-    
     const startOfYear = new Date(now.getFullYear(), 0, 0);
-    const diff = now - startOfYear;
-    const oneDay = 1000 * 60 * 60 * 24;
-    const dayOfYear = Math.floor(diff / oneDay);
-    
+    const dayOfYear = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
     document.getElementById('julianDayValue').innerText = dayOfYear;
 
     const futureDate = new Date();
     futureDate.setDate(now.getDate() + 25);
-    
-    const formattedDate = futureDate.toLocaleDateString('nl-NL', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
+    document.getElementById('futureDateValue').innerText = futureDate.toLocaleDateString('nl-NL', {
+      day: '2-digit', month: '2-digit', year: 'numeric'
     });
-    
-    document.getElementById('futureDateValue').innerText = formattedDate;
   }
 
   function onCauseChange() {
@@ -825,21 +789,16 @@
     const reprocessGroup = document.getElementById('reprocessFieldsGroup');
     const addLabel = document.getElementById('addLabel');
 
-    if (cause === 'reprocess_missing') {
-      reprocessGroup.style.display = 'block';
-      currentFatGroup.style.display = 'none';
+    const isReprocess = cause === 'reprocess_missing';
+    reprocessGroup.style.display = isReprocess ? 'block' : 'none';
+    currentFatGroup.style.display = isReprocess ? 'none' : 'block';
+
+    if (isReprocess || cause.startsWith('cream') || cause === 'unknown' || cause === 'water_more') {
       creamFatGroup.style.display = 'block';
       addLabel.innerHTML = 'Hoeveelheid room <strong>toevoegen</strong>:';
     } else {
-      reprocessGroup.style.display = 'none';
-      currentFatGroup.style.display = 'block';
-      if (cause.startsWith('cream') || cause === 'unknown' || cause === 'water_more') {
-        creamFatGroup.style.display = 'block';
-        addLabel.innerHTML = 'Hoeveelheid room <strong>toevoegen</strong>:';
-      } else {
-        creamFatGroup.style.display = 'none';
-        addLabel.innerHTML = cause.startsWith('fat') ? 'Hoeveelheid vloeibaar vet <strong>toevoegen</strong>:' : 'Hoeveelheid room/vet <strong>toevoegen</strong>:';
-      }
+      creamFatGroup.style.display = 'none';
+      addLabel.innerHTML = cause.startsWith('fat') ? 'Hoeveelheid vloeibaar vet <strong>toevoegen</strong>:' : 'Hoeveelheid room/vet <strong>toevoegen</strong>:';
     }
   }
 
@@ -870,18 +829,9 @@
     const matches = rawText.match(/[0-9]+([.,][0-9]+)?/g);
     
     let totalLiters = 0;
-    let runCount = 0;
-    
-    if (rawText.trim() !== '') {
-      const lines = rawText.split(/\r?\n/).filter(line => line.trim() !== '');
-      runCount = lines.length;
-    }
+    let runCount = rawText.trim() !== '' ? rawText.split(/\r?\n/).filter(line => line.trim() !== '').length : 0;
 
-    if (matches) {
-      matches.forEach(m => {
-        totalLiters += parseNum(m);
-      });
-    }
+    if (matches) matches.forEach(m => totalLiters += parseNum(m));
 
     const fYield = parseNum(document.getElementById('facYield').value) || 1.08;
     const fWater = parseNum(document.getElementById('facWater').value) || 0.01;
@@ -895,7 +845,6 @@
     
     const packagesVal = parseNum(document.getElementById('evapPackagesInput').value);
     const reprocessVal = parseNum(document.getElementById('evapReprocessInput').value);
-
     const bulkOrderVal = Math.round((packagesVal * fPkgMult) * fBulkMult + reprocessVal);
 
     document.getElementById('evapRuns').innerText = runCount;
@@ -917,20 +866,13 @@
       barcodeSvg.style.display = 'none';
       barcodePlaceholder.style.display = 'block';
     } else {
-      const encodedVal = encodeURIComponent(val);
-      qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodedVal}" alt="QR Code">`;
+      qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(val)}" alt="QR Code">`;
 
       try {
         barcodeSvg.style.display = 'block';
         barcodePlaceholder.style.display = 'none';
         JsBarcode("#barcodeSvg", val, {
-          format: "CODE128",
-          lineColor: "#000",
-          width: 2.5,
-          height: 90,
-          displayValue: true,
-          fontSize: 16,
-          margin: 10
+          format: "CODE128", lineColor: "#000", width: 2.5, height: 90, displayValue: true, fontSize: 16, margin: 10
         });
       } catch (e) {
         barcodeSvg.style.display = 'none';
@@ -971,15 +913,10 @@
     const standardResultsBlock = document.getElementById('standardResultsBlock');
     const unknownCauseOptionsBlock = document.getElementById('unknownCauseOptionsBlock');
 
-    if (missingComponent === 'unknown') {
-      actualBatchBlock.style.display = 'none';
-      actualBatchDetailsSection.style.display = 'none';
-      step2Title.innerText = '2. Correctieberekening (Stap voor stap)';
-    } else {
-      actualBatchBlock.style.display = 'block';
-      actualBatchDetailsSection.style.display = 'block';
-      step2Title.innerText = '2. Correctieberekening (Stap voor stap)';
-    }
+    const isUnknown = missingComponent === 'unknown';
+    actualBatchBlock.style.display = isUnknown ? 'none' : 'block';
+    actualBatchDetailsSection.style.display = isUnknown ? 'none' : 'block';
+    step2Title.innerText = '2. Correctieberekening (Stap voor stap)';
 
     const detailsEl = document.getElementById('actualBatchDetails');
     const actualBatchValueEl = document.getElementById('actualBatchValue');
@@ -1004,13 +941,8 @@
         const actualTotal = inputBatchSize - missingReprocessKg;
         computedActualTotal = actualTotal;
 
-        if (useWaterFlush) {
-          addAmount = missingFatKg / (effectiveCreamFat / 100);
-          waterToAdd = (missingReprocessKg - addAmount) + waterFlushKg;
-        } else {
-          addAmount = missingFatKg / (effectiveCreamFat / 100);
-          waterToAdd = missingReprocessKg - addAmount;
-        }
+        addAmount = missingFatKg / (effectiveCreamFat / 100);
+        waterToAdd = (missingReprocessKg - addAmount) + (useWaterFlush ? waterFlushKg : 0);
         if (waterToAdd < 0) waterToAdd = 0;
 
         const currentFatInTank = (inputBatchSize * targetFat / 100) - missingFatKg;
@@ -1071,7 +1003,7 @@
     }
 
     // --- ANALYSE VAN DE ACTUELE TANKINHOUD (BEHALVE UNKNOWN) ---
-    if (missingComponent !== 'unknown' && inputBatchSize > 0 && currentFat > 0 && targetFat > 0 && (effectiveCreamFat > 0 || missingComponent.startsWith('water'))) {
+    if (!isUnknown && inputBatchSize > 0 && currentFat > 0 && targetFat > 0 && (effectiveCreamFat > 0 || missingComponent.startsWith('water'))) {
       let calcCreamFat = (missingComponent.startsWith('water') && effectiveCreamFat === 0) ? 43 : effectiveCreamFat;
       let actualTotal = 0, actualIngredient = 0, actualWater = 0;
 
@@ -1105,8 +1037,7 @@
       detailsEl.innerHTML = '<p style="margin:0; font-style:italic; color:#666;">Vul de vereiste velden in en klik op "Bereken correctie".</p>';
     }
 
-    const activeBatchSize = (missingComponent !== 'unknown' && computedActualTotal > 0) ? computedActualTotal : inputBatchSize;
-
+    const activeBatchSize = (!isUnknown && computedActualTotal > 0) ? computedActualTotal : inputBatchSize;
     const isMoreCause = ['cream_more', 'fat_more', 'water_less'].includes(missingComponent);
     const isLessCause = ['cream_less', 'fat_less', 'water_more'].includes(missingComponent);
 
@@ -1132,9 +1063,7 @@
       if (currentFat < targetFat) {
         if (additionType === 'cream' && effectiveCreamFat > targetFat) {
           if (useWaterFlush && waterFlushKg > 0) {
-            addAmount = ((targetFat - currentFat) * activeBatchSize + waterFlushKg * targetFat) / (effectiveCreamFat - targetFat);
-            // Inclusief waterinspoel bij de weergegeven waarde optellen
-            addAmount += waterFlushKg;
+            addAmount = ((targetFat - currentFat) * activeBatchSize + waterFlushKg * targetFat) / (effectiveCreamFat - targetFat) + waterFlushKg;
           } else {
             addAmount = ((targetFat - currentFat) / (effectiveCreamFat - targetFat)) * activeBatchSize;
           }
@@ -1142,7 +1071,7 @@
           addAmount = ((targetFat - currentFat) / (100 - targetFat)) * activeBatchSize;
         }
 
-        if (missingComponent === 'unknown') {
+        if (isUnknown) {
           if (useWaterFlush && waterFlushKg > 0 && effectiveCreamFat > targetFat) {
             addAmount = (((targetFat - currentFat) * activeBatchSize + waterFlushKg * targetFat) / (effectiveCreamFat - targetFat)) + waterFlushKg;
           } else {
@@ -1160,13 +1089,8 @@
     const finalBatchSizeFat = activeBatchSize + addFatAmount;
 
     // --- VET-ANALYSE BEREKENING ---
-    let currentFatKg = 0;
-    let targetFatKgStandard = 0;
-    let targetFatKgCream = 0;
-    let targetFatKgFat = 0;
-    let diffFatKgStandard = 0;
-    let diffFatKgCream = 0;
-    let diffFatKgFat = 0;
+    let currentFatKg = 0, targetFatKgStandard = 0, targetFatKgCream = 0, targetFatKgFat = 0;
+    let diffFatKgStandard = 0, diffFatKgCream = 0, diffFatKgFat = 0;
 
     if (activeBatchSize > 0 && currentFat > 0 && targetFat > 0) {
       currentFatKg = (activeBatchSize * currentFat) / 100;
@@ -1186,15 +1110,12 @@
     const standardFatBlock = document.getElementById('standardFatAnalysisBlock');
     const unknownFatBlock = document.getElementById('unknownFatAnalysisBlock');
 
-    // Vraagteken-icoon altijd zichtbaar houden bij room-correcties
-    if (addTooltipIcon) {
-      addTooltipIcon.style.display = (additionType === 'cream') ? 'inline-flex' : 'none';
-    }
+    if (addTooltipIcon) addTooltipIcon.style.display = (additionType === 'cream') ? 'inline-flex' : 'none';
 
     if (!hasError && activeBatchSize > 0) {
       if (currentFat > 0 && targetFat > currentFat) {
 
-        if (missingComponent === 'unknown') {
+        if (isUnknown) {
           standardFatBlock.style.display = 'none';
           unknownFatBlock.style.display = 'block';
 
@@ -1234,13 +1155,7 @@
           unknownCauseOptionsBlock.style.display = 'none';
           rowAddIngredient.style.display = 'flex';
           
-          // Toon/verberg toggle voor waterinspoel bij roomdosering
-          if (additionType === 'cream') {
-            if (waterFlushToggleContainer) waterFlushToggleContainer.style.display = 'flex';
-          } else {
-            if (waterFlushToggleContainer) waterFlushToggleContainer.style.display = 'none';
-          }
-
+          if (waterFlushToggleContainer) waterFlushToggleContainer.style.display = (additionType === 'cream') ? 'flex' : 'none';
           rowAddWater.style.display = 'none';
 
           if (addTooltipText) {
@@ -1255,11 +1170,7 @@
         }
         
         const hideHoldWaterCauses = ['cream_less', 'fat_less', 'reprocess_missing'];
-        if (hideHoldWaterCauses.includes(missingComponent)) {
-          holdWaterBlock.style.display = 'none';
-        } else {
-          holdWaterBlock.style.display = 'block';
-        }
+        holdWaterBlock.style.display = hideHoldWaterCauses.includes(missingComponent) ? 'none' : 'block';
 
         const uncorrectedDiffFat = ((activeBatchSize * targetFat) / 100) - currentFatKg;
         waterToHoldNext = Math.abs(uncorrectedDiffFat) / (targetFat / 100);
@@ -1267,7 +1178,7 @@
         if (effectiveCreamFat > targetFat || additionType === 'fat') {
           const effectiveFatWithFlush = (addAmount > 0 && useWaterFlush) ? (((addAmount - waterFlushKg) * effectiveCreamFat) / addAmount).toFixed(2) : effectiveCreamFat.toFixed(2);
 
-          if (missingComponent === 'unknown') {
+          if (isUnknown) {
             stepsHtml = `
               <div class="calc-step">
                 <strong>Stap 1: Huidige situatie</strong><br>
@@ -1387,11 +1298,11 @@
       input.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === 'ArrowDown') {
           e.preventDefault();
-          let next = inputs[index + 1];
+          const next = inputs[index + 1];
           if (next) { next.focus(); if (next.select) next.select(); }
         } else if (e.key === 'ArrowUp') {
           e.preventDefault();
-          let prev = inputs[index - 1];
+          const prev = inputs[index - 1];
           if (prev) { prev.focus(); if (prev.select) prev.select(); }
         }
       });
@@ -1401,12 +1312,10 @@
   let deferredPrompt;
   const installBtn = document.getElementById('installBtn');
   const iosInstruction = document.getElementById('iosInstruction');
-  const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-  const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+  const isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+  const isStandalone = navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
 
-  if (isStandalone) {
-    installBtn.style.display = 'none';
-  }
+  if (isStandalone) installBtn.style.display = 'none';
 
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
@@ -1419,9 +1328,7 @@
     } else if (deferredPrompt) {
       deferredPrompt.prompt();
       const choiceResult = await deferredPrompt.userChoice;
-      if (choiceResult.outcome === 'accepted') {
-        console.log('App geïnstalleerd');
-      }
+      if (choiceResult.outcome === 'accepted') console.log('App geïnstalleerd');
       deferredPrompt = null;
     } else {
       alert('Om deze app te installeren:\n\n- Open het menu van je browser (3 puntjes rechtsboven).\n- Kies voor "App installeren" of "Toevoegen aan startscherm".');
