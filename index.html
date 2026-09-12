@@ -77,10 +77,10 @@
     .form-row-3col input { padding: 8px 6px; font-size: 0.9rem; text-align: right; }
     .form-row-3col label { font-size: 0.78rem; }
 
-    .extra-fields-toggle-row { display: flex; align-items: center; justify-content: flex-end; margin-top: -10px; margin-bottom: 12px; }
+    .extra-fields-toggle-row { display: flex; align-items: center; justify-content: center; margin-top: -10px; margin-bottom: 12px; }
     .btn-toggle-extra {
       background: none; border: 1px solid var(--border-blue); color: var(--primary); border-radius: 6px;
-      padding: 2px 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 12px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
       background-color: #ffffff;
     }
     .btn-toggle-extra:hover { background: var(--card-blue-bg); }
@@ -1500,19 +1500,13 @@
 
     block.style.display = 'block';
 
-    // Schatten van gehalte in toevoeging (room of vet of water = 0)
-    // Voor room nemen we aan dat DS ongeveer gelijk is aan vet + vaste componenten (of ca 55% bij 40% room, of vereenvoudigd: gesteld dat toevoeging van water 0% DS/prot/suc heeft, en room/vet een specifieke waarde heeft of we berekenen op basis van massa-behoud).
-    // Standaard massa behoud: (Mass_oud * perc_oud + Mass_toegevoegd * perc_toegevoegd) / Mass_nieuw
-    // Aanname voor room/vet extra parameters als niet bekend: we nemen aan dat extra room dezelfde concentratie heeft of we schatten DS op basis van vetgehalte (bijv. DS_room ≈ vetgehalte + 5%, proteïne ≈ 2.5%, sacharose ≈ 0%). Voor water = 0%.
-    
     let addedDS = 0, addedProt = 0, addedSuc = 0;
     if (addAmount > 0) {
       if (addType === 'fat') {
-        addedDS = addAmount * 1.0; // 100% DS bij puur vet
+        addedDS = addAmount * 1.0;
         addedProt = 0;
         addedSuc = 0;
       } else {
-        // Room: schatting op basis van room vetgehalte (bijv. DS = vet + 10% for non-fat solids, prot = 2.5%)
         let estCreamDS = Math.min(100, creamFatVal + 10);
         let estCreamProt = 2.5;
         addedDS = addAmount * (estCreamDS / 100);
