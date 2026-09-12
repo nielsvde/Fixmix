@@ -297,10 +297,13 @@
 
   <div id="tool1" class="main-tool-content tab-content-container active">
     
-    <div id="welcomeScreen">
-      <div class="welcome-options-title">Welkom bij FixMix. Deze tool helpt je om afwijkende vergehaltes in je productiebatch nauwkeurig te corrigeren. 
-
-Selecteer hieronder direct de specifieke oorzaak van de afwijking om naar het invulscherm te gaan.:</div>
+     <div id="welcomeScreen">
+      <div class="section-title">Handleiding & Uitleg</div>
+      <div class="welcome-intro">
+        Welkom bij FixMix. Deze tool helpt je om afwijkingen in je productebatch nauwkeurig te corrigeren. 
+        Selecteer hieronder direct de specifieke oorzaak van de afwijking om naar het invulscherm te gaan.
+      </div>
+      <div class="welcome-options-title">Kies de oorzaak van de afwijking:</div>
       <button type="button" class="cause-select-card" onclick="selectCauseAndProceed('unknown')">Oorzaak onbekend</button>
       <button type="button" class="cause-select-card" onclick="selectCauseAndProceed('cream_less')">Te weinig room gedoseerd</button>
       <button type="button" class="cause-select-card" onclick="selectCauseAndProceed('cream_more')">Te veel room gedoseerd</button>
@@ -310,21 +313,6 @@ Selecteer hieronder direct de specifieke oorzaak van de afwijking om naar het in
       <button type="button" class="cause-select-card" onclick="selectCauseAndProceed('water_more')">Te veel water gedoseerd</button>
       <button type="button" class="cause-select-card" onclick="selectCauseAndProceed('reprocess_missing')">Ontbrekende room herverwerking</button>
     </div>
-
-    <div id="calculatorFormContent">
-      <div class="form-group">
-        <label for="missingComponent">Oorzaak afwijking:</label>
-        <select id="missingComponent" onchange="onCauseChange(); hideTool1Results()">
-          <option value="unknown">Oorzaak onbekend</option>
-          <option value="cream_less">Te weinig room gedoseerd</option>
-          <option value="cream_more">Te veel room gedoseerd</option>
-          <option value="fat_less">Te weinig vloeibaar vet gedoseerd</option>
-          <option value="fat_more">Te veel vloeibaar vet gedoseerd</option>
-          <option value="water_less">Te weinig water gedoseerd</option>
-          <option value="water_more">Te veel water gedoseerd</option>
-          <option value="reprocess_missing">Ontbrekende room herverwerking</option>
-        </select>
-      </div>
 
       <div class="form-group">
         <div class="label-container">
