@@ -292,6 +292,15 @@
     </div>
     <hr style="border:0; border-top:1px dashed #e0c878; margin:8px 0;">
     <div class="settings-row">
+      <span>Standaard vetvrije droge stof room (%):</span>
+      <input type="text" inputmode="decimal" id="facCreamDS" value="10" oninput="formatInput(this); calculate()">
+    </div>
+    <div class="settings-row">
+      <span>Standaard proteïne in mager deel (%):</span>
+      <input type="text" inputmode="decimal" id="facCreamProtein" value="4.275" oninput="formatInput(this); calculate()">
+    </div>
+    <hr style="border:0; border-top:1px dashed #e0c878; margin:8px 0;">
+    <div class="settings-row">
       <span>Factor Product Opbrengst (standaard 1.08):</span>
       <input type="text" inputmode="decimal" id="facYield" value="1.08" oninput="formatInput(this); calculateEvap()">
     </div>
@@ -494,7 +503,7 @@
               </div>
               
               <div class="result-row" id="rowResultFat" style="display: none;">
-                <span>Verwacht vetgehalte na correctie:</span>
+                <span>Vetgehalte na correctie:</span>
                 <span id="resultFatVal" class="result-value">0 %</span>
               </div>
               <div class="result-row" id="rowResultDS" style="display: none;">
@@ -514,17 +523,15 @@
                 De Fixmix-tool gebruikt hier standaard, gemiddelde zuivelwaarden die in de zuivelindustrie algemeen als vaste basis worden gebruikt als er geen exacte laboratoriumanalyse van de room beschikbaar is.<br><br>
                 Natuurlijke room bestaat uit vet en magere melkbestanddelen (water, eiwitten, melksuiker en mineralen). Zodra jij het vetpercentage invoert (in jouw geval 42%), berekent de tool de rest via vaste verhoudingen:<br><br>
                 <strong>1. Hoe komt hij aan de Droge Stof (DS)?</strong><br>
-                De tool gaat uit van de vuistregel dat de vetvrije melkbestanddelen (ook wel Vaste Melkbestanddelen Niet-Vet of VMSNV genoemd) in standaard room ongeveer 10% bedragen.<br>
+                De tool gaat uit van de vuistregel dat de vetvrije melkbestanddelen (ook wel Vaste Melkbestanddelen Niet-Vet of VMSNV genoemd) in standaard room ongeveer <span id="tooltipDsVal">10</span>% bedragen.<br>
                 De totale droge stof is simpelweg: Vet% + Vetvrije droge stof.<br>
-                In jouw berekening: \(42\% \text{ vet} + 10\% \text{ vetvrije droge stof} = \mathbf{52\% \text{ totale Droge Stof}}\).<br><br>
+                In jouw berekening: \(42\% \text{ vet} + \text{vetvrije droge stof} = \mathbf{\text{totale Droge Stof}}\).<br><br>
                 <strong>2. Hoe komt hij aan het Eiwit (Proteïne)?</strong><br>
-                Magere melk (het vloeibare deel van de room waar het vet in zweeft) heeft een heel stabiele natuurlijke samenstelling. Gemiddeld bestaat het vetvrije deel van melk/room voor ongeveer een kwart tot een derde uit eiwit (gemiddeld zo'n 4,25% tot 4,3% eiwit in volledig magere melk).<br>
-                Omdat jouw room voor 42% uit vet bestaat, blijft er nog 58% magere vloeistof over (100 - 42 = 58).<br>
-                De tool vermenigvuldigt die 58% met het standaard eiwitgehalte van magere zuivel (in dit geval exact 4,275%).<br>
-                De som is: \(58\% \times 4,275\% = \mathbf{2,48\% \text{ proteïne in de room}}\).<br><br>
+                Magere melk (het vloeibare deel van de room waar het vet in zweeft) heeft een heel stabiele natuurlijke samenstelling. Gemiddeld bestaat het vetvrije deel van melk/room voor ongeveer een kwart tot een derde uit eiwit.<br>
+                Omdat jouw room voor 42% uit vet bestaat, blijft er nog een deel magere vloeistof over.<br>
+                De tool vermenigvuldigt dit magere deel met de ingestelde standaard proteïnewarde.<br><br>
                 <strong>Kort samengevat:</strong><br>
-                De tool weet dit niet omdat hij jouw room heeft gemeten, maar omdat de programmeur vaste referentiewaarden voor standaard fabrieksroom in de code heeft gezet. Omdat room een natuurproduct is, kunnen deze waardes in werkelijkheid een fractie afwijken (bijvoorbeeld 2,6% eiwit of 9,5% vetvrije droge stof), maar voor een snelle batchcorrectie in de praktijk zijn deze standaardwaardes nauwkeurig genoeg.<br><br>
-                Ik zou de standaard waardes voor eiwit en vetvrije droge stof aan kunnen passen via het instellingen scherm waar ook de waterinspoel aangepast kan worden.
+                De tool gebruikt hiervoor de instelbare referentiewaarden uit het instellingenmenu. Omdat room een natuurproduct is, kunnen deze waardes in werkelijkheid een fractie afwijken, maar voor een snelle batchcorrectie in de praktijk zijn deze standaardwaardes nauwkeurig genoeg.
               </div>
             </div>
 
@@ -763,7 +770,7 @@
     saveSettings();
   }
 
-  const settingIds = ['facWaterFlush', 'facYield', 'facWater', 'facEvap', 'facPkgMult', 'facBulkMult'];
+  const settingIds = ['facWaterFlush', 'facCreamDS', 'facCreamProtein', 'facYield', 'facWater', 'facEvap', 'facPkgMult', 'facBulkMult'];
 
   function saveSettings() {
     settingIds.forEach(id => {
@@ -792,7 +799,14 @@
 
   function toggleTooltip(id) {
     const el = document.getElementById(id);
-    if (el) el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    if (el) {
+      if (id === 'expectedValueTooltip') {
+        const dsValEl = document.getElementById('tooltipDsVal');
+        const facDS = parseNum(document.getElementById('facCreamDS').value) || 10;
+        if (dsValEl) dsValEl.innerText = facDS;
+      }
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
   }
 
   function switchTab(tabId, btn) {
@@ -1046,7 +1060,6 @@
     const inputDS = parseNum(document.getElementById('currentDS').value);
     const inputProtein = parseNum(document.getElementById('currentProtein').value);
     const inputSucrose = parseNum(document.getElementById('currentSucrose').value);
-    const hasExtraParams = (inputDS > 0 || inputProtein > 0 || inputSucrose > 0);
 
     let additionType = 'cream';
     let effectiveCreamFat = parseNum(document.getElementById('creamFat').value);
@@ -1220,7 +1233,6 @@
         document.getElementById('totalBatch').innerText = Math.round(finalTotalBatch) + ' kg';
         document.getElementById('calcSteps').innerHTML = stepsHtml;
         
-        // Bereken extra parameters indien van toepassing
         updateExtraParametersResults(actualTotal, currentFatInTank, addAmount, waterToAdd, finalTotalBatch, inputDS, inputProtein, inputSucrose, additionType, effectiveCreamFat, targetFat);
         return;
       } else if (effectiveCreamFat <= targetFat && effectiveCreamFat > 0) {
@@ -1506,7 +1518,6 @@
       document.getElementById('totalBatch').innerText = Math.round(finalBatchSizeStandard) + ' kg';
       document.getElementById('calcSteps').innerHTML = stepsHtml || '<p style="margin:0; color:#666;">Vul gegevens in om de stappen te tonen.</p>';
       
-      // Bereken extra parameters indien van toepassing
       updateExtraParametersResults(activeBatchSize, currentFatKg, addAmount, waterToAdd, finalBatchSizeStandard, inputDS, inputProtein, inputSucrose, additionType, effectiveCreamFat, targetFat);
     }
   }
@@ -1526,13 +1537,15 @@
 
     block.style.display = 'block';
 
-    // Vetgehalte na correctie weergeven (doelvet of berekend)
     if (targetFatVal > 0) {
       rowFat.style.display = 'flex';
       document.getElementById('resultFatVal').innerText = targetFatVal.toFixed(2) + ' %';
     } else {
       rowFat.style.display = 'none';
     }
+
+    const facCreamDS = parseNum(document.getElementById('facCreamDS').value) || 10;
+    const facCreamProtein = parseNum(document.getElementById('facCreamProtein').value) || 4.275;
 
     let addedDS = 0, addedProt = 0, addedSuc = 0;
     if (addAmount > 0) {
@@ -1541,8 +1554,8 @@
         addedProt = 0;
         addedSuc = 0;
       } else {
-        let estCreamDS = Math.min(100, creamFatVal + 10);
-        let estCreamProt = 2.5;
+        let estCreamDS = Math.min(100, creamFatVal + facCreamDS);
+        let estCreamProt = facCreamProtein;
         addedDS = addAmount * (estCreamDS / 100);
         addedProt = addAmount * (estCreamProt / 100);
         addedSuc = 0;
