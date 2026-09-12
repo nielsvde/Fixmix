@@ -328,18 +328,20 @@
             <hr class="divider" style="margin: 14px 0;">
           </div>
 
-          <!-- VET-ANALYSE BLOCK -->
-          <div class="result-row" id="rowCurrentFatKg">
-            <span>Vet in huidige batch:</span>
-            <span id="currentFatKgVal" class="result-value">0 kg</span>
-          </div>
-          <div class="result-row" id="rowTargetFatCurrentBatchKg">
-            <span>Gewenst vet in huidige batch:</span>
-            <span id="targetFatCurrentBatchKgVal" class="result-value">0 kg</span>
-          </div>
-          <div class="result-row" id="rowDiffFatCurrentBatchKg" style="margin-bottom: 12px;">
-            <span>Verschil in huidige batch:</span>
-            <span id="diffFatCurrentBatchKgVal" class="result-value">0 kg</span>
+          <!-- VET-ANALYSE BLOCK (HUIDIGE BATCH - ALLEEN BIJ OORZAAK ONBEKEND) -->
+          <div id="unknownCurrentBatchFatBlock" style="display: none;">
+            <div class="result-row" id="rowCurrentFatKg">
+              <span>Vet in huidige batch:</span>
+              <span id="currentFatKgVal" class="result-value">0 kg</span>
+            </div>
+            <div class="result-row" id="rowTargetFatCurrentBatchKg">
+              <span>Gewenst vet in huidige batch:</span>
+              <span id="targetFatCurrentBatchKgVal" class="result-value">0 kg</span>
+            </div>
+            <div class="result-row" id="rowDiffFatCurrentBatchKg" style="margin-bottom: 12px;">
+              <span>Verschil in huidige batch:</span>
+              <span id="diffFatCurrentBatchKgVal" class="result-value">0 kg</span>
+            </div>
           </div>
 
           <!-- Standaard vetanalyse (Bekende oorzaak) -->
@@ -911,9 +913,7 @@
     const rowAddIngredient = document.getElementById('rowAddIngredient');
     const waterFlushToggleContainer = document.getElementById('waterFlushToggleContainer');
     const rowAddWater = document.getElementById('rowAddWater');
-    const rowCurrentFatKg = document.getElementById('rowCurrentFatKg');
-    const rowTargetFatCurrentBatchKg = document.getElementById('rowTargetFatCurrentBatchKg');
-    const rowDiffFatCurrentBatchKg = document.getElementById('rowDiffFatCurrentBatchKg');
+    const unknownCurrentBatchFatBlock = document.getElementById('unknownCurrentBatchFatBlock');
     const holdWaterBlock = document.getElementById('holdWaterBlock');
     const errorSection = document.getElementById('errorSection');
     const actualBatchBlock = document.getElementById('actualBatchBlock');
@@ -974,6 +974,7 @@
       unknownCauseOptionsBlock.style.display = 'none';
       document.getElementById('standardFatAnalysisBlock').style.display = 'none';
       document.getElementById('unknownFatAnalysisBlock').style.display = 'none';
+      if (unknownCurrentBatchFatBlock) unknownCurrentBatchFatBlock.style.display = 'none';
       document.getElementById('calcSteps').innerHTML = '<p style="margin:0; color:#666;">Vul alle vereiste velden in om de stappen te tonen.</p>';
       return;
     }
@@ -983,9 +984,7 @@
 
     // --- HERVERWERKING LOGICA ---
     if (missingComponent === 'reprocess_missing') {
-      rowCurrentFatKg.style.display = 'none';
-      rowTargetFatCurrentBatchKg.style.display = 'none';
-      rowDiffFatCurrentBatchKg.style.display = 'none';
+      if (unknownCurrentBatchFatBlock) unknownCurrentBatchFatBlock.style.display = 'none';
       standardResultsBlock.style.display = 'block';
       unknownCauseOptionsBlock.style.display = 'none';
       document.getElementById('standardFatAnalysisBlock').style.display = 'block';
@@ -1083,9 +1082,7 @@
         return;
       }
     } else {
-      rowCurrentFatKg.style.display = 'flex';
-      rowTargetFatCurrentBatchKg.style.display = 'flex';
-      rowDiffFatCurrentBatchKg.style.display = 'flex';
+      if (unknownCurrentBatchFatBlock) unknownCurrentBatchFatBlock.style.display = isUnknown ? 'block' : 'none';
     }
 
     // --- ANALYSE VAN DE ACTUELE TANKINHOUD (BEHALVE UNKNOWN) ---
