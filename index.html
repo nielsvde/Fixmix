@@ -333,6 +333,14 @@
             <span>Vet in huidige batch:</span>
             <span id="currentFatKgVal" class="result-value">0 kg</span>
           </div>
+          <div class="result-row" id="rowTargetFatCurrentBatchKg">
+            <span>Gewenst vet in huidige batch:</span>
+            <span id="targetFatCurrentBatchKgVal" class="result-value">0 kg</span>
+          </div>
+          <div class="result-row" id="rowDiffFatCurrentBatchKg" style="margin-bottom: 12px;">
+            <span>Verschil in huidige batch:</span>
+            <span id="diffFatCurrentBatchKgVal" class="result-value">0 kg</span>
+          </div>
 
           <!-- Standaard vetanalyse (Bekende oorzaak) -->
           <div id="standardFatAnalysisBlock">
@@ -904,6 +912,8 @@
     const waterFlushToggleContainer = document.getElementById('waterFlushToggleContainer');
     const rowAddWater = document.getElementById('rowAddWater');
     const rowCurrentFatKg = document.getElementById('rowCurrentFatKg');
+    const rowTargetFatCurrentBatchKg = document.getElementById('rowTargetFatCurrentBatchKg');
+    const rowDiffFatCurrentBatchKg = document.getElementById('rowDiffFatCurrentBatchKg');
     const holdWaterBlock = document.getElementById('holdWaterBlock');
     const errorSection = document.getElementById('errorSection');
     const actualBatchBlock = document.getElementById('actualBatchBlock');
@@ -974,6 +984,8 @@
     // --- HERVERWERKING LOGICA ---
     if (missingComponent === 'reprocess_missing') {
       rowCurrentFatKg.style.display = 'none';
+      rowTargetFatCurrentBatchKg.style.display = 'none';
+      rowDiffFatCurrentBatchKg.style.display = 'none';
       standardResultsBlock.style.display = 'block';
       unknownCauseOptionsBlock.style.display = 'none';
       document.getElementById('standardFatAnalysisBlock').style.display = 'block';
@@ -1072,6 +1084,8 @@
       }
     } else {
       rowCurrentFatKg.style.display = 'flex';
+      rowTargetFatCurrentBatchKg.style.display = 'flex';
+      rowDiffFatCurrentBatchKg.style.display = 'flex';
     }
 
     // --- ANALYSE VAN DE ACTUELE TANKINHOUD (BEHALVE UNKNOWN) ---
@@ -1161,11 +1175,14 @@
     const finalBatchSizeFat = activeBatchSize + addFatAmount;
 
     // --- VET-ANALYSE BEREKENING ---
-    let currentFatKg = 0, targetFatKgStandard = 0, targetFatKgCream = 0, targetFatKgFat = 0;
+    let currentFatKg = 0, targetFatCurrentBatchKg = 0, diffFatCurrentBatchKg = 0;
+    let targetFatKgStandard = 0, targetFatKgCream = 0, targetFatKgFat = 0;
     let diffFatKgStandard = 0, diffFatKgCream = 0, diffFatKgFat = 0;
 
     if (activeBatchSize > 0 && targetFat > 0) {
       currentFatKg = (activeBatchSize * currentFat) / 100;
+      targetFatCurrentBatchKg = (activeBatchSize * targetFat) / 100;
+      diffFatCurrentBatchKg = currentFatKg - targetFatCurrentBatchKg;
       
       targetFatKgStandard = (finalBatchSizeStandard * targetFat) / 100;
       diffFatKgStandard = currentFatKg - targetFatKgStandard;
@@ -1178,6 +1195,19 @@
     }
 
     document.getElementById('currentFatKgVal').innerText = currentFatKg > 0 ? (currentFatKg.toFixed(2) + ' kg') : '0 kg';
+    document.getElementById('targetFatCurrentBatchKgVal').innerText = targetFatCurrentBatchKg > 0 ? (targetFatCurrentBatchKg.toFixed(2) + ' kg') : '0 kg';
+    
+    const diffCurrentEl = document.getElementById('diffFatCurrentBatchKgVal');
+    if (diffFatCurrentBatchKg < 0) {
+      diffCurrentEl.innerText = diffFatCurrentBatchKg.toFixed(2) + ' kg';
+      diffCurrentEl.style.color = '#c0392b';
+    } else if (diffFatCurrentBatchKg > 0) {
+      diffCurrentEl.innerText = '+' + diffFatCurrentBatchKg.toFixed(2) + ' kg';
+      diffCurrentEl.style.color = '#27ae60';
+    } else {
+      diffCurrentEl.innerText = '0.00 kg';
+      diffCurrentEl.style.color = 'var(--primary)';
+    }
 
     const standardFatBlock = document.getElementById('standardFatAnalysisBlock');
     const unknownFatBlock = document.getElementById('unknownFatAnalysisBlock');
