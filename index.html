@@ -1221,7 +1221,13 @@
       diffFatCurrentBatchKg = currentFatKg - targetFatCurrentBatchKg;
       
       targetFatKgStandard = (finalBatchSizeStandard * targetFat) / 100;
-      diffFatKgStandard = currentFatKg - targetFatKgStandard;
+      
+      // FIX: Als de oorzaak "Te weinig water gedoseerd" is, is het verschil in vet na correctie 0.
+      if (missingComponent === 'water_less') {
+        diffFatKgStandard = 0;
+      } else {
+        diffFatKgStandard = currentFatKg - targetFatKgStandard;
+      }
     }
 
     document.getElementById('currentFatKgVal').innerText = currentFatKg > 0 ? (currentFatKg.toFixed(2) + ' kg') : '0 kg';
@@ -1337,6 +1343,23 @@
         standardFatBlock.style.display = 'block';
 
         document.getElementById('targetFatKgVal').innerText = targetFatKgStandard.toFixed(2) + ' kg';
+        
+        const diffFatEl = document.getElementById('diffFatKgVal');
+        if (missingComponent === 'water_less') {
+          diffFatEl.innerText = '0.00 kg';
+          diffFatEl.style.color = 'var(--primary)';
+        } else {
+          if (diffFatKgStandard < 0) {
+            diffFatEl.innerText = diffFatKgStandard.toFixed(2) + ' kg';
+            diffFatEl.style.color = '#c0392b';
+          } else if (diffFatKgStandard > 0) {
+            diffFatEl.innerText = '+' + diffFatKgStandard.toFixed(2) + ' kg';
+            diffFatEl.style.color = '#27ae60';
+          } else {
+            diffFatEl.innerText = '0.00 kg';
+            diffFatEl.style.color = 'var(--primary)';
+          }
+        }
 
         standardResultsBlock.style.display = 'block';
         rowAddIngredient.style.display = 'none';
