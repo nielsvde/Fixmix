@@ -495,46 +495,6 @@
               <strong>Toelichting:</strong> Het verschil tussen aanwezig vet in de huidige batch en het totaal gewenste vet na de gekozen correctie.
             </div>
 
-            <div id="extraParametersResultBlock" style="display: none;">
-              <hr class="divider" style="margin: 14px 0;">
-              <div class="section-title" style="margin-bottom: 8px;">
-                Verwachte waarde na correctie
-                <span class="info-icon" style="margin-left: 6px;" onclick="toggleTooltip('expectedValueTooltip')">?</span>
-              </div>
-              
-              <div class="result-row" id="rowResultFat" style="display: none;">
-                <span>Vetgehalte na correctie:</span>
-                <span id="resultFatVal" class="result-value">0 %</span>
-              </div>
-              <div class="result-row" id="rowResultDS" style="display: none;">
-                <span>Droge stof na correctie:</span>
-                <span id="resultDSVal" class="result-value">0 %</span>
-              </div>
-              <div class="result-row" id="rowResultProtein" style="display: none;">
-                <span>Proteïne na correctie:</span>
-                <span id="resultProteinVal" class="result-value">0 %</span>
-              </div>
-              <div class="result-row" id="rowResultSucrose" style="display: none;">
-                <span>Sacharose na correctie:</span>
-                <span id="resultSucroseVal" class="result-value">0 %</span>
-              </div>
-
-              <div id="expectedValueTooltip" class="info-tooltip" style="margin-top: 10px;">
-                De Fixmix-tool gebruikt hier standaard, gemiddelde zuivelwaarden die in de zuivelindustrie algemeen als vaste basis worden gebruikt als er geen exacte laboratoriumanalyse van de room beschikbaar is.<br><br>
-                Natuurlijke room bestaat uit vet en magere melkbestanddelen (water, eiwitten, melksuiker en mineralen). Zodra jij het vetpercentage invoert (in jouw geval 42%), berekent de tool de rest via vaste verhoudingen:<br><br>
-                <strong>1. Hoe komt hij aan de Droge Stof (DS)?</strong><br>
-                De tool gaat uit van de vuistregel dat de vetvrije melkbestanddelen (ook wel Vaste Melkbestanddelen Niet-Vet of VMSNV genoemd) in standaard room ongeveer <span id="tooltipDsVal">10</span>% bedragen.<br>
-                De totale droge stof is simpelweg: Vet% + Vetvrije droge stof.<br>
-                In jouw berekening: \(42\% \text{ vet} + \text{vetvrije droge stof} = \mathbf{\text{totale Droge Stof}}\).<br><br>
-                <strong>2. Hoe komt hij aan het Eiwit (Proteïne)?</strong><br>
-                Magere melk (het vloeibare deel van de room waar het vet in zweeft) heeft een heel stabiele natuurlijke samenstelling. Gemiddeld bestaat het vetvrije deel van melk/room voor ongeveer een kwart tot een derde uit eiwit.<br>
-                Omdat jouw room voor 42% uit vet bestaat, blijft er nog een deel magere vloeistof over.<br>
-                De tool vermenigvuldigt dit magere deel met de ingestelde standaard proteïnewarde.<br><br>
-                <strong>Kort samengevat:</strong><br>
-                De tool gebruikt hiervoor de instelbare referentiewaarden uit het instellingenmenu. Omdat room een natuurproduct is, kunnen deze waardes in werkelijkheid een fractie afwijken, maar voor een snelle batchcorrectie in de praktijk zijn deze standaardwaardes nauwkeurig genoeg.
-              </div>
-            </div>
-
             <hr id="fatAnalysisDivider" class="divider" style="margin: 14px 0;">
 
             <div id="standardResultsBlock">
@@ -568,10 +528,52 @@
                 </div>
                 <div class="subtext-note">Alleen toepassen als de huidige batch niet met room/vet wordt gecorrigeerd.</div>
               </div>
+            </div>
 
-              <div class="result-row divider" id="rowTotalBatchStandard" style="margin-top: 10px; padding-top: 10px;">
+            <!-- Bloks verwachte waarde na correctie - verplaatst naar helemaal onderin -->
+            <div id="extraParametersResultBlock" style="display: none;">
+              <hr class="divider" style="margin: 14px 0;">
+              
+              <div class="result-row" id="rowTotalBatchStandard">
                 <span>Totale grootte batch na correctie:</span>
                 <span id="totalBatch" class="result-value">0 kg</span>
+              </div>
+
+              <div class="section-title" style="margin-top: 12px; margin-bottom: 8px;">
+                Verwachte waarde na correctie
+                <span class="info-icon" style="margin-left: 6px;" onclick="toggleTooltip('expectedValueTooltip')">?</span>
+              </div>
+              
+              <div class="result-row" id="rowResultFat" style="display: none;">
+                <span>Vetgehalte na correctie:</span>
+                <span id="resultFatVal" class="result-value">0 %</span>
+              </div>
+              <div class="result-row" id="rowResultDS" style="display: none;">
+                <span>Droge stof na correctie:</span>
+                <span id="resultDSVal" class="result-value">0 %</span>
+              </div>
+              <div class="result-row" id="rowResultProtein" style="display: none;">
+                <span>Proteïne na correctie:</span>
+                <span id="resultProteinVal" class="result-value">0 %</span>
+              </div>
+              <div class="result-row" id="rowResultSucrose" style="display: none;">
+                <span>Sacharose na correctie:</span>
+                <span id="resultSucroseVal" class="result-value">0 %</span>
+              </div>
+
+              <div id="expectedValueTooltip" class="info-tooltip" style="margin-top: 10px;">
+                De Fixmix-tool gebruikt hier standaard, gemiddelde zuivelwaarden die in de zuivelindustrie algemeen als vaste basis worden gebruikt als er geen exacte laboratoriumanalyse van de room beschikbaar is.<br><br>
+                Natuurlijke room bestaat uit vet en magere melkbestanddelen (water, eiwitten, melksuiker en mineralen). Zodra jij het vetpercentage invoert (in jouw geval <span id="tooltipCreamFatVal">42</span>%), berekent de tool de rest via vaste verhoudingen:<br><br>
+                <strong>1. Hoe komt hij aan de Droge Stof (DS)?</strong><br>
+                De tool gaat uit van de vuistregel dat de vetvrije melkbestanddelen (ook wel Vaste Melkbestanddelen Niet-Vet of VMSNV genoemd) in standaard room ongeveer <span id="tooltipDsVal">10</span>% bedragen.<br>
+                De totale droge stof is simpelweg: Vet% + Vetvrije droge stof.<br>
+                In jouw berekening: <span id="tooltipCreamFatCalcVal">42</span>% vet + vetvrije droge stof = <strong>totale Droge Stof</strong>.<br><br>
+                <strong>2. Hoe komt hij aan het Eiwit (Proteïne)?</strong><br>
+                Magere melk (het vloeibare deel van de room waar het vet in zweeft) heeft een heel stabiele natuurlijke samenstelling. Gemiddeld bestaat het vetvrije deel van melk/room voor ongeveer een kwart tot een derde uit eiwit.<br>
+                Omdat jouw room voor <span id="tooltipCreamFatVal2">42</span>% uit vet bestaat, blijft er nog een deel magere vloeistof over.<br>
+                De tool vermenigvuldigt dit magere deel met de ingestelde standaard proteïnewaarde.<br><br>
+                <strong>Kort samengevat:</strong><br>
+                De tool gebruikt hiervoor de instelbare referentiewaarden uit het instellingenmenu. Omdat room een natuurproduct is, kunnen deze waardes in werkelijkheid een fractie afwijken, maar voor een snelle batchcorrectie in de praktijk zijn deze standaardwaardes nauwkeurig genoeg.
               </div>
             </div>
 
@@ -748,7 +750,6 @@
     } else {
       container.style.display = 'none';
       btn.innerHTML = '<span>➕ Extra parameters (DS, Proteïne, Sacharose)</span>';
-      // Wis velden indien ingeklapt
       document.getElementById('currentDS').value = '';
       document.getElementById('currentProtein').value = '';
       document.getElementById('currentSucrose').value = '';
@@ -804,6 +805,15 @@
         const dsValEl = document.getElementById('tooltipDsVal');
         const facDS = parseNum(document.getElementById('facCreamDS').value) || 10;
         if (dsValEl) dsValEl.innerText = facDS;
+
+        // Dynamisch vetgehalte room ophalen (standaard 42% bij leeg/nul)
+        const creamFatVal = parseNum(document.getElementById('creamFat').value) || 42;
+        const elFat1 = document.getElementById('tooltipCreamFatVal');
+        const elFat2 = document.getElementById('tooltipCreamFatCalcVal');
+        const elFat3 = document.getElementById('tooltipCreamFatVal2');
+        if (elFat1) elFat1.innerText = creamFatVal;
+        if (elFat2) elFat2.innerText = creamFatVal;
+        if (elFat3) elFat3.innerText = creamFatVal;
       }
       el.style.display = el.style.display === 'block' ? 'none' : 'block';
     }
@@ -971,7 +981,6 @@
     document.getElementById('unknownCorrectiveIngredient').value = 'cream';
     setWaterFlush(false);
     
-    // Sluit extra parameters indien open
     document.getElementById('extraParametersContainer').style.display = 'none';
     document.getElementById('toggleExtraFieldsBtn').innerHTML = '<span>➕ Extra parameters (DS, Proteïne, Sacharose)</span>';
 
@@ -987,6 +996,58 @@
     onCauseChange();
     calculateEvap();
     generateCodes();
+  }
+
+  function updateExtraParametersResults(actualTotal, currentFatKg, addAmount, waterToAdd, finalTotalBatch, inputDS, inputProtein, inputSucrose, additionType, creamFatVal, targetFatVal) {
+    const extraBlock = document.getElementById('extraParametersResultBlock');
+    const rowFat = document.getElementById('rowResultFat');
+    const rowDS = document.getElementById('rowResultDS');
+    const rowProt = document.getElementById('rowResultProtein');
+    const rowSuc = document.getElementById('rowResultSucrose');
+
+    const showExtra = (inputDS > 0 || inputProtein > 0 || inputSucrose > 0);
+    
+    if (extraBlock) extraBlock.style.display = showExtra ? 'block' : 'none';
+
+    if (showExtra) {
+      if (rowFat) rowFat.style.display = 'flex';
+      document.getElementById('resultFatVal').innerText = targetFatVal.toFixed(2) + ' %';
+
+      const facDS = parseNum(document.getElementById('facCreamDS').value) || 10;
+      const facProt = parseNum(document.getElementById('facCreamProtein').value) || 4.275;
+
+      const creamDS = additionType === 'cream' ? (creamFatVal + facDS) : 100;
+      const creamProt = additionType === 'cream' ? ((100 - creamFatVal) / 100 * facProt) : 0;
+
+      if (inputDS > 0) {
+        const initialDSKg = (actualTotal * inputDS) / 100;
+        const addedDSKg = (addAmount * creamDS) / 100;
+        const finalDS = ((initialDSKg + addedDSKg) / finalTotalBatch) * 100;
+        document.getElementById('resultDSVal').innerText = finalDS.toFixed(2) + ' %';
+        if (rowDS) rowDS.style.display = 'flex';
+      } else {
+        if (rowDS) rowDS.style.display = 'none';
+      }
+
+      if (inputProtein > 0) {
+        const initialProtKg = (actualTotal * inputProtein) / 100;
+        const addedProtKg = (addAmount * creamProt) / 100;
+        const finalProt = ((initialProtKg + addedProtKg) / finalTotalBatch) * 100;
+        document.getElementById('resultProteinVal').innerText = finalProt.toFixed(2) + ' %';
+        if (rowProt) rowProt.style.display = 'flex';
+      } else {
+        if (rowProt) rowProt.style.display = 'none';
+      }
+
+      if (inputSucrose > 0) {
+        const initialSucKg = (actualTotal * inputSucrose) / 100;
+        const finalSuc = (initialSucKg / finalTotalBatch) * 100;
+        document.getElementById('resultSucroseVal').innerText = finalSuc.toFixed(2) + ' %';
+        if (rowSuc) rowSuc.style.display = 'flex';
+      } else {
+        if (rowSuc) rowSuc.style.display = 'none';
+      }
+    }
   }
 
   function calculateEvap() {
@@ -1056,7 +1117,6 @@
     const unknownIngredient = document.getElementById('unknownCorrectiveIngredient').value;
     const waterFlushKg = parseNum(document.getElementById('facWaterFlush').value) || 0;
 
-    // Extra parameters
     const inputDS = parseNum(document.getElementById('currentDS').value);
     const inputProtein = parseNum(document.getElementById('currentProtein').value);
     const inputSucrose = parseNum(document.getElementById('currentSucrose').value);
@@ -1132,6 +1192,7 @@
       standardResultsBlock.style.display = 'none';
       document.getElementById('standardFatAnalysisBlock').style.display = 'none';
       if (unknownCurrentBatchFatBlock) unknownCurrentBatchFatBlock.style.display = 'none';
+      document.getElementById('extraParametersResultBlock').style.display = 'none';
       document.getElementById('calcSteps').innerHTML = '<p style="margin:0; color:#666;">Vul alle vereiste velden in om de stappen te tonen.</p>';
       return;
     }
@@ -1487,157 +1548,81 @@
         if (waterFlushToggleContainer) waterFlushToggleContainer.style.display = 'none';
         rowAddWater.style.display = 'flex';
         holdWaterBlock.style.display = 'none';
-        
+
         stepsHtml = `
           <div class="calc-step">
-            <strong>Stap 1: Huidige vs. verwachte situatie na verdunning</strong><br>
+            <strong>Stap 1: Huidige vs. verwachte situatie na correctie</strong><br>
             • Huidige tankinhoud: <strong>${Math.round(activeBatchSize)} kg</strong> met <strong>${currentFat.toFixed(2)}%</strong> vet = <strong>${currentFatKg.toFixed(2)} kg vet</strong><br>
-            • Berekende water toevoeging: <strong>${Math.round(waterToAdd)} kg water</strong><br>
-            • Totale batch na verdunning: <strong>${Math.round(finalBatchSizeStandard)} kg</strong> met <strong>${targetFat.toFixed(2)}%</strong> vet<br>
-            • Gewenst vet in totale batch: <strong>${targetFatKgStandard.toFixed(2)} kg vet</strong>
+            • Doel vetgehalte: <strong>${targetFat.toFixed(2)}%</strong><br>
+            • Totale batch na verdunning: <strong>${Math.round(finalBatchSizeStandard)} kg</strong>
           </div>
           <div class="calc-step">
-            <strong>Stap 2: Bepaling toe te voegen water (Verdunning)</strong><br>
-            Om de mix te verdunnen naar de doelwaarde van <strong>${targetFat.toFixed(2)}%</strong> vet, dient water te worden toegevoegd.<br>
-            <span class="calc-formula">Water toevoegen = ((${currentFat.toFixed(2)}% / ${targetFat.toFixed(2)}%) - 1) × ${Math.round(activeBatchSize)} kg</span>
+            <strong>Stap 2: Bepaling toe te voegen water</strong><br>
+            Om het vetgehalte te verlagen van <strong>${currentFat.toFixed(2)}%</strong> naar <strong>${targetFat.toFixed(2)}%</strong> dient de batch te worden verdund met water.<br>
             👉 <strong>Dosering: Voeg exact ${Math.round(waterToAdd)} kg water toe.</strong>
           </div>
           <div class="calc-step">
-            <strong>Stap 3: Resultaat na verdunning</strong><br>
+            <strong>Stap 3: Resultaat na correctie</strong><br>
             • Oorspronkelijke inhoud: <strong>${Math.round(activeBatchSize)} kg</strong><br>
             • Toegevoegd water: <strong>${Math.round(waterToAdd)} kg</strong><br>
             • Totale nieuwe batchgrootte: <strong>${Math.round(finalBatchSizeStandard)} kg</strong>
           </div>`;
-      }
-    }
+      } else {
+        standardFatBlock.style.display = 'block';
+        document.getElementById('targetFatKgVal').innerText = targetFatKgStandard.toFixed(2) + ' kg';
+        document.getElementById('diffFatKgVal').innerText = '0.00 kg';
+        document.getElementById('diffFatKgVal').style.color = 'var(--primary)';
 
-    if (!isReprocess) {
+        standardResultsBlock.style.display = 'block';
+        rowAddIngredient.style.display = 'none';
+        if (waterFlushToggleContainer) waterFlushToggleContainer.style.display = 'none';
+        rowAddWater.style.display = 'none';
+        holdWaterBlock.style.display = 'none';
+
+        stepsHtml = `
+          <div class="calc-step">
+            <strong>Geen correctie vereist:</strong><br>
+            Het gemeten vetgehalte (<strong>${currentFat.toFixed(2)}%</strong>) is al exact gelijk aan het gewenste vetgehalte.
+          </div>`;
+      }
+
       document.getElementById('addValue').innerText = Math.round(addAmount) + ' kg';
       document.getElementById('waterToAdd').innerText = Math.round(waterToAdd) + ' kg';
       document.getElementById('waterToHoldNextBatch').innerText = Math.round(waterToHoldNext) + ' kg';
       document.getElementById('totalBatch').innerText = Math.round(finalBatchSizeStandard) + ' kg';
-      document.getElementById('calcSteps').innerHTML = stepsHtml || '<p style="margin:0; color:#666;">Vul gegevens in om de stappen te tonen.</p>';
-      
+      document.getElementById('calcSteps').innerHTML = stepsHtml;
+
       updateExtraParametersResults(activeBatchSize, currentFatKg, addAmount, waterToAdd, finalBatchSizeStandard, inputDS, inputProtein, inputSucrose, additionType, effectiveCreamFat, targetFat);
-    }
-  }
-
-  function updateExtraParametersResults(baseMass, baseFatKg, addAmount, waterToAdd, finalMass, dsInput, protInput, sucInput, addType, creamFatVal, targetFatVal) {
-    const block = document.getElementById('extraParametersResultBlock');
-    const rowFat = document.getElementById('rowResultFat');
-    const rowDS = document.getElementById('rowResultDS');
-    const rowProt = document.getElementById('rowResultProtein');
-    const rowSuc = document.getElementById('rowResultSucrose');
-
-    const hasAny = (dsInput > 0 || protInput > 0 || sucInput > 0 || targetFatVal > 0);
-    if (!hasAny || finalMass <= 0) {
-      block.style.display = 'none';
-      return;
-    }
-
-    block.style.display = 'block';
-
-    if (targetFatVal > 0) {
-      rowFat.style.display = 'flex';
-      document.getElementById('resultFatVal').innerText = targetFatVal.toFixed(2) + ' %';
-    } else {
-      rowFat.style.display = 'none';
-    }
-
-    const facCreamDS = parseNum(document.getElementById('facCreamDS').value) || 10;
-    const facCreamProtein = parseNum(document.getElementById('facCreamProtein').value) || 4.275;
-
-    let addedDS = 0, addedProt = 0, addedSuc = 0;
-    if (addAmount > 0) {
-      if (addType === 'fat') {
-        addedDS = addAmount * 1.0;
-        addedProt = 0;
-        addedSuc = 0;
-      } else {
-        let estCreamDS = Math.min(100, creamFatVal + facCreamDS);
-        let estCreamProt = facCreamProtein;
-        addedDS = addAmount * (estCreamDS / 100);
-        addedProt = addAmount * (estCreamProt / 100);
-        addedSuc = 0;
-      }
-    }
-
-    if (dsInput > 0) {
-      const totalDS_kg = (baseMass * (dsInput / 100)) + addedDS;
-      const finalDS_perc = (totalDS_kg / finalMass) * 100;
-      rowDS.style.display = 'flex';
-      document.getElementById('resultDSVal').innerText = finalDS_perc.toFixed(2) + ' %';
-    } else {
-      rowDS.style.display = 'none';
-    }
-
-    if (protInput > 0) {
-      const totalProt_kg = (baseMass * (protInput / 100)) + addedProt;
-      const finalProt_perc = (totalProt_kg / finalMass) * 100;
-      rowProt.style.display = 'flex';
-      document.getElementById('resultProteinVal').innerText = finalProt_perc.toFixed(2) + ' %';
-    } else {
-      rowProt.style.display = 'none';
-    }
-
-    if (sucInput > 0) {
-      const totalSuc_kg = (baseMass * (sucInput / 100)) + addedSuc;
-      const finalSuc_perc = (totalSuc_kg / finalMass) * 100;
-      rowSuc.style.display = 'flex';
-      document.getElementById('resultSucroseVal').innerText = finalSuc_perc.toFixed(2) + ' %';
-    } else {
-      rowSuc.style.display = 'none';
     }
   }
 
   window.addEventListener('DOMContentLoaded', () => {
     loadSettings();
-    onCauseChange();
-    generateCodes();
     updateDateInformation();
-
-    const inputs = Array.from(document.querySelectorAll('#tool1 input:not([type="hidden"]), #tool1 select'));
-    inputs.forEach((input, index) => {
-      input.addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.key === 'ArrowDown') {
-          e.preventDefault();
-          const next = inputs[index + 1];
-          if (next) { next.focus(); if (next.select) next.select(); }
-        } else if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          const prev = inputs[index - 1];
-          if (prev) { prev.focus(); if (prev.select) prev.select(); }
-        }
-      });
+    
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = document.getElementById('installBtn');
+      if (btn) {
+        btn.style.display = 'inline-flex';
+        btn.addEventListener('click', () => {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+        });
+      }
     });
-  });
 
-  let deferredPrompt;
-  const installBtn = document.getElementById('installBtn');
-  const iosInstruction = document.getElementById('iosInstruction');
-  const isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
-  const isStandalone = navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-
-  if (isStandalone) installBtn.style.display = 'none';
-
-  window.addEventListener('beforeinstallprompt', e => {
-    e.preventDefault();
-    deferredPrompt = e;
-  });
-
-  installBtn.addEventListener('click', async () => {
-    if (isIos) {
-      iosInstruction.style.display = iosInstruction.style.display === 'block' ? 'none' : 'block';
-    } else if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const choiceResult = await deferredPrompt.userChoice;
-      if (choiceResult.outcome === 'accepted') console.log('App geïnstalleerd');
-      deferredPrompt = null;
-    } else {
-      alert('Om deze app te installeren:\n\n- Open het menu van je browser (3 puntjes rechtsboven).\n- Kies voor "App installeren" of "Toevoegen aan startscherm".');
+    const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (isIos && !isStandalone) {
+      const iosBox = document.getElementById('iosInstruction');
+      if (iosBox) iosBox.style.display = 'block';
     }
+
+    generateCodes();
   });
 </script>
-
 </body>
 </html>
