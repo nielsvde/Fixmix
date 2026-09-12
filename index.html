@@ -530,7 +530,7 @@
               </div>
             </div>
 
-            <!-- Bloks verwachte waarde na correctie - verplaatst naar helemaal onderin -->
+            <!-- Bloks verwachte waarde na correctie -->
             <div id="extraParametersResultBlock" style="display: none;">
               <hr class="divider" style="margin: 14px 0;">
 
@@ -539,7 +539,7 @@
                 <span class="info-icon" style="margin-left: 6px;" onclick="toggleTooltip('expectedValueTooltip')">?</span>
               </div>
 
-            <div class="result-row" id="rowTotalBatchStandard">
+              <div class="result-row" id="rowTotalBatchStandard">
                 <span>Totale grootte batch na correctie:</span>
                 <span id="totalBatch" class="result-value">0 kg</span>
               </div>
@@ -721,6 +721,39 @@
   let computedActualTotal = 0;
   let html5QrCode = null;
   let useWaterFlush = false;
+  let deferredPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const installBtn = document.getElementById('installBtn');
+    if (installBtn) installBtn.style.display = 'inline-flex';
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadSettings();
+    updateDateInformation();
+    
+    const installBtn = document.getElementById('installBtn');
+    if (installBtn) {
+      installBtn.addEventListener('click', async () => {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+          const iosBox = document.getElementById('iosInstruction');
+          if (iosBox) iosBox.style.display = iosBox.style.display === 'block' ? 'none' : 'block';
+        } else if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === 'accepted') {
+            deferredPrompt = null;
+            installBtn.style.display = 'none';
+          }
+        } else {
+          alert("Installatie via de knop is niet beschikbaar. Gebruik het menu van je browser om 'Toevoegen aan startscherm' te kiezen.");
+        }
+      });
+    }
+  });
 
   function setWaterFlush(enable) {
     useWaterFlush = enable;
@@ -806,7 +839,6 @@
         const facDS = parseNum(document.getElementById('facCreamDS').value) || 10;
         if (dsValEl) dsValEl.innerText = facDS;
 
-        // Dynamisch vetgehalte room ophalen (standaard 42% bij leeg/nul)
         const creamFatVal = parseNum(document.getElementById('creamFat').value) || 42;
         const elFat1 = document.getElementById('tooltipCreamFatVal');
         const elFat2 = document.getElementById('tooltipCreamFatCalcVal');
@@ -1498,27 +1530,13 @@
             <div class="calc-step">
               <strong>Stap 1: Huidige vs. verwachte situatie na correctie</strong><br>
               • Huidige tankinhoud: <strong>${Math.round(activeBatchSize)} kg</strong> met <strong>${currentFat.toFixed(2)}%</strong> vet = <strong>${currentFatKg.toFixed(2)} kg vet</strong><br>
-              • Berekende toevoeging: <strong>${Math.round(addAmount)} kg ${ingredientName}</strong>${(useWaterFlush && additionType === 'cream') ? ' (incl. ' + waterFlushKg + ' kg inspoelwater)' : ''}<br>
-              • Totale batch na correctie: <strong>${Math.round(finalBatchSizeStandard)} kg</strong> met <strong>${targetFat.toFixed(2)}%</strong> vet<br>
-              • Gewenst vet in totale batch: <strong>${targetFatKgStandard.toFixed(2)} kg vet</strong><br>
-              • Toe te voegen vet massa via ${ingredientName}: <strong>${Math.abs(diffFatKgStandard).toFixed(2)} kg vet</strong>
+              • Berekende toevoeging: <strong>${Math.round(addAmount)} kg ${ingredientName}</strong> ${(useWaterFlush && additionType === 'cream') ? '(incl. ' + waterFlushKg + ' kg waterinspoel, effectief vetgehalte: ' + effectiveFatWithFlush + '%)' : ''}<br>
+              • Totale nieuwe batchgrootte: <strong>${Math.round(finalBatchSizeStandard)} kg</strong> met <strong>${targetFat.toFixed(2)}%</strong> vet = <strong>${targetFatKgStandard.toFixed(2)} kg vet</strong>
             </div>
             <div class="calc-step">
-              <strong>Stap 2: Bepaling toe te voegen ${ingredientName}</strong><br>
-              Om het vetgehalte te verhogen naar de doelwaarde van <strong>${targetFat.toFixed(2)}%</strong>, wordt ${ingredientName} toegevoegd (vetgehalte <strong>${effectiveCreamFat.toFixed(2)}%</strong>).<br>
-              ${(useWaterFlush && additionType === 'cream') ? `• Door de waterinspoel van <strong>${waterFlushKg} kg</strong> is de totale dosering aangepast en daalt het effectieve vetgehalte naar <strong>${effectiveFatWithFlush}%</strong>.<br>` : ''}
-              👉 <strong>Dosering: Voeg exact ${Math.round(addAmount)} kg ${ingredientName} toe ${(useWaterFlush && additionType === 'cream') ? '(inclusief ' + waterFlushKg + ' kg waterinspoel)' : ''}.</strong>
-            </div>` +
-            (!hideHoldWaterCauses.includes(missingComponent) ? `
-            <div class="calc-step">
-              <strong>Alternatieve correctie (Water inhouden op volgende batch):</strong><br>
-              Indien de huidige batch niet direct wordt gecorrigeerd met extra ${ingredientName}, kan het vettekort op de huidige batchgrootte (<strong>${Math.abs(uncorrectedDiffFat).toFixed(2)} kg</strong>) worden gecompenseerd door bij de <i>volgende batch</i> <strong>${Math.round(waterToHoldNext)} kg minder water</strong> te doseren.
-            </div>` : '') + `
-            <div class="calc-step">
-              <strong>Stap 3: Resultaat na correctie</strong><br>
-              • Oorspronkelijke inhoud: <strong>${Math.round(activeBatchSize)} kg</strong><br>
-              • Correctiedosering: <strong>${Math.round(addAmount)} kg ${ingredientName}</strong>${(useWaterFlush && additionType === 'cream') ? ' (inclusief ' + waterFlushKg + ' kg waterinspoel)' : ''}<br>
-              • Totale nieuwe batchgrootte: <strong>${Math.round(finalBatchSizeStandard)} kg</strong>
+              <strong>Stap 2: Bepaling dosering ${ingredientName}</strong><br>
+              <span class="calc-formula">Extra ${ingredientName} = (Doelvet% - GemetenVet%) / (${additionType === 'cream' ? 'RoomVet%' : '100%'} - Doelvet%) * Inhoud</span>
+              • Dosering: <strong>${Math.round(addAmount)} kg ${ingredientName}</strong>
             </div>`;
         }
       } else if (currentFat > targetFat && !isReprocess) {
@@ -1527,20 +1545,15 @@
         document.getElementById('targetFatKgVal').innerText = targetFatKgStandard.toFixed(2) + ' kg';
         
         const diffFatEl = document.getElementById('diffFatKgVal');
-        if (missingComponent === 'water_less') {
+        if (diffFatKgStandard < 0) {
+          diffFatEl.innerText = diffFatKgStandard.toFixed(2) + ' kg';
+          diffFatEl.style.color = '#c0392b';
+        } else if (diffFatKgStandard > 0) {
+          diffFatEl.innerText = '+' + diffFatKgStandard.toFixed(2) + ' kg';
+          diffFatEl.style.color = '#27ae60';
+        } else {
           diffFatEl.innerText = '0.00 kg';
           diffFatEl.style.color = 'var(--primary)';
-        } else {
-          if (diffFatKgStandard < 0) {
-            diffFatEl.innerText = diffFatKgStandard.toFixed(2) + ' kg';
-            diffFatEl.style.color = '#c0392b';
-          } else if (diffFatKgStandard > 0) {
-            diffFatEl.innerText = '+' + diffFatKgStandard.toFixed(2) + ' kg';
-            diffFatEl.style.color = '#27ae60';
-          } else {
-            diffFatEl.innerText = '0.00 kg';
-            diffFatEl.style.color = 'var(--primary)';
-          }
         }
 
         standardResultsBlock.style.display = 'block';
@@ -1553,76 +1566,26 @@
           <div class="calc-step">
             <strong>Stap 1: Huidige vs. verwachte situatie na correctie</strong><br>
             • Huidige tankinhoud: <strong>${Math.round(activeBatchSize)} kg</strong> met <strong>${currentFat.toFixed(2)}%</strong> vet = <strong>${currentFatKg.toFixed(2)} kg vet</strong><br>
-            • Doel vetgehalte: <strong>${targetFat.toFixed(2)}%</strong><br>
-            • Totale batch na verdunning: <strong>${Math.round(finalBatchSizeStandard)} kg</strong>
+            • Toe te voegen water: <strong>${Math.round(waterToAdd)} kg</strong><br>
+            • Totale nieuwe batchgrootte: <strong>${Math.round(finalBatchSizeStandard)} kg</strong> met <strong>${targetFat.toFixed(2)}%</strong> vet = <strong>${targetFatKgStandard.toFixed(2)} kg vet</strong>
           </div>
           <div class="calc-step">
-            <strong>Stap 2: Bepaling toe te voegen water</strong><br>
-            Om het vetgehalte te verlagen van <strong>${currentFat.toFixed(2)}%</strong> naar <strong>${targetFat.toFixed(2)}%</strong> dient de batch te worden verdund met water.<br>
-            👉 <strong>Dosering: Voeg exact ${Math.round(waterToAdd)} kg water toe.</strong>
-          </div>
-          <div class="calc-step">
-            <strong>Stap 3: Resultaat na correctie</strong><br>
-            • Oorspronkelijke inhoud: <strong>${Math.round(activeBatchSize)} kg</strong><br>
-            • Toegevoegd water: <strong>${Math.round(waterToAdd)} kg</strong><br>
-            • Totale nieuwe batchgrootte: <strong>${Math.round(finalBatchSizeStandard)} kg</strong>
-          </div>`;
-      } else {
-        standardFatBlock.style.display = 'block';
-        document.getElementById('targetFatKgVal').innerText = targetFatKgStandard.toFixed(2) + ' kg';
-        document.getElementById('diffFatKgVal').innerText = '0.00 kg';
-        document.getElementById('diffFatKgVal').style.color = 'var(--primary)';
-
-        standardResultsBlock.style.display = 'block';
-        rowAddIngredient.style.display = 'none';
-        if (waterFlushToggleContainer) waterFlushToggleContainer.style.display = 'none';
-        rowAddWater.style.display = 'none';
-        holdWaterBlock.style.display = 'none';
-
-        stepsHtml = `
-          <div class="calc-step">
-            <strong>Geen correctie vereist:</strong><br>
-            Het gemeten vetgehalte (<strong>${currentFat.toFixed(2)}%</strong>) is al exact gelijk aan het gewenste vetgehalte.
+            <strong>Stap 2: Bepaling water verdunning</strong><br>
+            <span class="calc-formula">Extra Water = ((GemetenVet% / Doelvet%) - 1) * Inhoud</span>
+            • Verdunning: <strong>${Math.round(waterToAdd)} kg water</strong>
           </div>`;
       }
-
-      document.getElementById('addValue').innerText = Math.round(addAmount) + ' kg';
-      document.getElementById('waterToAdd').innerText = Math.round(waterToAdd) + ' kg';
-      document.getElementById('waterToHoldNextBatch').innerText = Math.round(waterToHoldNext) + ' kg';
-      document.getElementById('totalBatch').innerText = Math.round(finalBatchSizeStandard) + ' kg';
-      document.getElementById('calcSteps').innerHTML = stepsHtml;
-
-      updateExtraParametersResults(activeBatchSize, currentFatKg, addAmount, waterToAdd, finalBatchSizeStandard, inputDS, inputProtein, inputSucrose, additionType, effectiveCreamFat, targetFat);
     }
+
+    document.getElementById('addValue').innerText = Math.round(addAmount) + ' kg';
+    document.getElementById('waterToAdd').innerText = Math.round(waterToAdd) + ' kg';
+    document.getElementById('waterToHoldNextBatch').innerText = Math.round(waterToHoldNext) + ' kg';
+    document.getElementById('totalBatch').innerText = Math.round(finalBatchSizeStandard) + ' kg';
+    document.getElementById('calcSteps').innerHTML = stepsHtml || '<p style="margin:0; color:#666;">Geen stappen beschikbaar.</p>';
+
+    updateExtraParametersResults(activeBatchSize, currentFatKg, addAmount, waterToAdd, finalBatchSizeStandard, inputDS, inputProtein, inputSucrose, additionType, effectiveCreamFat, targetFat);
   }
-
-  window.addEventListener('DOMContentLoaded', () => {
-    loadSettings();
-    updateDateInformation();
-    
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      const btn = document.getElementById('installBtn');
-      if (btn) {
-        btn.style.display = 'inline-flex';
-        btn.addEventListener('click', () => {
-          deferredPrompt.prompt();
-          deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
-        });
-      }
-    });
-
-    const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-    if (isIos && !isStandalone) {
-      const iosBox = document.getElementById('iosInstruction');
-      if (iosBox) iosBox.style.display = 'block';
-    }
-
-    generateCodes();
-  });
 </script>
+
 </body>
 </html>
