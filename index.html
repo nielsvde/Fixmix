@@ -488,7 +488,15 @@
 
             <div id="extraParametersResultBlock" style="display: none;">
               <hr class="divider" style="margin: 14px 0;">
-              <div class="section-title" style="margin-bottom: 8px;">Verwachte waarde na correctie</div>
+              <div class="section-title" style="margin-bottom: 8px;">
+                Verwachte waarde na correctie
+                <span class="info-icon" style="margin-left: 6px;" onclick="toggleTooltip('expectedValueTooltip')">?</span>
+              </div>
+              
+              <div class="result-row" id="rowResultFat" style="display: none;">
+                <span>Verwacht vetgehalte na correctie:</span>
+                <span id="resultFatVal" class="result-value">0 %</span>
+              </div>
               <div class="result-row" id="rowResultDS" style="display: none;">
                 <span>Droge stof na correctie:</span>
                 <span id="resultDSVal" class="result-value">0 %</span>
@@ -500,6 +508,23 @@
               <div class="result-row" id="rowResultSucrose" style="display: none;">
                 <span>Sacharose na correctie:</span>
                 <span id="resultSucroseVal" class="result-value">0 %</span>
+              </div>
+
+              <div id="expectedValueTooltip" class="info-tooltip" style="margin-top: 10px;">
+                De Fixmix-tool gebruikt hier standaard, gemiddelde zuivelwaarden die in de zuivelindustrie algemeen als vaste basis worden gebruikt als er geen exacte laboratoriumanalyse van de room beschikbaar is.<br><br>
+                Natuurlijke room bestaat uit vet en magere melkbestanddelen (water, eiwitten, melksuiker en mineralen). Zodra jij het vetpercentage invoert (in jouw geval 42%), berekent de tool de rest via vaste verhoudingen:<br><br>
+                <strong>1. Hoe komt hij aan de Droge Stof (DS)?</strong><br>
+                De tool gaat uit van de vuistregel dat de vetvrije melkbestanddelen (ook wel Vaste Melkbestanddelen Niet-Vet of VMSNV genoemd) in standaard room ongeveer 10% bedragen.<br>
+                De totale droge stof is simpelweg: Vet% + Vetvrije droge stof.<br>
+                In jouw berekening: \(42\% \text{ vet} + 10\% \text{ vetvrije droge stof} = \mathbf{52\% \text{ totale Droge Stof}}\).<br><br>
+                <strong>2. Hoe komt hij aan het Eiwit (Proteïne)?</strong><br>
+                Magere melk (het vloeibare deel van de room waar het vet in zweeft) heeft een heel stabiele natuurlijke samenstelling. Gemiddeld bestaat het vetvrije deel van melk/room voor ongeveer een kwart tot een derde uit eiwit (gemiddeld zo'n 4,25% tot 4,3% eiwit in volledig magere melk).<br>
+                Omdat jouw room voor 42% uit vet bestaat, blijft er nog 58% magere vloeistof over (100 - 42 = 58).<br>
+                De tool vermenigvuldigt die 58% met het standaard eiwitgehalte van magere zuivel (in dit geval exact 4,275%).<br>
+                De som is: \(58\% \times 4,275\% = \mathbf{2,48\% \text{ proteïne in de room}}\).<br><br>
+                <strong>Kort samengevat:</strong><br>
+                De tool weet dit niet omdat hij jouw room heeft gemeten, maar omdat de programmeur vaste referentiewaarden voor standaard fabrieksroom in de code heeft gezet. Omdat room een natuurproduct is, kunnen deze waardes in werkelijkheid een fractie afwijken (bijvoorbeeld 2,6% eiwit of 9,5% vetvrije droge stof), maar voor een snelle batchcorrectie in de praktijk zijn deze standaardwaardes nauwkeurig genoeg.<br><br>
+                Ik zou de standaard waardes voor eiwit en vetvrije droge stof aan kunnen passen via het instellingen scherm waar ook de waterinspoel aangepast kan worden.
               </div>
             </div>
 
@@ -937,7 +962,7 @@
     document.getElementById('toggleExtraFieldsBtn').innerHTML = '<span>➕ Extra parameters (DS, Proteïne, Sacharose)</span>';
 
     hideTool1Results();
-    ['batchTooltip', 'addTooltip', 'evapTooltip', 'diffFatTooltip'].forEach(id => {
+    ['batchTooltip', 'addTooltip', 'evapTooltip', 'diffFatTooltip', 'expectedValueTooltip'].forEach(id => {
       const el = document.getElementById(id);
       if(el) el.style.display = 'none';
     });
@@ -1196,7 +1221,7 @@
         document.getElementById('calcSteps').innerHTML = stepsHtml;
         
         // Bereken extra parameters indien van toepassing
-        updateExtraParametersResults(actualTotal, currentFatInTank, addAmount, waterToAdd, finalTotalBatch, inputDS, inputProtein, inputSucrose, additionType, effectiveCreamFat);
+        updateExtraParametersResults(actualTotal, currentFatInTank, addAmount, waterToAdd, finalTotalBatch, inputDS, inputProtein, inputSucrose, additionType, effectiveCreamFat, targetFat);
         return;
       } else if (effectiveCreamFat <= targetFat && effectiveCreamFat > 0) {
         errorSection.innerHTML = `<div class="error-box"><strong>⚠️ Ongeldig vetgehalte!</strong><br>Room vetgehalte (${effectiveCreamFat.toFixed(2)}%) moet hoger zijn dan gewenst vetgehalte (${targetFat.toFixed(2)}%).</div>`;
@@ -1482,23 +1507,32 @@
       document.getElementById('calcSteps').innerHTML = stepsHtml || '<p style="margin:0; color:#666;">Vul gegevens in om de stappen te tonen.</p>';
       
       // Bereken extra parameters indien van toepassing
-      updateExtraParametersResults(activeBatchSize, currentFatKg, addAmount, waterToAdd, finalBatchSizeStandard, inputDS, inputProtein, inputSucrose, additionType, effectiveCreamFat);
+      updateExtraParametersResults(activeBatchSize, currentFatKg, addAmount, waterToAdd, finalBatchSizeStandard, inputDS, inputProtein, inputSucrose, additionType, effectiveCreamFat, targetFat);
     }
   }
 
-  function updateExtraParametersResults(baseMass, baseFatKg, addAmount, waterToAdd, finalMass, dsInput, protInput, sucInput, addType, creamFatVal) {
+  function updateExtraParametersResults(baseMass, baseFatKg, addAmount, waterToAdd, finalMass, dsInput, protInput, sucInput, addType, creamFatVal, targetFatVal) {
     const block = document.getElementById('extraParametersResultBlock');
+    const rowFat = document.getElementById('rowResultFat');
     const rowDS = document.getElementById('rowResultDS');
     const rowProt = document.getElementById('rowResultProtein');
     const rowSuc = document.getElementById('rowResultSucrose');
 
-    const hasAny = (dsInput > 0 || protInput > 0 || sucInput > 0);
+    const hasAny = (dsInput > 0 || protInput > 0 || sucInput > 0 || targetFatVal > 0);
     if (!hasAny || finalMass <= 0) {
       block.style.display = 'none';
       return;
     }
 
     block.style.display = 'block';
+
+    // Vetgehalte na correctie weergeven (doelvet of berekend)
+    if (targetFatVal > 0) {
+      rowFat.style.display = 'flex';
+      document.getElementById('resultFatVal').innerText = targetFatVal.toFixed(2) + ' %';
+    } else {
+      rowFat.style.display = 'none';
+    }
 
     let addedDS = 0, addedProt = 0, addedSuc = 0;
     if (addAmount > 0) {
