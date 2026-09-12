@@ -70,6 +70,20 @@
     .form-group { margin-bottom: 16px; text-align: left; }
     .form-row-2col { display: flex; gap: 10px; margin-bottom: 16px; }
     .form-row-2col .form-group { flex: 1; margin-bottom: 0; }
+    
+    /* Nieuwe 3-koloms rij voor extra parameters */
+    .form-row-3col { display: flex; gap: 6px; margin-bottom: 16px; }
+    .form-row-3col .form-group { flex: 1; margin-bottom: 0; }
+    .form-row-3col input { padding: 8px 6px; font-size: 0.9rem; text-align: right; }
+    .form-row-3col label { font-size: 0.78rem; }
+
+    .extra-fields-toggle-row { display: flex; align-items: center; justify-content: flex-end; margin-top: -10px; margin-bottom: 12px; }
+    .btn-toggle-extra {
+      background: none; border: 1px solid var(--border-blue); color: var(--primary); border-radius: 6px;
+      padding: 2px 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+      background-color: #ffffff;
+    }
+    .btn-toggle-extra:hover { background: var(--card-blue-bg); }
 
     .label-container { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
     label { font-size: 0.9rem; font-weight: 600; }
@@ -360,6 +374,29 @@
         </div>
       </div>
 
+      <div class="extra-fields-toggle-row">
+        <button type="button" id="toggleExtraFieldsBtn" class="btn-toggle-extra" onclick="toggleExtraParameters()">
+          <span>➕ Extra parameters (DS, Proteïne, Sacharose)</span>
+        </button>
+      </div>
+
+      <div id="extraParametersContainer" style="display: none;">
+        <div class="form-row-3col">
+          <div class="form-group">
+            <label for="currentDS">Gem. droge stof (%):</label>
+            <input type="text" inputmode="decimal" id="currentDS" placeholder="bijv. 40.00" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
+          </div>
+          <div class="form-group">
+            <label for="currentProtein">Gem. proteïne (%):</label>
+            <input type="text" inputmode="decimal" id="currentProtein" placeholder="bijv. 3.20" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
+          </div>
+          <div class="form-group">
+            <label for="currentSucrose">Gem. sacharose (%):</label>
+            <input type="text" inputmode="decimal" id="currentSucrose" placeholder="bijv. 12.00" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
+          </div>
+        </div>
+      </div>
+
       <div class="form-group" id="waterMoreTypeGroup" style="display: none;">
         <label for="waterMoreCorrectiveIngredient">Corrigeren met:</label>
         <select id="waterMoreCorrectiveIngredient" onchange="onCauseChange(); hideTool1Results()">
@@ -447,6 +484,23 @@
 
             <div id="diffFatTooltip" class="info-tooltip" style="margin-bottom: 10px;">
               <strong>Toelichting:</strong> Het verschil tussen aanwezig vet in de huidige batch en het totaal gewenste vet na de gekozen correctie.
+            </div>
+
+            <div id="extraParametersResultBlock" style="display: none;">
+              <hr class="divider" style="margin: 14px 0;">
+              <div class="section-title" style="margin-bottom: 8px;">Verwachte waarde na correctie</div>
+              <div class="result-row" id="rowResultDS" style="display: none;">
+                <span>Droge stof na correctie:</span>
+                <span id="resultDSVal" class="result-value">0 %</span>
+              </div>
+              <div class="result-row" id="rowResultProtein" style="display: none;">
+                <span>Proteïne na correctie:</span>
+                <span id="resultProteinVal" class="result-value">0 %</span>
+              </div>
+              <div class="result-row" id="rowResultSucrose" style="display: none;">
+                <span>Sacharose na correctie:</span>
+                <span id="resultSucroseVal" class="result-value">0 %</span>
+              </div>
             </div>
 
             <hr id="fatAnalysisDivider" class="divider" style="margin: 14px 0;">
@@ -653,6 +707,23 @@
     }
   }
 
+  function toggleExtraParameters() {
+    const container = document.getElementById('extraParametersContainer');
+    const btn = document.getElementById('toggleExtraFieldsBtn');
+    if (container.style.display === 'none' || container.style.display === '') {
+      container.style.display = 'block';
+      btn.innerHTML = '<span>➖ Verberg extra parameters</span>';
+    } else {
+      container.style.display = 'none';
+      btn.innerHTML = '<span>➕ Extra parameters (DS, Proteïne, Sacharose)</span>';
+      // Wis velden indien ingeklapt
+      document.getElementById('currentDS').value = '';
+      document.getElementById('currentProtein').value = '';
+      document.getElementById('currentSucrose').value = '';
+      hideTool1Results();
+    }
+  }
+
   function hideTool1Results() {
     const resultsWrapper = document.getElementById('resultsTabWrapper');
     if (resultsWrapper) resultsWrapper.style.display = 'none';
@@ -852,7 +923,7 @@
   }
 
   function resetCalculator() {
-    ['batchSize', 'currentFat', 'targetFat', 'creamFat', 'missingReprocessKg', 'reprocessFat', 'evapInput', 'evapPackagesInput', 'evapReprocessInput', 'codeTextInput'].forEach(id => {
+    ['batchSize', 'currentFat', 'targetFat', 'creamFat', 'missingReprocessKg', 'reprocessFat', 'evapInput', 'evapPackagesInput', 'evapReprocessInput', 'codeTextInput', 'currentDS', 'currentProtein', 'currentSucrose'].forEach(id => {
       const el = document.getElementById(id);
       if(el) el.value = '';
     });
@@ -860,6 +931,11 @@
     document.getElementById('waterMoreCorrectiveIngredient').value = 'cream';
     document.getElementById('unknownCorrectiveIngredient').value = 'cream';
     setWaterFlush(false);
+    
+    // Sluit extra parameters indien open
+    document.getElementById('extraParametersContainer').style.display = 'none';
+    document.getElementById('toggleExtraFieldsBtn').innerHTML = '<span>➕ Extra parameters (DS, Proteïne, Sacharose)</span>';
+
     hideTool1Results();
     ['batchTooltip', 'addTooltip', 'evapTooltip', 'diffFatTooltip'].forEach(id => {
       const el = document.getElementById(id);
@@ -940,6 +1016,12 @@
     const waterMoreIngredient = document.getElementById('waterMoreCorrectiveIngredient').value;
     const unknownIngredient = document.getElementById('unknownCorrectiveIngredient').value;
     const waterFlushKg = parseNum(document.getElementById('facWaterFlush').value) || 0;
+
+    // Extra parameters
+    const inputDS = parseNum(document.getElementById('currentDS').value);
+    const inputProtein = parseNum(document.getElementById('currentProtein').value);
+    const inputSucrose = parseNum(document.getElementById('currentSucrose').value);
+    const hasExtraParams = (inputDS > 0 || inputProtein > 0 || inputSucrose > 0);
 
     let additionType = 'cream';
     let effectiveCreamFat = parseNum(document.getElementById('creamFat').value);
@@ -1112,6 +1194,9 @@
         document.getElementById('waterToAdd').innerText = Math.round(waterToAdd) + ' kg';
         document.getElementById('totalBatch').innerText = Math.round(finalTotalBatch) + ' kg';
         document.getElementById('calcSteps').innerHTML = stepsHtml;
+        
+        // Bereken extra parameters indien van toepassing
+        updateExtraParametersResults(actualTotal, currentFatInTank, addAmount, waterToAdd, finalTotalBatch, inputDS, inputProtein, inputSucrose, additionType, effectiveCreamFat);
         return;
       } else if (effectiveCreamFat <= targetFat && effectiveCreamFat > 0) {
         errorSection.innerHTML = `<div class="error-box"><strong>⚠️ Ongeldig vetgehalte!</strong><br>Room vetgehalte (${effectiveCreamFat.toFixed(2)}%) moet hoger zijn dan gewenst vetgehalte (${targetFat.toFixed(2)}%).</div>`;
@@ -1222,7 +1307,6 @@
       
       targetFatKgStandard = (finalBatchSizeStandard * targetFat) / 100;
       
-      // FIX: Als de oorzaak "Te weinig water gedoseerd" is, is het verschil in vet na correctie 0.
       if (missingComponent === 'water_less') {
         diffFatKgStandard = 0;
       } else {
@@ -1396,6 +1480,72 @@
       document.getElementById('waterToHoldNextBatch').innerText = Math.round(waterToHoldNext) + ' kg';
       document.getElementById('totalBatch').innerText = Math.round(finalBatchSizeStandard) + ' kg';
       document.getElementById('calcSteps').innerHTML = stepsHtml || '<p style="margin:0; color:#666;">Vul gegevens in om de stappen te tonen.</p>';
+      
+      // Bereken extra parameters indien van toepassing
+      updateExtraParametersResults(activeBatchSize, currentFatKg, addAmount, waterToAdd, finalBatchSizeStandard, inputDS, inputProtein, inputSucrose, additionType, effectiveCreamFat);
+    }
+  }
+
+  function updateExtraParametersResults(baseMass, baseFatKg, addAmount, waterToAdd, finalMass, dsInput, protInput, sucInput, addType, creamFatVal) {
+    const block = document.getElementById('extraParametersResultBlock');
+    const rowDS = document.getElementById('rowResultDS');
+    const rowProt = document.getElementById('rowResultProtein');
+    const rowSuc = document.getElementById('rowResultSucrose');
+
+    const hasAny = (dsInput > 0 || protInput > 0 || sucInput > 0);
+    if (!hasAny || finalMass <= 0) {
+      block.style.display = 'none';
+      return;
+    }
+
+    block.style.display = 'block';
+
+    // Schatten van gehalte in toevoeging (room of vet of water = 0)
+    // Voor room nemen we aan dat DS ongeveer gelijk is aan vet + vaste componenten (of ca 55% bij 40% room, of vereenvoudigd: gesteld dat toevoeging van water 0% DS/prot/suc heeft, en room/vet een specifieke waarde heeft of we berekenen op basis van massa-behoud).
+    // Standaard massa behoud: (Mass_oud * perc_oud + Mass_toegevoegd * perc_toegevoegd) / Mass_nieuw
+    // Aanname voor room/vet extra parameters als niet bekend: we nemen aan dat extra room dezelfde concentratie heeft of we schatten DS op basis van vetgehalte (bijv. DS_room ≈ vetgehalte + 5%, proteïne ≈ 2.5%, sacharose ≈ 0%). Voor water = 0%.
+    
+    let addedDS = 0, addedProt = 0, addedSuc = 0;
+    if (addAmount > 0) {
+      if (addType === 'fat') {
+        addedDS = addAmount * 1.0; // 100% DS bij puur vet
+        addedProt = 0;
+        addedSuc = 0;
+      } else {
+        // Room: schatting op basis van room vetgehalte (bijv. DS = vet + 10% for non-fat solids, prot = 2.5%)
+        let estCreamDS = Math.min(100, creamFatVal + 10);
+        let estCreamProt = 2.5;
+        addedDS = addAmount * (estCreamDS / 100);
+        addedProt = addAmount * (estCreamProt / 100);
+        addedSuc = 0;
+      }
+    }
+
+    if (dsInput > 0) {
+      const totalDS_kg = (baseMass * (dsInput / 100)) + addedDS;
+      const finalDS_perc = (totalDS_kg / finalMass) * 100;
+      rowDS.style.display = 'flex';
+      document.getElementById('resultDSVal').innerText = finalDS_perc.toFixed(2) + ' %';
+    } else {
+      rowDS.style.display = 'none';
+    }
+
+    if (protInput > 0) {
+      const totalProt_kg = (baseMass * (protInput / 100)) + addedProt;
+      const finalProt_perc = (totalProt_kg / finalMass) * 100;
+      rowProt.style.display = 'flex';
+      document.getElementById('resultProteinVal').innerText = finalProt_perc.toFixed(2) + ' %';
+    } else {
+      rowProt.style.display = 'none';
+    }
+
+    if (sucInput > 0) {
+      const totalSuc_kg = (baseMass * (sucInput / 100)) + addedSuc;
+      const finalSuc_perc = (totalSuc_kg / finalMass) * 100;
+      rowSuc.style.display = 'flex';
+      document.getElementById('resultSucroseVal').innerText = finalSuc_perc.toFixed(2) + ' %';
+    } else {
+      rowSuc.style.display = 'none';
     }
   }
 
