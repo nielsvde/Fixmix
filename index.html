@@ -346,6 +346,10 @@
 
           <!-- Standaard vetanalyse (Bekende oorzaak) -->
           <div id="standardFatAnalysisBlock">
+            <div class="result-row" id="rowCurrentFatKgStandard">
+              <span>Vet in huidige batch:</span>
+              <span id="currentFatKgStandardVal" class="result-value">0 kg</span>
+            </div>
             <div class="result-row" id="rowTargetFatKg">
               <span>Gewenst vet in batch (na correctie):</span>
               <span id="targetFatKgVal" class="result-value">0 kg</span>
@@ -1040,6 +1044,8 @@
 
         const finalTotalBatch = actualTotal + addAmount + waterToAdd;
         const targetFatKg = (finalTotalBatch * targetFat) / 100;
+        
+        document.getElementById('currentFatKgStandardVal').innerText = currentFatInTank.toFixed(2) + ' kg';
         document.getElementById('targetFatKgVal').innerText = targetFatKg.toFixed(2) + ' kg';
         
         const diffFatEl = document.getElementById('diffFatKgVal');
@@ -1192,6 +1198,7 @@
     }
 
     document.getElementById('currentFatKgVal').innerText = currentFatKg > 0 ? (currentFatKg.toFixed(2) + ' kg') : '0 kg';
+    document.getElementById('currentFatKgStandardVal').innerText = currentFatKg > 0 ? (currentFatKg.toFixed(2) + ' kg') : '0 kg';
     document.getElementById('targetFatCurrentBatchKgVal').innerText = targetFatCurrentBatchKg > 0 ? (targetFatCurrentBatchKg.toFixed(2) + ' kg') : '0 kg';
     
     const diffCurrentEl = document.getElementById('diffFatCurrentBatchKgVal');
