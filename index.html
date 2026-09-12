@@ -82,8 +82,13 @@
       display: none; margin-top: 6px; padding: 10px; background-color: #fff3cd; color: #856404;
       border: 1px solid #ffeeba; border-radius: 8px; font-size: 0.82rem; line-height: 1.4;
     }
-    input, select, textarea {
+    
+    /* Veld stijlen - Select lettertype verkleind om alles op 1 regel te houden */
+    input, textarea {
       width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; background: #fff; font-family: inherit;
+    }
+    select {
+      width: 100%; padding: 10px 8px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.85rem; background: #fff; font-family: inherit;
     }
     textarea { resize: vertical; min-height: 100px; }
 
@@ -272,22 +277,6 @@
       </select>
     </div>
 
-    <div class="form-group" id="waterMoreTypeGroup" style="display: none;">
-      <label for="waterMoreCorrectiveIngredient">Corrigeren met:</label>
-      <select id="waterMoreCorrectiveIngredient" onchange="onCauseChange(); hideTool1Results()">
-        <option value="cream">Room</option>
-        <option value="fat">Vloeibaar vet</option>
-      </select>
-    </div>
-
-    <div class="form-group" id="unknownTypeGroup" style="display: none;">
-      <label for="unknownCorrectiveIngredient">Corrigeren met:</label>
-      <select id="unknownCorrectiveIngredient" onchange="onCauseChange(); hideTool1Results()">
-        <option value="cream">Room</option>
-        <option value="fat">Vloeibaar vet</option>
-      </select>
-    </div>
-
     <div class="form-group">
       <div class="label-container">
         <label for="batchSize">Geplande batchgrootte (kg):</label>
@@ -306,6 +295,23 @@
         <label for="targetFat">Doel vet (%):</label>
         <input type="text" inputmode="decimal" id="targetFat" placeholder="bijv. 30.50" oninput="formatInput(this); hideTool1Results()" onblur="formatDecimals(this, 2)">
       </div>
+    </div>
+
+    <!-- Corrigeren met (verplaatst naar onder gemeten en doel vet) -->
+    <div class="form-group" id="waterMoreTypeGroup" style="display: none;">
+      <label for="waterMoreCorrectiveIngredient">Corrigeren met:</label>
+      <select id="waterMoreCorrectiveIngredient" onchange="onCauseChange(); hideTool1Results()">
+        <option value="cream">Room</option>
+        <option value="fat">Vloeibaar vet</option>
+      </select>
+    </div>
+
+    <div class="form-group" id="unknownTypeGroup" style="display: none;">
+      <label for="unknownCorrectiveIngredient">Corrigeren met:</label>
+      <select id="unknownCorrectiveIngredient" onchange="onCauseChange(); hideTool1Results()">
+        <option value="cream">Room</option>
+        <option value="fat">Vloeibaar vet</option>
+      </select>
     </div>
 
     <div class="form-group" id="creamFatGroup">
